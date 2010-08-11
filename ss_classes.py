@@ -37,11 +37,12 @@ class Staircase(object):
         self.step = step
         self.n = 0 #This is what will be compared to n_up for udpating.
         self.harder = np.sign(harder) #Make sure that this is only -1 or 1.
+        self.record = [start]
         
     def update(self,correct):
         """
 
-        This function updates the staircase value, accroding to the state of
+        This function updates the staircase value, according to the state of
         the staircase, the n/n_up values and whether or not the subject got it
         right. This staircase is then propagated on to the next trial.
 
@@ -52,7 +53,7 @@ class Staircase(object):
         """
 
         if correct:
-            if self.n>=self.n_up:
+            if self.n>=self.n_up-1:
                 self.value += self.harder * self.step #'harder' sets the sign
                                                       #of the change to make it
                                                       #harder
@@ -66,6 +67,8 @@ class Staircase(object):
                                         #opposite direction than above to make
                                         #it easier!
 
+        #Add to the records the updated value: 
+        self.record.append(self.value)
 
 class Stimulus(object):
     """
@@ -80,23 +83,23 @@ class Stimulus(object):
 
     def __init__(win,):
     
-    self.grating = visual.PatchStim(win,tex="sin",mask="circle",texRes=128,
-            color=[1.0,1.0,1.0],colorSpace='rgb', opacity=1.0,
-            size=(5.0,5.0), sf=(2.0,2.0),
-            ori = 45, depth=0.5)
+        self.grating = visual.PatchStim(win,tex="sin",mask="circle",texRes=128,
+                color=[1.0,1.0,1.0],colorSpace='rgb', opacity=1.0,
+                size=(5.0,5.0), sf=(2.0,2.0),
+                ori = 45, depth=0.5)
 
-    #Setting the tex argument to None sets this to just be uniform: 
-    self.center = visual.PatchStim(win,tex=None) 
-    
-    trial_clock = core.Clock()
-    t = lastFPSupdate = 0
+        #Setting the tex argument to None sets this to just be uniform: 
+        self.center = visual.PatchStim(win,tex=None) 
 
-    def show():
-        while t<duration:#sets the duration
-            t=trial_clock.getTime()
+        trial_clock = core.Clock()
+        t = lastFPSupdate = 0
 
-            self.grating.setContrast(sin(t*pi*2))
-            self.grating.draw()  #redraw it
+        def show():
+            while t<duration:#sets the duration
+                t=trial_clock.getTime()
 
-            win.flip()          #update the screen
+                self.grating.setContrast(sin(t*pi*2))
+                self.grating.draw()  #redraw it
+
+                win.flip()          #update the screen
 
