@@ -69,37 +69,4 @@ class Staircase(object):
 
         #Add to the records the updated value: 
         self.record.append(self.value)
-
-class Stimulus(object):
-    """
-    This is the stimulus object for the 
     
-
-    In order to generate counter-phase, we vary the contrast of the grating
-    between -1 and 1, according to the frequency
-
-
-    """
-
-    def __init__(win,):
-    
-        self.grating = visual.PatchStim(win,tex="sin",mask="circle",texRes=128,
-                color=[1.0,1.0,1.0],colorSpace='rgb', opacity=1.0,
-                size=(5.0,5.0), sf=(2.0,2.0),
-                ori = 45, depth=0.5)
-
-        #Setting the tex argument to None sets this to just be uniform: 
-        self.center = visual.PatchStim(win,tex=None) 
-
-        trial_clock = core.Clock()
-        t = lastFPSupdate = 0
-
-        def show():
-            while t<duration:#sets the duration
-                t=trial_clock.getTime()
-
-                self.grating.setContrast(sin(t*pi*2))
-                self.grating.draw()  #redraw it
-
-                win.flip()          #update the screen
-
