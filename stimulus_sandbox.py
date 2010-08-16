@@ -15,31 +15,35 @@ temporal_freq = 4
 spatial_freq = 1.1
 
 surround_ori = 0
-annulus_ori = 90
+annulus_ori = 45
 
 surround_contrast = 1.
 annulus_contrast = 0.8
-target_contrast = 0.1
+target_contrast = 0
 
 surround_outer = 12.2
 annulus_outer = 6
 annulus_inner = 3
 surround_inner = 0.4
 
+#Make sure that everything makes sense:
+assert surround_inner<=annulus_inner
+assert annulus_outer<=surround_outer
+
+
 fixation_size = 0.2
 
-ring_width = 0.1
+ring_width = 0.2
 spoke_width = 0.1
 num_spokes = 8
 
-target_loc = 4
+target_loc = 1
 
 win = visual.Window((800,800),
                     allowGUI=False,
                     monitor='testMonitor',
                     units='deg')
     
-
 outer_surround  = visual.PatchStim(win,tex="sin",mask="circle",texRes=256,
                                    color=surround_contrast,
                                    size=(surround_outer-ring_width/2,
@@ -79,18 +83,24 @@ center_area = visual.PatchStim(win, tex=None, mask='circle', color=0,
                                 surround_inner],
                           interpolate=True)
 
-#Generate a mask, which will cover everything except for the target wedge:
+#In order to apply a different contrast to the target wedge, generate a mask, which will cover everything except for the target wedge:
 grid_array = np.linspace(-1*annulus.size[0],annulus.size[0],annulus.texRes)
 x,y=np.meshgrid(grid_array,grid_array)
 r = np.sqrt(x**2 + y**2)
 theta = np.arctan2(x,y) + np.pi
 target_mask = np.ones((annulus.texRes,annulus.texRes))
-target_mask[np.where(r>annulus_outer)] = -1
-target_mask[np.where(r<annulus_inner)] = -1
-target_mask[np.where(theta<target_loc*np.deg2rad(45))] = -1
-target_mask[np.where(theta>(target_loc+1)*np.deg2rad(45))]=-1
+target_mask[np.where(r>annulus_outer-ring_width/2)] = -1
+target_mask[np.where(r<annulus_inner-ring_width/2)] = -1
 
-#Now show the target contrast in the wedge:
+#Since the whole PatchStim is rotated according to annulus_ori, we need to
+#adjust for that, so that the target locations remain invariant across
+#different orientations:
+target_mask[np.where(theta<target_loc*np.deg2rad(45)-
+                     np.deg2rad(annulus_ori))] = -1
+target_mask[np.where(theta>(target_loc+1)*np.deg2rad(45)-
+                     np.deg2rad(annulus_ori))] = -1
+
+#Now show the target contrast in the wedge, using that mask:
 target_wedge = visual.PatchStim(win,tex="sin",mask=target_mask,
                                 texRes=256,
                                 color=target_contrast,
@@ -102,8 +112,8 @@ target_wedge = visual.PatchStim(win,tex="sin",mask=target_mask,
 spokes = []
 for i in np.arange(num_spokes/2):
     spokes.append(visual.ShapeStim(win,
-                         fillRGB = -1,
-                         lineRGB = -1,
+                         fillColor = -1,
+                         lineColor = -1,
                          vertices = ((-spoke_width/2,annulus_outer/2),
                                      (spoke_width/2,-annulus_outer/2),
                                      (-spoke_width/2,-annulus_outer/2),

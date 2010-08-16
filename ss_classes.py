@@ -70,3 +70,172 @@ class Staircase(object):
         #Add to the records the updated value: 
         self.record.append(self.value)
     
+
+class Stimulus(object):
+
+    """The surround suppression stimulus, including everything """
+
+    def __init__(self,win,params,target_loc=None,target_contrast=None):
+        """
+
+        Initialize the object, by setting all the various subobjects
+
+        Parameters
+        ----------
+
+        win: a psychopy window object
+
+        params: an object with parameters for setting the size and . Note that
+        the units of size here need to be the units that were used to
+        initialize the window object (should be degrees).
+
+        target_loc: the location of the target wedge, if such is needed
+
+        target_contrast: the contrast of said target, if needed.
+
+        """
+
+        #Carry the window object around with you:
+        self.win = win
+        
+        self.outer_surround  = visual.PatchStim(self.win,tex="sin",mask="circle",
+                                           texRes=256,
+                                           color=surround_contrast,
+                                           size=(surround_outer-ring_width/2,
+                                                 surround_outer-ring_width/2),
+                                           sf=(spatial_freq,spatial_freq),
+                                           ori = surround_ori)
+
+        self.annulus = visual.PatchStim(self.win,tex="sin",mask="circle",
+                                        texRes=256,
+                                        color=annulus_contrast,
+                                        size=(annulus_outer-ring_width/2,
+                                              annulus_outer-ring_width/2),
+                                        sf=(spatial_freq,spatial_freq),
+                                        ori = annulus_ori)
+
+        self.inner_surround = visual.PatchStim(self.win,tex="sin",mask="circle",
+                                               texRes=256,
+                                               color=surround_contrast,
+                                               size=(annulus_inner-ring_width/2,
+                                                     annulus_inner-ring_width/2),
+                                               sf=(spatial_freq,spatial_freq),
+                                               ori = surround_ori)
+
+        #This is the bit between the annulus and the outer surround: 
+        self.ring1 = visual.PatchStim(self.win, tex=None, mask='circle',
+                                      color=-1, #Always black
+                                      size=[annulus_outer+ring_width/2,
+                                            annulus_outer+ring_width/2],
+                                      interpolate=True)
+
+        #This is the bit between the annulus and the inner surround: 
+        self.ring2 = visual.PatchStim(self.win, tex=None, mask='circle',
+                                      color=-1, #Always black
+                                      size=[annulus_inner+ring_width/2,
+                                            annulus_inner+ring_width/2],
+                                      interpolate=True)
+
+        #This is the central area, between the inner surround and the fixation: 
+        self.center_area = visual.PatchStim(self.win, tex=None, mask='circle',
+                                            color=0, #Always gray
+                                            size=[surround_inner,
+                                                  surround_inner],
+                                            interpolate=True)
+
+        #If there is a target: 
+        if target is not None: 
+            #In order to apply a different contrast to the target wedge,
+            #generate a mask, which will cover everything except for the target
+            #wedge:
+            grid_array = np.linspace(-1*annulus.size[0],annulus.size[0],
+                                     annulus.texRes)
+            x,y=np.meshgrid(grid_array,grid_array)
+            r = np.sqrt(x**2 + y**2)
+            theta = np.arctan2(x,y) + np.pi
+            target_mask = np.ones((annulus.texRes,annulus.texRes))
+            target_mask[np.where(r>annulus_outer-ring_width/2)] = -1
+            target_mask[np.where(r<annulus_inner-ring_width/2)] = -1
+
+            #Since the whole PatchStim is rotated according to annulus_ori, we
+            #need to adjust for that, so that the target locations remain
+            #invariant across different orientations (hence subtraction of
+            #annulus_ori):
+            target_mask[np.where(theta<target_loc*np.deg2rad(45)-
+                                 np.deg2rad(annulus_ori))] = -1
+            target_mask[np.where(theta>(target_loc+1)*np.deg2rad(45)-
+                                 np.deg2rad(annulus_ori))] = -1
+
+            #Now show the target contrast in the wedge, using that mask:
+            self.target = visual.PatchStim(self.win,tex="sin",mask=target_mask,
+                                           texRes=256,
+                                           color=target_contrast, input
+                                           size=(annulus_outer-ring_width/2,
+                                                 annulus_outer-ring_width/2),
+                                           sf=(spatial_freq,spatial_freq),
+                                           ori = annulus_ori)
+        else:
+            self.target = None
+
+        self.spokes = []
+        for i in np.arange(num_spokes/2):
+            self.spokes.append(visual.ShapeStim(self.win,
+                                 fillColor = -1,
+                                 lineColor = -1,
+                                 vertices = ((-spoke_width/2,annulus_outer/2),
+                                             (spoke_width/2,-annulus_outer/2),
+                                             (-spoke_width/2,-annulus_outer/2),
+                                             (spoke_width/2,annulus_outer/2)),
+                                 ori=i*45))
+
+        # Fixation (made out of two concentric squares):
+        self.fixation = visual.PatchStim(self.win, tex=None, color=1,
+                                    size=fixation_size,
+                                    interpolate=True)
+
+        self.fixation_center = visual.PatchStim(self.win, tex=None, color=-1,
+                                    size=fixation_size/2,
+                                    interpolate=True)
+
+            
+        def show(self,duration):
+            #Choose a random phase to start the presentation with: 
+            ph_rand = np.random.rand(1) * 2*np.pi - np.pi
+
+            #Start a clock 
+            clock = core.Clock()
+            while t<duration: #Keep going for the duration
+                t=clock.getTime()
+
+                #Set the contrast for all of them to be the same and oscillate:
+                self.annulus.setContrast(np.sin(ph_rand +
+                                                t*temporal_freq*np.pi*2))
+
+                self.inner_surround.setContrast(np.sin(ph_rand +
+                                                  t*temporal_freq*np.pi*2))
+                
+                self.outer_surround.setContrast(np.sin(ph_rand +
+                                                  t*temporal_freq*np.pi*2))    
+
+                #Only if there is a target:
+                if self.target is not None: 
+                    self.target_wedge.setContrast(np.sin(ph_rand +
+                                                    t*temporal_freq*np.pi*2))
+
+                #Draw them (order matters!)
+                self.outer_surround.draw()
+                self.ring1.draw()
+                self.annulus.draw()
+                if self.target is not None:
+                    self.target_wedge.draw()
+                for spoke in self.spokes:
+                    spoke.draw()
+                self.ring2.draw()
+                self.inner_surround.draw()
+                self.center_area.draw()
+                self.fixation.draw()
+                self.fixation_center.draw()
+
+                win.flip() #update the screen
+
+            
