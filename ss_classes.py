@@ -143,39 +143,9 @@ class Stimulus(object):
                                                   surround_inner],
                                             interpolate=True)
 
-        #If there is a target: 
-        if target is not None: 
-            #In order to apply a different contrast to the target wedge,
-            #generate a mask, which will cover everything except for the target
-            #wedge:
-            grid_array = np.linspace(-1*annulus.size[0],annulus.size[0],
-                                     annulus.texRes)
-            x,y=np.meshgrid(grid_array,grid_array)
-            r = np.sqrt(x**2 + y**2)
-            theta = np.arctan2(x,y) + np.pi
-            target_mask = np.ones((annulus.texRes,annulus.texRes))
-            target_mask[np.where(r>annulus_outer-ring_width/2)] = -1
-            target_mask[np.where(r<annulus_inner-ring_width/2)] = -1
 
-            #Since the whole PatchStim is rotated according to annulus_ori, we
-            #need to adjust for that, so that the target locations remain
-            #invariant across different orientations (hence subtraction of
-            #annulus_ori):
-            target_mask[np.where(theta<target_loc*np.deg2rad(45)-
-                                 np.deg2rad(annulus_ori))] = -1
-            target_mask[np.where(theta>(target_loc+1)*np.deg2rad(45)-
-                                 np.deg2rad(annulus_ori))] = -1
-
-            #Now show the target contrast in the wedge, using that mask:
-            self.target = visual.PatchStim(self.win,tex="sin",mask=target_mask,
-                                           texRes=256,
-                                           color=target_contrast, input
-                                           size=(annulus_outer-ring_width/2,
-                                                 annulus_outer-ring_width/2),
-                                           sf=(spatial_freq,spatial_freq),
-                                           ori = annulus_ori)
-        else:
-            self.target = None
+        #Set the target to None per default:
+        self.target = None
 
         self.spokes = []
         for i in np.arange(num_spokes/2):
@@ -197,7 +167,72 @@ class Stimulus(object):
                                     size=fixation_size/2,
                                     interpolate=True)
 
+        def set_target(self,params,target_co,target_loc,target_ori):
+            """Set the target
+
+            Parameters
+            ----------
+
+            params: a parameter object with all the pre-defined params
+
+            target_co: the contrast of the target in this trial (set by the
+            staircase)
+
+            target_loc: the location of the target (integer between 0 and 7) in
+            this trial.
+
+            target_ori: The orientation of the target (typically set to the
+            same orientation as the annulus):
             
+
+            """
+
+            #Throw errors if the contrast values don't make sense:
+            if target_co > params.pedestal_contrast:
+                raise ValueError ("Target contrast cannot be larger than the pedestal contrast: %s" %params.pedestal_contrast)
+
+            if target_co < params.min_contrast:
+                raise ValueError("Target contrast cannot be smaller than the minimal contrast: %s"%params.min_contrast) 
+
+
+            #In order to apply a different contrast to the target wedge,
+            #generate a mask, which will cover everything except for the target
+            #wedge:
+            grid_array = np.linspace(-1*self.annulus.size[0],
+                                     self.annulus.size[0],
+                                     annulus.texRes)
+            
+            x,y=np.meshgrid(grid_array,grid_array)
+            r = np.sqrt(x**2 + y**2)
+            theta = np.arctan2(x,y) + np.pi
+            target_mask = np.ones((self.annulus.texRes,self.annulus.texRes))
+
+            target_mask[np.where(r>params.annulus_outer-
+                                 params.ring_width/2)] = -1
+
+            target_mask[np.where(r<params.annulus_inner-
+                                 params.ring_width/2)] = -1
+
+            #Since the whole PatchStim is rotated according to annulus_ori, we
+            #need to adjust for that, so that the target locations remain
+            #invariant across different orientations (hence subtraction of
+            #annulus_ori):
+            target_mask[np.where(theta<target_loc*np.deg2rad(45)-
+                                 np.deg2rad(annulus_ori))] = -1
+            target_mask[np.where(theta>(target_loc+1)*np.deg2rad(45)-
+                                 np.deg2rad(target_ori))] = -1
+
+            #Now show the target contrast in the wedge, using that mask:
+            self.target = visual.PatchStim(self.win,tex="sin",mask=target_mask,
+                                           texRes=256,
+                                           color=target_co, 
+                                           size=(params.annulus_outer-
+                                                 params.ring_width/2,
+                                                 params.annulus_outer-
+                                                 params.ring_width/2),
+                                           sf=params.spatial_freq,
+                                           ori=target_ori)
+        
         def show(self,duration):
             #Choose a random phase to start the presentation with: 
             ph_rand = np.random.rand(1) * 2*np.pi - np.pi
