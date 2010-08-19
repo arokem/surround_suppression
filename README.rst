@@ -152,3 +152,12 @@ classes. More about this below:
   
 - Staircase. There is a simple implementation of that alreay in the ss_classes
   file 
+
+
+============
+ Questions:
+============
+
+- 2 AFC or present/absent?
+- Feedback: auditory, visual or both?
+- fixation target: How about a uniform contrast decrement of an entire half?  

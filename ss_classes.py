@@ -8,6 +8,7 @@
 
 import numpy as np
 from psychopy import core, visual, event
+from psychopy.sound import SoundPyglet as Sound
 
 params = dict()
 
@@ -76,6 +77,9 @@ class Event(object):
                 except: #Do nothing in case of an exception:
                     pass
             self.win.flip()
+
+        #Return the entire object at the end, so that we can inspect it:
+        return self
     
 class Staircase(object):
     """
@@ -94,8 +98,8 @@ class Staircase(object):
         n_up,n_down: The kind of staircase to be used, defaults to a 3-up,
                      1-down staircase 
 
-        harder: {-1,1} The direction which would make the task harder. Defaults to -1,
-        which is true for the contrast decrement detection task.  
+        harder: {-1,1} The direction which would make the task harder. Defaults
+        to -1, which is true for the contrast decrement detection task.
 
         """
         self.value = start
@@ -136,12 +140,14 @@ class Staircase(object):
         #Add to the records the updated value: 
         self.record.append(self.value)
     
-
+      
 class Stimulus(Event):
 
     """The surround suppression stimulus, including everything """
 
-    def __init__(self,win,params,target_loc=None,target_contrast=None,
+    def __init__(self,win,params,surround_contrast=None,surround_ori=None,
+                 annulus_contrast=None, annulus_ori=None, fixation_ori=None,
+                 fixation_color=None,
                  tex_res = 256):
         """
 
@@ -156,60 +162,89 @@ class Stimulus(Event):
         the units of size here need to be the units that were used to
         initialize the window object (should be degrees).
 
-        target_loc: the location of the target wedge, if such is needed
+        surround_contrast, surround_ori, annulus_contrast, annulus_ori: These
+        variables can be used in order to over-ride the values of these
+        variables in the params object. They cannot be set online, after the
+        object has been initialized, except by calling the setters of the
+        psychopy objects.
 
-        target_contrast: the contrast of said target, if needed.
+        fixation_ori: sometimes we might want to rotate the fixation square to
+        some other orientation. This allows this. Defaults to None => upright
+        square. 
 
+        fixation_color: If we want to change the color of the fixation from
+        white (the default) to some other color (rgb argument). 
+
+        
+        tex_res: the resolution (in pixels) at which the OpenGL texture is
+        rendered (?).
         """
 
         #Carry the window object around with you:
         self.win = win
+        #The resolution for the textures:
+        self.tex_res = tex_res
+        #The temporal frequency of the flicker:
+        self.temporal_freq = params.temporal_freq
 
+        #Set the params for the different components of the stimulus. The
+        #default is to follow what is given by the params:
+        if surround_contrast is None:
+            surround_contrast = params.surround_contrast
+        if surround_ori is None:
+            surround_ori = params.surround_ori
+        if annulus_contrast is None:
+            annulus_contrast = params.annulus_contrast
+        if annulus_ori is None:
+            annulus_ori = params.annulus_ori
+        
         #Set both parts of the surround
         self.outer_surround = visual.PatchStim(self.win,tex="sin",mask="circle",
                                            texRes=tex_res,
-                                           color=params.surround_contrast,
-                                           size=(param.surround_outer-
+                                           color=surround_contrast,
+                                           size=(params.surround_outer-
                                                  params.ring_width/2,
                                                  params.surround_outer-
                                                  params.ring_width/2),
                                            sf=params.spatial_freq,
-                                           ori = param.surround_ori)
+                                           ori = surround_ori)
 
         self.inner_surround = visual.PatchStim(self.win,tex="sin",mask="circle",
                                                texRes=tex_res,
-                                               color=params.surround_contrast,
+                                               color=surround_contrast,
                                                size=(params.annulus_inner-
                                                      params.ring_width/2,
                                                      params.annulus_inner-
                                                      params.ring_width/2),
-                                               sf=params.spatial_freq
-                                               ori = params.surround_ori)
+                                               sf=params.spatial_freq,
+                                               ori = surround_ori)
 
         #Set the annulus:
         self.annulus = visual.PatchStim(self.win,tex="sin",mask="circle",
                                         texRes=tex_res,
-                                        color=params.annulus_contrast,
-                                        size=(param.annulus_outer-
+                                        color=annulus_contrast,
+                                        size=(params.annulus_outer-
                                               params.ring_width/2,
                                               params.annulus_outer-
                                               params.ring_width/2),
                                         sf=params.spatial_freq,
-                                        ori = params.annulus_ori)
+                                        ori = annulus_ori)
 
-        #Set the rings abutting the annulus on both sides: 
+        #Set the rings abutting the annulus on both sides:
+        ring_width = params.ring_width
+        spoke_width = params.spoke_width
         #This is the bit between the annulus and the outer surround: 
         self.ring1 = visual.PatchStim(self.win, tex=None, mask='circle',
                                       color=-1, #Always black
-                                      size=[annulus_outer+ring_width/2,
-                                            annulus_outer+ring_width/2],
+                                      size=[params.annulus_outer+ring_width/2,
+                                            params.annulus_outer+ring_width/2],
                                       interpolate=True)
 
         #This is the bit between the annulus and the inner surround: 
         self.ring2 = visual.PatchStim(self.win, tex=None, mask='circle',
                                       color=-1, #Always black
-                                      size=[annulus_inner+ring_width/2,
-                                            annulus_inner+ring_width/2],
+                                      size=[params.annulus_inner+ring_width/2,
+                                            params.annulus_inner+ring_width/2],
                                       interpolate=True)
 
         #This is the central area, between the inner surround and the fixation: 
@@ -221,29 +256,39 @@ class Stimulus(Event):
         self.spokes = []
         for i in np.arange(num_spokes/2):
             self.spokes.append(visual.ShapeStim(self.win,
-                                 fillColor = -1,
-                                 lineColor = -1,
-                                 vertices = ((-spoke_width/2,annulus_outer/2),
-                                             (spoke_width/2,-annulus_outer/2),
-                                             (-spoke_width/2,-annulus_outer/2),
-                                             (spoke_width/2,annulus_outer/2)),
-                                 ori=i*45))
+                                fillColor = -1,
+                                lineColor = -1,
+                                vertices = ((-spoke_width/2,annulus_outer/2),
+                                            (spoke_width/2,-annulus_outer/2),
+                                            (-spoke_width/2,-annulus_outer/2),
+                                            (spoke_width/2,annulus_outer/2)),
+                                ori=i*45))
 
         # Fixation (made out of two concentric squares):
-        self.fixation = visual.PatchStim(self.win, tex=None, color=1,
-                                    size=fixation_size,
-                                    interpolate=True)
+        # Set the fixation parameters from the input or the defaults:
+        if fixation_color is None:
+            fixation_color = 1
+        if fixation_ori is None:
+            fixation_ori = 0
 
-        self.fixation_center = visual.PatchStim(self.win, tex=None, color=-1,
-                                    size=fixation_size/2,
-                                    interpolate=True)
+        self.fixation = visual.PatchStim(self.win, tex=None,
+                                         color=fixation_color,
+                                         size=fixation_size,
+                                         interpolate=True,
+                                         ori=fixation_ori)
+
+        self.fixation_center = visual.PatchStim(self.win, tex=None,
+                                                color=-1,
+                                                size=fixation_size/4,
+                                                interpolate=True,
+                                                ori=fixation_ori)
 
         def finalize(self,params,target_co=None,target_loc=None,
-                     target_ori=None):
+                     target_ori=None,fixation_co=None):
 
             """
 
-            Set the target
+            Finalize the stimulus, by setting the target
 
             Parameters
             ----------
@@ -259,8 +304,11 @@ class Stimulus(Event):
 
             target_ori: The orientation of the target (typically set to the
             same orientation as the annulus). Defaults to None => the
-            orientation given in the params object 
-            
+            orientation given in the params object
+
+            fixation_co: This allows setting of the fixation contrast (the
+            difference between white and black), so that it can serve as a
+            target.
 
             """
             if target_co is None: 
@@ -313,7 +361,7 @@ class Stimulus(Event):
                 #Now show the target contrast in the wedge, using that mask:
                 self.target = visual.PatchStim(self.win,tex="sin",
                                                mask=target_mask,
-                                               texRes=256,
+                                               texRes=self.tex_res,
                                                color=target_co, 
                                                size=(params.annulus_outer-
                                                      params.ring_width/2,
@@ -321,33 +369,36 @@ class Stimulus(Event):
                                                      params.ring_width/2),
                                                sf=params.spatial_freq,
                                                ori=target_ori)
-        
-        def __call__(self,duration=0):
-            #Choose a random phase to start the presentation with: 
-            ph_rand = np.random.rand(1) * 2*np.pi - np.pi
 
+                #If you want to set the fixation target with a contrast value:
+                if fixation_co is not None:
+                    #Set the fixation target somehow
+                    self.fixation.setContrast(fixation_co)
+                    self.fixation_center.setContrast(fixation_co)    
+                    
+        def __call__(self,params,duration=0):
+            #Choose a random phase (btwn -pi and pi) to start the presentation
+            #with:
+            ph_rand = (np.random.rand(1) * 2*np.pi) - np.pi
             #Start a clock 
             clock = core.Clock()
             while t<duration: #Keep going for the duration
                 t=clock.getTime()
 
-                #Set the contrast for all of them to be the same and oscillate:
                 self.annulus.setContrast(np.sin(ph_rand +
-                                                t*temporal_freq*np.pi*2))
-
+                                                t*self.temporal_freq*np.pi*2))
                 self.inner_surround.setContrast(np.sin(ph_rand +
-                                                  t*temporal_freq*np.pi*2))
-                
+                                                t*self.temporal_freq*np.pi*2))
                 self.outer_surround.setContrast(np.sin(ph_rand +
-                                                  t*temporal_freq*np.pi*2))    
-
-                #Only if there is a target:
+                                                t*self.temporal_freq*np.pi*2))
+                
                 if self.target is not None: 
-                    self.target_wedge.setContrast(np.sin(ph_rand +
-                                                    t*temporal_freq*np.pi*2))
+                    self.target.setContrast(np.sin(ph_rand +
+                                            t*self.temporal_freq*np.pi*2))
 
                 #Draw them (order matters!)
-                self.outer_surround.draw()
+                if self.outer_surround is not None:
+                    self.outer_surround.draw()
                 self.ring1.draw()
                 self.annulus.draw()
                 if self.target is not None:
@@ -359,7 +410,124 @@ class Stimulus(Event):
                 self.center_area.draw()
                 self.fixation.draw()
                 self.fixation_center.draw()
-
+                
                 win.flip() #update the screen
+                
+            #Return the object, so that we can inspect it:
+            return self
+        
+class WaitForButton(Event):
+    """
+    A class which waits with whatever is on the screen until a button is
+    pressed. This can wait for either a particular button (such as the ttl
+    pulse from the scanner) or any old button (when initiating the experiment
+    by the subject).
 
-            
+    """
+    def __init__(self,win):
+
+        
+    
+class Text(Event):
+
+    """
+
+    A class for showing text on the screen. The text persists after
+    presenting it, unless otherwise indicated. Text is always shown at the
+    center of the screen, white on gray. 
+
+    """
+
+    def __init__ (self,win,text=''):
+        """ """
+
+    #No need for a 'finalize' method in this case.
+    
+    def __call__(self):
+        """ """ 
+    
+class Response(Event):
+
+    """
+    Getting responses from subjects and
+    
+    """
+def sound_freq_sweep(startFreq, endFreq, duration, samplesPerSec=None):
+ """   
+ Creates a normalized sound vector (duration seconds long) where the
+ frequency sweeps from startFreq to endFreq (on a log2 scale).
+
+ samplesPerSec is optional- the system-wide default sample rate of 8192
+ will be used if not specified.
+
+ example: 
+ t = fsweep(100, 500, .2);
+
+"""
+if samples_per_sec is None:
+    samplesPerSec = 8192;
+
+time = np.arange(0,duration*samplesPerSec)
+
+
+if startFreq != endFreq:
+    startFreq = np.log2(startFreq)
+    endFreq = np.log2(endFreq)
+    freq = 2.^[startFreq:(endFreq-startFreq)/(length(time)-1):endFreq];
+else:
+    freq = startFreq
+
+snd = sin(time.*freq*(pi*2)/samplesPerSec);
+
+% window the sound vector with a 50 ms raised cosine
+numAtten = round(samplesPerSec*.05);
+% don't window if requested sound is too short
+if length(snd) >= numAtten
+    snd = cosWindow(snd, numAtten);
+end
+
+% normalize
+snd = snd/max(abs(snd));
+
+
+function x = cosWindow(x, numAtten)
+% x = cosWindow(x, numAtten) windows the vector X by a raised cosine.
+% numAtten specifies the number of values at the beginning and end of
+% X to attenuate with the window.
+%
+% September 13, 1998 Bob Dougherty
+
+if nargin~=2
+    error('Usage: out = cosWindow(x, numAtten)')
+end
+
+if numAtten<1 return; end    % do nothing
+
+[m,n] = size(x);
+if min(n,m) > 1    
+    error('x must be a vector')
+end
+l = max(m,n);
+if l < numAtten    
+    error('length of x must be > or = numAtten')
+end
+
+wind = 0.5*cos([pi:pi/(numAtten-1):2*pi])+.5;
+if n==1
+    wind = wind';
+    x(1:numAtten) = x(1:numAtten).*wind;
+    x(l-numAtten+1:l) = x(l-numAtten+1:l).*fliplr(wind')';
+else
+    x(1:numAtten) = x(1:numAtten).*wind;
+    x(l-numAtten+1:l) = x(l-numAtten+1:l).*fliplr(wind);
+end
+
+    
+class Feedback(Event):
+
+    def __init__(self):
+        """This provides auditory feedback (and visual?) about performance """ 
+
+        self.incorrect_sound =
+        self.correct_sound =
+        self.no_respones_sound = 

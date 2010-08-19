@@ -8,7 +8,7 @@ from psychopy import visual,core
 
 #For now, set these params locally, eventually move to the params file: 
 
-duration = 5
+duration = 10
 
 #For the grating:
 temporal_freq = 4
@@ -18,8 +18,8 @@ surround_ori = 0
 annulus_ori = 45
 
 surround_contrast = 1.
-annulus_contrast = 0.8
-target_contrast = 0
+annulus_contrast =0.8
+target_contrast = 0.3
 
 surround_outer = 12.2
 annulus_outer = 6
