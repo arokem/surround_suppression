@@ -10,7 +10,70 @@ import numpy as np
 from psychopy import core, visual, event
 from psychopy.sound import SoundPyglet as Sound
 
-params = dict()
+
+class Params(object):
+    """
+    The Params class stores all of the parameters needed during
+    the execution of ss_run. Runtime variables are set through gui, a priori
+    variables are read in from file (default: ss_params.py). All variables
+    within Params are private must be read/set through methods.
+        
+    """
+    def __init__(self, p_file='ss_params'):
+        #The following params are read in from a file with dict p.
+        im = __import__(p_file)
+        self.__pedestal_inner = im.p['inner_radius']
+        self.__pedestal_outer = im.p['outer_radius']
+        self.__pedestal_contrast = im.p['pedestal_contrast']
+        self.__surround_size = im.p['surround_size']
+        self.__surround_angle = im.p['surround_angle']
+        self.__surround_contrast = im.p['surround_contrast']
+        self.__ring_width = im.p['ring_width']
+        self.__spoke_width = im.p['spoke_width']
+        self.__spatial_freq = im.p['spatial_freq']
+        self.__spatial_phase = im.p['spatial_phase']
+        self.__temporal_freq = im.p['temporal_freq']
+        self.__temporal_phase = im.p['temporal_phase']
+        self.__stim_duration = im.p['stim_duration']
+        self.__response_duration = im.p['response_duration']
+        self.__feedb_duration = im.p['feedb_duration']
+        #The following params are set post execution within ss_run
+        self.__subject_id = None
+        self.__results_name = None
+        self.__fix_or_ann = None
+        
+    def __getitem__(self, choice):
+        #Returns value of the chosen variable. Use: A = Params['var_name']
+        result = {
+            'pedestal_inner'    : self.__pedestal_inner,
+            'pedestal_outer'    : self.__pedestal_outer,
+            'pedestal_contrast' : self.__pedestal_contrast,
+            'surround_size'     : self.__surround_size,
+            'surround_angle'    : self.__surround_angle,
+            'surround_contrast' : self.__surround_contrast,
+            'ring_width'        : self.__ring_width,
+            'spoke_width'       : self.__spoke_width,
+            'spatial_freq'      : self.__spatial_freq,
+            'spatial_phase'     : self.__spatial_phase,
+            'temporal_freq'     : self.__temporal_freq,
+            'temporal_phase'    : self.__temporal_phase,
+            'stim_duration'     : self.__stim_duration,
+            'response_duration' : self.__reponse_duration,
+            'feedb_duration'    : self.__feedb_duration
+        }[choice]        
+        return result
+    
+    def __setitem__(self, choice, new_value):
+        #Sets the chosen runtime variable. Use: Params['var_name'] = A
+        if choice == 'subject_id':
+            self.__subject_id = new_value
+        elif choice == 'results_name':
+            self.__results_name = new_value
+        elif choice == 'fix_or_ann':
+            self.__fix_or_ann = new_value
+        else:
+            print "Can't assign there"
+        
 
 
 class Event(object):
