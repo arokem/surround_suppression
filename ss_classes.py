@@ -53,7 +53,14 @@ class Event(object):
         This method overloads the __call__ method allowing directly calling 
         the object with the inputs for the event occurence
 
-        """        
+        """
+        
+        #Allow to set the duration at this point as well (which would
+        #over-ride any previous setting):
+        if 'duration' in kwargs.keys():
+            self.duration = kwargs['duration']
+        
+
         #In the simplest case, just clear the screen completely at each refresh:
         clock = core.Clock()
         t=0
@@ -134,7 +141,8 @@ class Stimulus(Event):
 
     """The surround suppression stimulus, including everything """
 
-    def __init__(self,win,params,target_loc=None,target_contrast=None):
+    def __init__(self,win,params,target_loc=None,target_contrast=None,
+                 tex_res = 256):
         """
 
         Initialize the object, by setting all the various subobjects
@@ -156,31 +164,40 @@ class Stimulus(Event):
 
         #Carry the window object around with you:
         self.win = win
-        
-        self.outer_surround  = visual.PatchStim(self.win,tex="sin",mask="circle",
-                                           texRes=256,
-                                           color=surround_contrast,
-                                           size=(surround_outer-ring_width/2,
-                                                 surround_outer-ring_width/2),
-                                           sf=(spatial_freq,spatial_freq),
-                                           ori = surround_ori)
 
-        self.annulus = visual.PatchStim(self.win,tex="sin",mask="circle",
-                                        texRes=256,
-                                        color=annulus_contrast,
-                                        size=(annulus_outer-ring_width/2,
-                                              annulus_outer-ring_width/2),
-                                        sf=(spatial_freq,spatial_freq),
-                                        ori = annulus_ori)
+        #Set both parts of the surround
+        self.outer_surround = visual.PatchStim(self.win,tex="sin",mask="circle",
+                                           texRes=tex_res,
+                                           color=params.surround_contrast,
+                                           size=(param.surround_outer-
+                                                 params.ring_width/2,
+                                                 params.surround_outer-
+                                                 params.ring_width/2),
+                                           sf=params.spatial_freq,
+                                           ori = param.surround_ori)
 
         self.inner_surround = visual.PatchStim(self.win,tex="sin",mask="circle",
-                                               texRes=256,
-                                               color=surround_contrast,
-                                               size=(annulus_inner-ring_width/2,
-                                                     annulus_inner-ring_width/2),
-                                               sf=(spatial_freq,spatial_freq),
-                                               ori = surround_ori)
+                                               texRes=tex_res,
+                                               color=params.surround_contrast,
+                                               size=(params.annulus_inner-
+                                                     params.ring_width/2,
+                                                     params.annulus_inner-
+                                                     params.ring_width/2),
+                                               sf=params.spatial_freq
+                                               ori = params.surround_ori)
 
+        #Set the annulus:
+        self.annulus = visual.PatchStim(self.win,tex="sin",mask="circle",
+                                        texRes=tex_res,
+                                        color=params.annulus_contrast,
+                                        size=(param.annulus_outer-
+                                              params.ring_width/2,
+                                              params.annulus_outer-
+                                              params.ring_width/2),
+                                        sf=params.spatial_freq,
+                                        ori = params.annulus_ori)
+
+        #Set the rings abutting the annulus on both sides: 
         #This is the bit between the annulus and the outer surround: 
         self.ring1 = visual.PatchStim(self.win, tex=None, mask='circle',
                                       color=-1, #Always black
@@ -198,13 +215,8 @@ class Stimulus(Event):
         #This is the central area, between the inner surround and the fixation: 
         self.center_area = visual.PatchStim(self.win, tex=None, mask='circle',
                                             color=0, #Always gray
-                                            size=[surround_inner,
-                                                  surround_inner],
+                                            size=params.surround_inner,
                                             interpolate=True)
-
-
-        #Set the target to None per default:
-        self.target = None
 
         self.spokes = []
         for i in np.arange(num_spokes/2):
@@ -226,8 +238,12 @@ class Stimulus(Event):
                                     size=fixation_size/2,
                                     interpolate=True)
 
-        def set_target(self,params,target_co,target_loc,target_ori):
-            """Set the target
+        def finalize(self,params,target_co=None,target_loc=None,
+                     target_ori=None):
+
+            """
+
+            Set the target
 
             Parameters
             ----------
@@ -235,62 +251,76 @@ class Stimulus(Event):
             params: a parameter object with all the pre-defined params
 
             target_co: the contrast of the target in this trial (set by the
-            staircase)
+            staircase). Set to None if no target is to be set in this stimulus
+            object 
 
             target_loc: the location of the target (integer between 0 and 7) in
-            this trial.
+            this trial. defaults to None => random location
 
             target_ori: The orientation of the target (typically set to the
-            same orientation as the annulus):
+            same orientation as the annulus). Defaults to None => the
+            orientation given in the params object 
             
 
             """
+            if target_co is None: 
+                #Set the target to None per default:
+                self.target = None
+            #If a target is to be shown, proceed on to set it:
+            else: 
+                #Throw errors if the contrast values don't make sense:
+                if target_co > params.pedestal_contrast:
+                    raise ValueError ("Target contrast cannot be larger than the pedestal contrast: %s" %params.pedestal_contrast)
 
-            #Throw errors if the contrast values don't make sense:
-            if target_co > params.pedestal_contrast:
-                raise ValueError ("Target contrast cannot be larger than the pedestal contrast: %s" %params.pedestal_contrast)
+                if target_co < params.min_contrast:
+                    raise ValueError("Target contrast cannot be smaller than the minimal contrast: %s"%params.min_contrast) 
 
-            if target_co < params.min_contrast:
-                raise ValueError("Target contrast cannot be smaller than the minimal contrast: %s"%params.min_contrast) 
+                if target_loc is None:
+                    #Choose a random one between 0 and 7 (with equal
+                    #probabilities):
+                    target_loc = int(np.random.rand(1) * 8)
+                if target_ori is None:
+                    #Get it from the params:
+                    target_ori = params.target_ori
+                    
+                #In order to apply a different contrast to the target wedge,
+                #generate a mask, which will cover everything except for the
+                #target wedge:
+                grid_array = np.linspace(-1*self.annulus.size[0],
+                                         self.annulus.size[0],
+                                         annulus.texRes)
 
+                x,y=np.meshgrid(grid_array,grid_array)
+                r = np.sqrt(x**2 + y**2)
+                theta = np.arctan2(x,y) + np.pi
+                target_mask = np.ones((self.annulus.texRes,self.annulus.texRes))
 
-            #In order to apply a different contrast to the target wedge,
-            #generate a mask, which will cover everything except for the target
-            #wedge:
-            grid_array = np.linspace(-1*self.annulus.size[0],
-                                     self.annulus.size[0],
-                                     annulus.texRes)
-            
-            x,y=np.meshgrid(grid_array,grid_array)
-            r = np.sqrt(x**2 + y**2)
-            theta = np.arctan2(x,y) + np.pi
-            target_mask = np.ones((self.annulus.texRes,self.annulus.texRes))
+                target_mask[np.where(r>params.annulus_outer-
+                                     params.ring_width/2)] = -1
 
-            target_mask[np.where(r>params.annulus_outer-
-                                 params.ring_width/2)] = -1
+                target_mask[np.where(r<params.annulus_inner-
+                                     params.ring_width/2)] = -1
 
-            target_mask[np.where(r<params.annulus_inner-
-                                 params.ring_width/2)] = -1
+                #Since the whole PatchStim is rotated according to annulus_ori,
+                #we need to adjust for that, so that the target locations
+                #remain invariant across different orientations (hence
+                #subtraction of annulus_ori):
+                target_mask[np.where(theta<target_loc*np.deg2rad(45)-
+                                     np.deg2rad(annulus_ori))] = -1
+                target_mask[np.where(theta>(target_loc+1)*np.deg2rad(45)-
+                                     np.deg2rad(target_ori))] = -1
 
-            #Since the whole PatchStim is rotated according to annulus_ori, we
-            #need to adjust for that, so that the target locations remain
-            #invariant across different orientations (hence subtraction of
-            #annulus_ori):
-            target_mask[np.where(theta<target_loc*np.deg2rad(45)-
-                                 np.deg2rad(annulus_ori))] = -1
-            target_mask[np.where(theta>(target_loc+1)*np.deg2rad(45)-
-                                 np.deg2rad(target_ori))] = -1
-
-            #Now show the target contrast in the wedge, using that mask:
-            self.target = visual.PatchStim(self.win,tex="sin",mask=target_mask,
-                                           texRes=256,
-                                           color=target_co, 
-                                           size=(params.annulus_outer-
-                                                 params.ring_width/2,
-                                                 params.annulus_outer-
-                                                 params.ring_width/2),
-                                           sf=params.spatial_freq,
-                                           ori=target_ori)
+                #Now show the target contrast in the wedge, using that mask:
+                self.target = visual.PatchStim(self.win,tex="sin",
+                                               mask=target_mask,
+                                               texRes=256,
+                                               color=target_co, 
+                                               size=(params.annulus_outer-
+                                                     params.ring_width/2,
+                                                     params.annulus_outer-
+                                                     params.ring_width/2),
+                                               sf=params.spatial_freq,
+                                               ori=target_ori)
         
         def __call__(self,duration=0):
             #Choose a random phase to start the presentation with: 
