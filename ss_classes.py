@@ -11,6 +11,49 @@ from psychopy import core, visual, event
 
 params = dict()
 
+
+class Event(object):
+
+    """This is the base clase for the events, which sets the template for all
+    the events objects """
+    def __init__(self,win,**kwargs):
+        """
+        This always initializes with the window object and with a params
+        object
+        
+        
+        """
+        self.win = win 
+        if 'duration' in kwargs.keys():
+            self.duration = kwargs['duration']
+        else:
+            self.duration = 0
+        
+    def finalize(self,**kwargs):
+        """
+        This is a function to finalize the event, before making it happen
+
+        """
+        #In the simplest case, just set additional attributes according to the
+        #input: 
+        for k in kwargs:
+            self.__setattr__(k,kwargs[k])
+        
+    def __call__(self,**kwargs):
+        """
+        Make the event go for the alloted duration
+
+        This method overloads the __call__ method allowing directly calling 
+        the object with the inputs for the event occurence
+
+        """        
+        #In the simplest case, just clear the screen completely at each refresh:
+        clock = core.Clock()
+        t=0
+        while t<self.duration: #Keep going for the duration
+            t=clock.getTime()
+            self.win.flip()
+    
 class Staircase(object):
     """
     This is an object for holding, updating and potentially analyzing
@@ -71,7 +114,7 @@ class Staircase(object):
         self.record.append(self.value)
     
 
-class Stimulus(object):
+class Stimulus(Event):
 
     """The surround suppression stimulus, including everything """
 
@@ -233,7 +276,7 @@ class Stimulus(object):
                                            sf=params.spatial_freq,
                                            ori=target_ori)
         
-        def show(self,duration):
+        def __call__(self,duration=0):
             #Choose a random phase to start the presentation with: 
             ph_rand = np.random.rand(1) * 2*np.pi - np.pi
 
