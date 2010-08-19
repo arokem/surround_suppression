@@ -23,12 +23,19 @@ class Event(object):
         
         
         """
+        #The event has to be attached to some psychopy window object:
         self.win = win 
+
+        #The duration attribute is also necessary: 
         if 'duration' in kwargs.keys():
             self.duration = kwargs['duration']
         else:
             self.duration = 0
-        
+            
+        #Set the rest of the attributes, if they are provided:
+        for k in kwargs:
+            self.__setattr__(k,kwargs[k])
+
     def finalize(self,**kwargs):
         """
         This is a function to finalize the event, before making it happen
@@ -52,6 +59,15 @@ class Event(object):
         t=0
         while t<self.duration: #Keep going for the duration
             t=clock.getTime()
+            #For each of the object attributes, go and check whether it has a
+            #'draw' method. If it does, call that method before flipping the
+            #window, so that if stimuli objects from psychopy were provided,
+            #those will be shown for the duration: 
+            for k in self.__dict__:
+                try:
+                    self.__dict__[k].draw()
+                except: #Do nothing in case of an exception:
+                    pass
             self.win.flip()
     
 class Staircase(object):
