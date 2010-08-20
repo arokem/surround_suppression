@@ -9,6 +9,7 @@
 import numpy as np
 from psychopy import core, visual, event
 from psychopy.sound import SoundPyglet as Sound
+from ss_tools import sound_freq_sweep
 
 
 class Params(object):
@@ -518,75 +519,6 @@ class Response(Event):
     Getting responses from subjects and
     
     """
-def sound_freq_sweep(startFreq, endFreq, duration, samplesPerSec=None):
- """   
- Creates a normalized sound vector (duration seconds long) where the
- frequency sweeps from startFreq to endFreq (on a log2 scale).
-
- samplesPerSec is optional- the system-wide default sample rate of 8192
- will be used if not specified.
-
- example: 
- t = fsweep(100, 500, .2);
-
-"""
-if samples_per_sec is None:
-    samplesPerSec = 8192;
-
-time = np.arange(0,duration*samplesPerSec)
-
-
-if startFreq != endFreq:
-    startFreq = np.log2(startFreq)
-    endFreq = np.log2(endFreq)
-    freq = 2.^[startFreq:(endFreq-startFreq)/(length(time)-1):endFreq];
-else:
-    freq = startFreq
-
-snd = sin(time.*freq*(pi*2)/samplesPerSec);
-
-% window the sound vector with a 50 ms raised cosine
-numAtten = round(samplesPerSec*.05);
-% don't window if requested sound is too short
-if length(snd) >= numAtten
-    snd = cosWindow(snd, numAtten);
-end
-
-% normalize
-snd = snd/max(abs(snd));
-
-
-function x = cosWindow(x, numAtten)
-% x = cosWindow(x, numAtten) windows the vector X by a raised cosine.
-% numAtten specifies the number of values at the beginning and end of
-% X to attenuate with the window.
-%
-% September 13, 1998 Bob Dougherty
-
-if nargin~=2
-    error('Usage: out = cosWindow(x, numAtten)')
-end
-
-if numAtten<1 return; end    % do nothing
-
-[m,n] = size(x);
-if min(n,m) > 1    
-    error('x must be a vector')
-end
-l = max(m,n);
-if l < numAtten    
-    error('length of x must be > or = numAtten')
-end
-
-wind = 0.5*cos([pi:pi/(numAtten-1):2*pi])+.5;
-if n==1
-    wind = wind';
-    x(1:numAtten) = x(1:numAtten).*wind;
-    x(l-numAtten+1:l) = x(l-numAtten+1:l).*fliplr(wind')';
-else
-    x(1:numAtten) = x(1:numAtten).*wind;
-    x(l-numAtten+1:l) = x(l-numAtten+1:l).*fliplr(wind);
-end
 
     
 class Feedback(Event):
