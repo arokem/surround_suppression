@@ -161,3 +161,6 @@ classes. More about this below:
 - 2 AFC or present/absent?
 - Feedback: auditory, visual or both?
 - fixation target: How about a uniform contrast decrement of an entire half?  
+- Do we foresee a situation in which we would want more than 8 segments in the
+  annulus?
+  
