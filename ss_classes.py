@@ -16,7 +16,7 @@ class Params(object):
     The Params class stores all of the parameters needed during
     the execution of ss_run. Runtime variables are set through gui, a priori
     variables are read in from file (default: ss_params.py). All variables
-    within Params are private must be read/set through methods.
+    within Params are private and must be read/set through methods.
         
     """
     def __init__(self, p_file='ss_params'):
@@ -59,7 +59,10 @@ class Params(object):
             'temporal_phase'    : self.__temporal_phase,
             'stim_duration'     : self.__stim_duration,
             'response_duration' : self.__reponse_duration,
-            'feedb_duration'    : self.__feedb_duration
+            'feedb_duration'    : self.__feedb_duration,
+            'subject_id'        : self.__subject_id,
+            'results_name'      : self.__results_name,
+            'fix_or_ann'        : self.__fix_or_ann
         }[choice]        
         return result
     
