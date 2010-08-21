@@ -508,19 +508,6 @@ class Stimulus(Event):
             #Return the object, so that we can inspect it:
             return self
 
-
-# XXX TODO: Continue working on these objects:
-
-## class WaitForButton(Event):
-##     """
-##     A class which waits with whatever is on the screen until a button is
-##     pressed. This can wait for either a particular button (such as the ttl
-##     pulse from the scanner) or any old button (when initiating the experiment
-##     by the subject).
-
-##     """
-##     def __init__(self,win):
-        
     
 class Text(Event):
 
