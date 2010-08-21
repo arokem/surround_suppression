@@ -5,11 +5,11 @@
 - Trial
 
 """ 
-
+import wx
 import numpy as np
 from psychopy import core, visual, event, gui
 from psychopy.sound import SoundPyglet as Sound
-from ss_tools import sound_freq_sweep
+from ss_tools import sound_freq_sweep, GetFromGui
 
 
 class Params(object):
@@ -58,7 +58,7 @@ class Params(object):
             super.__setattr__(self,name,value)
             self._dont_touch.append(name)
 
-    def set_by_gui(self,**kwargs):
+    def set_by_gui(self,app):
         """
         Set additional parameters through a psychopy gui object
 
@@ -69,13 +69,23 @@ class Params(object):
         of the parameter object 
                 
         """
-        info = kwargs.copy() #This initializes the information that needs to be
-                              #set through a gui. Just to be on the safe side,
-                              #don't mess with the input dict, but with a copy
-        this_gui = gui.DlgFromDict(dictionary=info,title='Enter run info')
-
-        for k in info.keys():
-            self.__setattr__(k,info[k])
+        
+        # Use the GetFromGui class from ss_tools:
+        user_choice = GetFromGui(None, -1, 'Session Params',
+                                 ['Parallel', 'Orthogonal'])
+        # success is achieved if the user presses 'done': 
+        if user_choice.success:                
+                user_params = {
+                    "subject" : user_choice.subject,
+                    "stimulus_condition" : user_choice.stimulus_condition,
+                    "task" : user_choice.TaskType}
+        else:
+            raise ValueError("Program stopped by user")
+        # Stop execution of the window
+        user_choice.Destroy()
+        
+        for k in user_params.keys():
+            self.__setattr__(k,user_params[k])
         
 class Event(object):
 
@@ -528,8 +538,13 @@ class Stimulus(Event):
 ## class Feedback(Event):
 
 ##     def __init__(self):
-##         """This provides auditory feedback (and visual?) about performance """ 
+##         """This provides auditory (and visual?) feedback about performance """ 
 
-##         self.incorrect_sound =
-##         self.correct_sound =
-##         self.no_respones_sound = 
+##         self.incorrect_sound = Sound(sound_freq_sweep(8000, 200, .1))
+##         self.correct_sound = Sound('C',duration=0.5)
+##         self.no_respones_sound = Sound(sound_freq_sweep(200, 300, .1))   
+##     def finalize(self,correct)
+        
+##     def __call__():
+
+        

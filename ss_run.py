@@ -6,7 +6,7 @@ And on the Psychtoolbox version used to get the data in Yoon et al. (2009 and
 2010).
 
 """ 
-
+import wx
 import numpy as np
 from ss_classes import Params
 from psychopy import gui
@@ -19,12 +19,14 @@ if __name__ == "__main__":
 
     #Initialize params from file:
     params = Params()
-    params.set_by_gui(subject_id = '', condition = 'ortho')
+    app = wx.App()
+    params.set_by_gui(app)
+    app.MainLoop()
 
-    if params.condition == 'ortho':
-        params.annulus_ori = params.surround_ori + 90
-    else:
+    if params.stimulus_condition == 0: #Parallel
         params.annulus_ori = params.surround_ori
+    elif params.stimulus_condition == 1: #Orthogonal
+        params.annulus_ori = params.surround_ori + 90 
         
     #After this is done, info now has in it what the user put in there.
 
