@@ -11,6 +11,7 @@ import numpy as np
 from ss_classes import Params
 from psychopy import gui
 
+
 #This brings in all of the classes defined in ss_classes:
 from ss_classes import *
     
@@ -33,15 +34,14 @@ if __name__ == "__main__":
                           params.annulus_contrast/params.contrast_increments)
 
     trial_list = [Trial(win,params,0),Trial(win,params,1),Trial(win,params,2)]
-    
+
     #Send a message to the screen and wait for a subject keypress:
     start_text(win) 
         
     #Loop over the event list, while consuming each event, by calling it:
     
     for this_trial in trial_list:
-
-        #These two are bound together: 
+        #
         this_trial.stimulus.finalize(params,target_co=staircase.value,
                                      target_loc=0)
         this_trial.stimulus(duration=params.stimulus_duration)
@@ -49,9 +49,7 @@ if __name__ == "__main__":
         this_trial.response.finalize(correct_key = '1')
         correct = this_trial.response()
         this_trial.feedback.finalize(correct)
+        this_trial.feedback()
         staircase.update(correct)
-        
-        
 
-         
     win.close()
