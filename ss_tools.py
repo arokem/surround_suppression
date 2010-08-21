@@ -56,31 +56,31 @@ class GetFromGui(wx.Dialog):
         # Add text labels
         wx.StaticText(self, -1, 'Subject ID:', pos=(10,20))
         wx.StaticText(self, -1, 'Surround Orientation:', pos=(10,60))
-        wx.StaticText(self, -1, 'Annulus Orientation:', pos=(10, 100))
-        wx.StaticText(self, -1, 'Task:', pos=(10,140))
+        wx.StaticText(self, -1, 'Annulus Orientation:', pos=(10, 120))
+        wx.StaticText(self, -1, 'Task:', pos=(30,200))
 
         # Add the subj id text box, drop down menu, radio buttons
         self.textbox = wx.TextCtrl(self, -1, pos=(100,18), size=(150, -1))
 
         #Spin control for the surround orientation:
-        self.sc_surround = wx.SpinCtrl(self, -1, '', (140,75))
+        self.sc_surround = wx.SpinCtrl(self, -1, '', (140,80))
         self.sc_surround.SetRange(0,180)
         self.sc_surround.SetValue(0)
 
         #Spin control for the annulus orientation:
-        self.sc_annulus = wx.SpinCtrl(self, -1, '', (140,115))
+        self.sc_annulus = wx.SpinCtrl(self, -1, '', (140,140))
         self.sc_annulus.SetRange(0,180)
         self.sc_annulus.SetValue(0)
                       
         #Radio buttons for the different tasks:
-        self.rb_task1 = wx.RadioButton(self, -1, 'Annulus', (95, 140),
+        self.rb_task1 = wx.RadioButton(self, -1, 'Annulus', (95, 200),
                                   style=wx.RB_GROUP)
-        self.rb_task2 = wx.RadioButton(self, -1, 'Fixation', (175, 140))
+        self.rb_task2 = wx.RadioButton(self, -1, 'Fixation', (175, 200))
         self.rb_task1.SetValue(1)
 
         # Add OK/Cancel buttons
-        wx.Button(self, 1, 'Done', (60, 170))
-        wx.Button(self, 2, 'Quit', (150, 170))
+        wx.Button(self, 1, 'Done', (60, 240))
+        wx.Button(self, 2, 'Quit', (150, 240))
         
         # Bind button press events to class methods for execution
         self.Bind(wx.EVT_BUTTON, self.OnDone, id=1)

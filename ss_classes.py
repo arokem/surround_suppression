@@ -58,7 +58,7 @@ class Params(object):
             super.__setattr__(self,name,value)
             self._dont_touch.append(name)
 
-    def set_by_gui(self,app):
+    def set_by_gui(self):
         """
         Set additional parameters through a psychopy gui object
 
@@ -81,6 +81,7 @@ class Params(object):
                     "annulus_ori" : user_choice.annulus_ori,
                     "task" : user_choice.TaskType}
         else:
+            user_choice.Destroy()
             raise ValueError("Program stopped by user")
         # Stop execution of the window
         user_choice.Destroy()
