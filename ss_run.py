@@ -23,10 +23,7 @@ if __name__ == "__main__":
     params.set_by_gui(app)
     app.MainLoop()
 
-    if params.stimulus_condition == 0: #Parallel
-        params.annulus_ori = params.surround_ori
-    elif params.stimulus_condition == 1: #Orthogonal
-        params.annulus_ori = params.surround_ori + 90 
+
         
     #After this is done, info now has in it what the user put in there.
 

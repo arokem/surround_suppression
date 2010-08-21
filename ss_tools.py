@@ -52,32 +52,35 @@ def sound_freq_sweep(startFreq, endFreq, duration, samples_per_sec=None):
 class GetFromGui(wx.Dialog):
     """ Allows user to set input parameters of ss through a simple GUI"""    
     def __init__(self, parent, id, title, combo_choices=['No Choices Given']):
-        wx.Dialog.__init__(self, parent, id, title, size=(280, 190))
+        wx.Dialog.__init__(self, parent, id, title, size=(280, 300))
         # Add text labels
         wx.StaticText(self, -1, 'Subject ID:', pos=(10,20))
-        wx.StaticText(self, -1, 'Stimulus:', pos=(10,60))
-        wx.StaticText(self, -1, 'Task:', pos=(10, 100))
+        wx.StaticText(self, -1, 'Surround Orientation:', pos=(10,60))
+        wx.StaticText(self, -1, 'Annulus Orientation:', pos=(10, 100))
+        wx.StaticText(self, -1, 'Task:', pos=(10,140))
 
         # Add the subj id text box, drop down menu, radio buttons
         self.textbox = wx.TextCtrl(self, -1, pos=(100,18), size=(150, -1))
 
-        #Add the drop down menu
-        self.rb_stim1 = wx.RadioButton(self, -1, 'Para', (95,58),
-                                       style=wx.RB_GROUP)
-        
-        self.rb_stim2 = wx.RadioButton(self, -1, 'Ortho', (175,58))
+        #Spin control for the surround orientation:
+        self.sc_surround = wx.SpinCtrl(self, -1, '', (140,75))
+        self.sc_surround.SetRange(0,180)
+        self.sc_surround.SetValue(0)
 
-        self.rb_stim1.SetValue(1)
-        
+        #Spin control for the annulus orientation:
+        self.sc_annulus = wx.SpinCtrl(self, -1, '', (140,115))
+        self.sc_annulus.SetRange(0,180)
+        self.sc_annulus.SetValue(0)
+                      
         #Radio buttons for the different tasks:
-        self.rb_task1 = wx.RadioButton(self, -1, 'Annulus', (95, 100),
+        self.rb_task1 = wx.RadioButton(self, -1, 'Annulus', (95, 140),
                                   style=wx.RB_GROUP)
-        self.rb_task2 = wx.RadioButton(self, -1, 'Fixation', (175, 100))
+        self.rb_task2 = wx.RadioButton(self, -1, 'Fixation', (175, 140))
         self.rb_task1.SetValue(1)
 
         # Add OK/Cancel buttons
-        wx.Button(self, 1, 'Done', (60, 135))
-        wx.Button(self, 2, 'Quit', (150, 135))
+        wx.Button(self, 1, 'Done', (60, 170))
+        wx.Button(self, 2, 'Quit', (150, 170))
         
         # Bind button press events to class methods for execution
         self.Bind(wx.EVT_BUTTON, self.OnDone, id=1)
@@ -97,10 +100,9 @@ class GetFromGui(wx.Dialog):
             self.TaskType = 'Annulus'
         else:
             self.TaskType = 'Fixation'
-        if self.rb_stim1.GetValue():
-            self.stimulus_condition = 0 #Parallel
-        else:
-            self.stimulus_condition = 1 #Orthogonal
+
+        self.surround_ori = self.sc_surround.GetValue()
+        self.annulus_ori = self.sc_annulus.GetValue()
         
         self.Close()
 

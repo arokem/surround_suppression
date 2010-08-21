@@ -77,7 +77,8 @@ class Params(object):
         if user_choice.success:                
                 user_params = {
                     "subject" : user_choice.subject,
-                    "stimulus_condition" : user_choice.stimulus_condition,
+                    "surround_ori" : user_choice.surround_ori,
+                    "annulus_ori" : user_choice.annulus_ori,
                     "task" : user_choice.TaskType}
         else:
             raise ValueError("Program stopped by user")
@@ -86,7 +87,7 @@ class Params(object):
         
         for k in user_params.keys():
             self.__setattr__(k,user_params[k])
-        
+
 class Event(object):
 
     """This is the base clase for the events, which sets the template for all

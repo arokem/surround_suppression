@@ -11,7 +11,6 @@ p = {
     'annulus_contrast' : 0.75,  # relative contrast, Default: 0.75
     'surround_outer' : 12.2,    # deg of visual angle, Default: 9.2
     'surround_inner': 0.4,      # deg of visual angle 
-    'surround_ori' : 0,         # degrees, Default: 0
     'surround_contrast' : 1,    # relative contrast, Default: 0.75
     'ring_width' : 0.1,         # deg of visual angle, Default: 0.1
     'spoke_width' : 0.1,        # deg of visual angle, Default: 0.1
