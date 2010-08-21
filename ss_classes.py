@@ -551,17 +551,70 @@ class Text(Event):
             for key in event.getKeys():
                 if key in self.keys:
                     return
-                
 
 
+def start_text(win):
+    """
 
-## class Response(Event):
+    This is a short-cut function to provide the default usage of the Text
+    object
 
-##     """
-##     Getting responses from subjects and
+    """
     
-##     """
+    #Initialize the object and call it in the same line:
+    T = Text(win)()
 
+                
+class Response(Event):
+
+    """
+    Getting responses from subjects and evaluating their correctness
+    
+    """
+    def __init__(win,params,keys=['1','2']):
+        """
+
+        Initializer for the Response object. Listening only to '1' and '2',
+        unless the keys input variable is set otherwise.
+        
+        """
+        self.duration = params.response_duration
+
+    def finalize(correct_key=None):
+        """
+
+        Which key is the correct one in this trial? Defaults to '1'.
+        
+        """
+        if correct_key is None:
+            self.correct_key = '1'
+        else:
+            self.correct_key = correct_key
+
+    def __call__(self):
+        """
+        
+        When the object is called, it evaluates whether the key pressed is
+        the right key for that trial and returns 1 if the right key was pressed
+        and 0 if the other one was pressed. If no key is replaced during the
+        duration will return None
+
+        """
+        clock = core.Clock()
+        t=0
+        while t<self.duration: #Keep going for the duration
+            t=clock.getTime()
+
+            self.text.draw()
+            self.win.flip()
+            
+            for key in event.getKeys():
+                if key in self.keys:
+                    if key==self.correct_key:
+                        return 1
+                    else:
+                        return 0
+        return None
     
 class Feedback(Event):
 
@@ -611,6 +664,5 @@ class Feedback(Event):
         
         while t<self.duration: #Keep going for the duration
             t=clock.getTime()
-        
 
         
