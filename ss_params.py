@@ -19,9 +19,9 @@ p = {
     'spatial_phase' : 0,        # seconds, Default: 0
     'temporal_freq' : 4,        # Hz, Default: 4
     'temporal_phase' : 0,       # seconds, Default: 0
-    'stim_duration' : 0.5,      # seconds, Default: 0
-    'response_duration' : 1.05, # seconds, Default:0
-    'feedback_duration' : 0.35,    # seconds, Default: 0
+    'stim_duration' : 0.75,      # seconds, Default: 0
+    'response_duration' : 1.0, # seconds, Default:0
+    'feedback_duration' : 0.25,    # seconds, Default: 0
     'fixation_size': .3 #deg of visual angle
     }
 

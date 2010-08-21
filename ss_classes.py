@@ -223,7 +223,7 @@ class Stimulus(Event):
 
     def __init__(self,win,params,surround_contrast=None,surround_ori=None,
                  annulus_contrast=None, annulus_ori=None, fixation_ori=None,
-                 fixation_color=None,
+                 fixation_color=None,fixation_shape=None,
                  tex_res = 256):
         """
 
@@ -251,6 +251,8 @@ class Stimulus(Event):
         fixation_color: If we want to change the color of the fixation from
         white (the default) to some other color (rgb argument). 
 
+        fixation_shape: The shape of the mask applied to the fixation
+        {None(default) => square | 'circle'}
         
         tex_res: the resolution (in pixels) at which the OpenGL texture is
         rendered (?).
@@ -359,13 +361,13 @@ class Stimulus(Event):
                                          ori=fixation_ori)
 
         self.fixation_center = visual.PatchStim(self.win, tex=None,
-                                                color=-1,
-                                                size=params.fixation_size/4,
+                                                color=0,
+                                                size=params.fixation_size/2,
                                                 interpolate=True,
                                                 ori=fixation_ori)
 
         def finalize(self,params,target_co=None,target_loc=None,
-                     target_ori=None,fixation_co=None):
+                     target_ori=None,fix_target_co=None,fix_target_loc=None):
 
             """
 
@@ -387,9 +389,12 @@ class Stimulus(Event):
             same orientation as the annulus). Defaults to None => the
             orientation given in the params object
 
-            fixation_co: This allows setting of the fixation contrast (the
+            fix_target_co: This allows setting of the fixation contrast (the
             difference between white and black), so that it can serve as a
             target.
+
+            fix_target_loc: the location of the fixation target (right{1} or
+            left{otherwise})
 
             """
             if target_co is None: 
@@ -417,7 +422,7 @@ class Stimulus(Event):
                 #target wedge:
                 grid_array = np.linspace(-1*self.annulus.size[0],
                                          self.annulus.size[0],
-                                         annulus.texRes)
+                                         self.annulus.texRes)
 
                 x,y=np.meshgrid(grid_array,grid_array)
                 r = np.sqrt(x**2 + y**2)
@@ -452,10 +457,16 @@ class Stimulus(Event):
                                                ori=target_ori)
 
                 #If you want to set the fixation target with a contrast value:
-                if fixation_co is not None:
-                    #Set the fixation target somehow
-                    self.fixation.setContrast(fixation_co)
-                    self.fixation_center.setContrast(fixation_co)    
+                if fix_target_co is not None:
+                    if fix_target_loc == 1:
+                        pos = [0,self.fixation_size/2]
+                    else:
+                        pos = [0,-self.fixation_size/2]
+                        
+                    self.fixation_target = visual.PatchStim(self.win,
+                                            tex=None,
+                                            pos = pos,
+                                            opacity=1-fix_target_co)
                     
         def __call__(self,params,duration=0):
             #Choose a random phase (btwn -pi and pi) to start the presentation
@@ -511,24 +522,52 @@ class Stimulus(Event):
 ##     def __init__(self,win):
         
     
-## class Text(Event):
+class Text(Event):
 
-##     """
+    """
+    A class for showing text on the screen until a key is pressed 
+    """
 
-##     A class for showing text on the screen. The text persists after
-##     presenting it, unless otherwise indicated. Text is always shown at the
-##     center of the screen, white on gray. 
+    def __init__ (self,win,text='Press a key to continue',
+                  keys=['1','2'],**kwargs):
+        """
+        
+        Will do the default thing(show 'text' in white on gray background),
+        unless you pass in kwargs, which will just go through to
+        visual.TextStim (see docstring of that class for more details)
 
-##     """
+        keys: list. The keys to which you listen for input
+        """
 
-##     def __init__ (self,win,text=''):
-##         """ """
-
-##     #No need for a 'finalize' method in this case.
+        self.win = win
+        
+        self.text = visual.TextStim(win,text=text,**kwargs)
+        self.keys=keys
+        
+    #No need for a 'finalize' method in this case.
     
-##     def __call__(self):
-##         """ """ 
-    
+    def __call__(self,duration=np.inf):
+        """
+        Text is shown to the screen, until a key is pressed or until duration
+        elapses (default = inf)
+        
+        """
+
+        clock = core.Clock()
+        t=0
+        while t<duration: #Keep going for the duration
+            t=clock.getTime()
+
+            self.text.draw()
+            self.win.flip()
+
+            for key in event.getKeys():
+                if key in self.keys:
+                    return
+                
+
+
+
 ## class Response(Event):
 
 ##     """
