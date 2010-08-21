@@ -2,6 +2,7 @@
 """
     This file stores all of the a priori variables for the ss program. All
     variables must be stored inside of the p dict.
+
 """
 
 
@@ -20,7 +21,7 @@ p = {
     'temporal_phase' : 0,       # seconds, Default: 0
     'stim_duration' : 0.5,      # seconds, Default: 0
     'response_duration' : 1.05, # seconds, Default:0
-    'feedb_duration' : 0.35,    # seconds, Default: 0
+    'feedback_duration' : 0.35,    # seconds, Default: 0
     'fixation_size': .3 #deg of visual angle
     }
 

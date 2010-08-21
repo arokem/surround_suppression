@@ -1,8 +1,12 @@
-"""Base classes for the surround suppression experiment
+"""
+
+Classes for the surround suppression experiment
+
 
 - Stimulus
 - Staircase
 - Trial
+
 
 """ 
 import wx
@@ -60,14 +64,10 @@ class Params(object):
 
     def set_by_gui(self):
         """
-        Set additional parameters through a psychopy gui object
+        Set additional parameters through a wx GUI object. The wx app needs to
+        be started and set in the main loop
 
-        Parameters
-        ----------
-        kwargs: key-value pairs for the parameters that are set in the
-        gui. Once this is called, these parameters become dont_touch attributes
-        of the parameter object 
-                
+        
         """
         
         # Use the GetFromGui class from ss_tools:
@@ -537,16 +537,54 @@ class Stimulus(Event):
 ##     """
 
     
-## class Feedback(Event):
+class Feedback(Event):
 
-##     def __init__(self):
-##         """This provides auditory (and visual?) feedback about performance """ 
+    def __init__(self,params):
+        """This provides auditory (and visual?) feedback about performance """ 
 
-##         self.incorrect_sound = Sound(sound_freq_sweep(8000, 200, .1))
-##         self.correct_sound = Sound('C',duration=0.5)
-##         self.no_respones_sound = Sound(sound_freq_sweep(200, 300, .1))   
-##     def finalize(self,correct)
+        self.incorrect_sound = Sound(sound_freq_sweep(8000, 200, .1))
+        self.correct_sound = Sound(sound_freq_sweep(1000,1000,.1))
+        self.no_respones_sound = Sound(sound_freq_sweep(200, 300, .1))   
+        #This will be how long to wait when issued:
+        self.duration = params.feedback_duration
+        #set the default state to be None
+        self.feedback = None
         
-##     def __call__():
+    def finalize(self,correct=None):
+        """
+
+        What feedback to give depends on whether subjects got it right or
+        not
+
+        Parameters
+        ----------
+
+        correct: {1|0} for correct incorrect. Default: None => no-response
+        """
+        if correct is None:
+            self.feedback = self.no_respones_sound
+        elif correct==1:
+            self.feedback = self.correct_sound
+        elif correct==0:
+            self.feedback = self.incorrect_sound
+                   
+    def __call__(self):
+        """
+        Play the feedback
+        """
+        #Start a clock:
+        clock = core.Clock()
+        t=0
+        
+        #If the object wasn't properly finalized for some reason:
+        if self.feedback is None:
+            self.feedback = self.no_respones_sound
+        
+        self.feedback.play()
+        self.feedback.play() #For some reason need to call play twice 
+        
+        while t<self.duration: #Keep going for the duration
+            t=clock.getTime()
+        
 
         
