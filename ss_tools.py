@@ -60,16 +60,20 @@ class GetFromGui(wx.Dialog):
 
         # Add the subj id text box, drop down menu, radio buttons
         self.textbox = wx.TextCtrl(self, -1, pos=(100,18), size=(150, -1))
+
         #Add the drop down menu
-        self.combobox = wx.ComboBox(self, -1, pos=(100, 58), size=(150, -1),
-            choices=combo_choices, style=wx.CB_READONLY)
-        self.combobox.SetSelection(0)
+        self.rb_stim1 = wx.RadioButton(self, -1, 'Para', (95,58),
+                                       style=wx.RB_GROUP)
+        
+        self.rb_stim2 = wx.RadioButton(self, -1, 'Ortho', (175,58))
+
+        self.rb_stim1.SetValue(1)
         
         #Radio buttons for the different tasks:
-        self.rb1 = wx.RadioButton(self, -1, 'Annulus', (95, 100),
+        self.rb_task1 = wx.RadioButton(self, -1, 'Annulus', (95, 100),
                                   style=wx.RB_GROUP)
-        self.rb2 = wx.RadioButton(self, -1, 'Fixation', (175, 100))
-        self.rb1.SetValue(1)
+        self.rb_task2 = wx.RadioButton(self, -1, 'Fixation', (175, 100))
+        self.rb_task1.SetValue(1)
 
         # Add OK/Cancel buttons
         wx.Button(self, 1, 'Done', (60, 135))
@@ -85,11 +89,19 @@ class GetFromGui(wx.Dialog):
     def OnDone(self,event):
         self.success = True
         self.subject = self.textbox.GetValue()
-        self.stimulus_condition = self.combobox.GetSelection()
-        if self.rb1.GetValue():
+        #If subjet is not set, default to 'test_subject':
+        if self.subject == '':
+            self.subject == 'test_subject'
+        
+        if self.rb_task1.GetValue():
             self.TaskType = 'Annulus'
         else:
             self.TaskType = 'Fixation'
+        if self.rb_stim1.GetValue():
+            self.stimulus_condition = 0 #Parallel
+        else:
+            self.stimulus_condition = 1 #Orthogonal
+        
         self.Close()
 
     # If "Exit is pressed", toggle failure and close the window

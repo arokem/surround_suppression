@@ -30,21 +30,21 @@ if __name__ == "__main__":
         
     #After this is done, info now has in it what the user put in there.
 
-    #This initializes the window (for now, this is just a part of monitor 0):
-    win = visual.Window([800,600],allowGUI=True)
+##     #This initializes the window (for now, this is just a part of monitor 0):
+##     win = visual.Window([800,600],allowGUI=True)
 
-    #Compile a list of events
-    #XXX TODO
+##     #Compile a list of events
+##     #XXX TODO
         
-    #Loop over this list, while consuming each event, by calling it:
+##     #Loop over this list, while consuming each event, by calling it:
     
-##     for this_event in event_list:
+## ##     for this_event in event_list:
         
-##         this_event.finalize(inputs) #What needs to be provided as input 
-##         result = this_event(other_inputs) #The __call__ method makes the event
-##                                         #actually happen
+## ##         this_event.finalize(inputs) #What needs to be provided as input 
+## ##         result = this_event(other_inputs) #The __call__ method makes the event
+## ##                                         #actually happen
 
-##         #Record the result of this event somehow and pass it on to the next
-##         #event in the line. Maybe update the staircase at this point? 
+## ##         #Record the result of this event somehow and pass it on to the next
+## ##         #event in the line. Maybe update the staircase at this point? 
 
-    win.close()
+##     win.close()
