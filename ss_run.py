@@ -24,26 +24,34 @@ if __name__ == "__main__":
     app = wx.App()
     params.set_by_gui()
     app.MainLoop()
-        
+    params.target_ori = params.annulus_ori
+    
     #This initializes the window (for now, this is just a part of monitor 0):
-    win = visual.Window([800,600],allowGUI=True)
+    win = visual.Window([800,600],monitor='testMonitor',units='deg')
 
-    staircase = Staircase()
-    #Compile a list of events
-    #XXX TODO
+    staircase = Staircase(params.start_target_contrast,
+                          params.annulus_contrast/params.contrast_increments)
 
+    trial_list = [Trial(win,params,0),Trial(win,params,1),Trial(win,params,2)]
+    
     #Send a message to the screen and wait for a subject keypress:
     start_text(win) 
         
     #Loop over the event list, while consuming each event, by calling it:
     
-##     for this_event in event_list:
+    for this_trial in trial_list:
+
+        #These two are bound together: 
+        this_trial.stimulus.finalize(params,target_co=staircase.value,
+                                     target_loc=0)
+        this_trial.stimulus(duration=params.stimulus_duration)
+        this_trial.fixation(duration=0.01) 
+        this_trial.response.finalize(correct_key = '1')
+        correct = this_trial.response()
+        this_trial.feedback.finalize(correct)
+        staircase.update(correct)
         
-##         this_event.finalize(inputs) #What needs to be provided as input 
-##         result = this_event(other_inputs) #The __call__ method makes the event
-##                                         #actually happen
+        
 
-##         #Record the result of this event somehow and pass it on to the next
-##         #event in the line. Maybe update the staircase at this point? 
-
+         
     win.close()

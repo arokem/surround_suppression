@@ -264,7 +264,9 @@ class Stimulus(Event):
         self.tex_res = tex_res
         #The temporal frequency of the flicker:
         self.temporal_freq = params.temporal_freq
-
+        #Per default set the target to None (to be replaced later if needed):
+        self.target = None
+        
         #Set the params for the different components of the stimulus. The
         #default is to follow what is given by the params:
         if surround_contrast is None:
@@ -366,147 +368,148 @@ class Stimulus(Event):
                                                 interpolate=True,
                                                 ori=fixation_ori)
 
-        def finalize(self,params,target_co=None,target_loc=None,
+    def finalize(self,params,target_co=None,target_loc=None,
                      target_ori=None,fix_target_co=None,fix_target_loc=None):
 
-            """
+        """
 
-            Finalize the stimulus, by setting the target
+        Finalize the stimulus, by setting the target
 
-            Parameters
-            ----------
+        Parameters
+        ----------
 
-            params: a parameter object with all the pre-defined params
+        params: a parameter object with all the pre-defined params
 
-            target_co: the contrast of the target in this trial (set by the
-            staircase). Set to None if no target is to be set in this stimulus
-            object 
+        target_co: the contrast of the target in this trial (set by the
+        staircase). Set to None if no target is to be set in this stimulus
+        object 
 
-            target_loc: the location of the target (integer between 0 and 7) in
-            this trial. defaults to None => random location
+        target_loc: the location of the target (integer between 0 and 7) in
+        this trial. defaults to None => random location
 
-            target_ori: The orientation of the target (typically set to the
-            same orientation as the annulus). Defaults to None => the
-            orientation given in the params object
+        target_ori: The orientation of the target (typically set to the
+        same orientation as the annulus). Defaults to None => the
+        orientation given in the params object
 
-            fix_target_co: This allows setting of the fixation contrast (the
-            difference between white and black), so that it can serve as a
-            target.
+        fix_target_co: This allows setting of the fixation contrast (the
+        difference between white and black), so that it can serve as a
+        target.
 
-            fix_target_loc: the location of the fixation target (right{1} or
-            left{otherwise})
+        fix_target_loc: the location of the fixation target (right{1} or
+        left{otherwise})
 
-            """
-            if target_co is None: 
-                #Set the target to None per default:
-                self.target = None
-            #If a target is to be shown, proceed on to set it:
-            else: 
-                #Throw errors if the contrast values don't make sense:
-                if target_co > params.pedestal_contrast:
-                    raise ValueError ("Target contrast cannot be larger than the pedestal contrast: %s" %params.pedestal_contrast)
+        """
+        if target_co is None: 
+            #Set the target to None per default:
+            self.target = None
+        #If a target is to be shown, proceed on to set it:
+        else: 
+            #Throw errors if the contrast values don't make sense:
+            if target_co > params.annulus_contrast:
+                raise ValueError ("Target contrast cannot be larger than the pedestal contrast: %s" %params.pedestal_contrast)
 
-                if target_co < params.min_contrast:
-                    raise ValueError("Target contrast cannot be smaller than the minimal contrast: %s"%params.min_contrast) 
+            if target_co < params.target_contrast_min:
+                raise ValueError("Target contrast cannot be smaller than the minimal contrast: %s"%params.min_contrast) 
 
-                if target_loc is None:
-                    #Choose a random one between 0 and 7 (with equal
-                    #probabilities):
-                    target_loc = int(np.random.rand(1) * 8)
-                if target_ori is None:
-                    #Get it from the params:
-                    target_ori = params.target_ori
+            if target_loc is None:
+                #Choose a random one between 0 and 7 (with equal
+                #probabilities):
+                target_loc = int(np.random.rand(1) * 8)
+            if target_ori is None:
+                #Get it from the params:
+                target_ori = params.target_ori
+
+            #In order to apply a different contrast to the target wedge,
+            #generate a mask, which will cover everything except for the
+            #target wedge:
+            grid_array = np.linspace(-1*self.annulus.size[0],
+                                     self.annulus.size[0],
+                                     self.annulus.texRes)
+
+            x,y=np.meshgrid(grid_array,grid_array)
+            r = np.sqrt(x**2 + y**2)
+            theta = np.arctan2(x,y) + np.pi
+            target_mask = np.ones((self.annulus.texRes,self.annulus.texRes))
+
+            target_mask[np.where(r>params.annulus_outer-
+                                 params.ring_width/2)] = -1
+
+            target_mask[np.where(r<params.annulus_inner-
+                                 params.ring_width/2)] = -1
+
+            #Since the whole PatchStim is rotated according to annulus_ori,
+            #we need to adjust for that, so that the target locations
+            #remain invariant across different orientations (hence
+            #subtraction of annulus_ori):
+            target_mask[np.where(theta<target_loc*np.deg2rad(45)-
+                                 np.deg2rad(target_ori))] = -1
+            target_mask[np.where(theta>(target_loc+1)*np.deg2rad(45)-
+                                 np.deg2rad(target_ori))] = -1
+
+            #Now show the target contrast in the wedge, using that mask:
+            self.target = visual.PatchStim(self.win,tex="sin",
+                                           mask=target_mask,
+                                           texRes=self.tex_res,
+                                           contrast=target_co, 
+                                           size=(params.annulus_outer-
+                                                 params.ring_width/2,
+                                                 params.annulus_outer-
+                                                 params.ring_width/2),
+                                           sf=params.spatial_freq,
+                                           ori=target_ori)
+
+            #If you want to set the fixation target with a contrast value:
+            if fix_target_co is not None:
+                if fix_target_loc == 1:
+                    pos = [0,self.fixation_size/2]
+                else:
+                    pos = [0,-self.fixation_size/2]
+
+                self.fixation_target = visual.PatchStim(self.win,
+                                        tex=None,
+                                        pos = pos,
+                                        opacity=1-fix_target_co)
                     
-                #In order to apply a different contrast to the target wedge,
-                #generate a mask, which will cover everything except for the
-                #target wedge:
-                grid_array = np.linspace(-1*self.annulus.size[0],
-                                         self.annulus.size[0],
-                                         self.annulus.texRes)
+    def __call__(self,duration=0):
+        #Choose a random phase (btwn -pi and pi) to start the presentation
+        #with:
+        ph_rand = (np.random.rand(1) * 2*np.pi) - np.pi
+        #Start a clock 
+        clock = core.Clock()
+        t = 0
+        while t<duration: #Keep going for the duration
+            t=clock.getTime()
 
-                x,y=np.meshgrid(grid_array,grid_array)
-                r = np.sqrt(x**2 + y**2)
-                theta = np.arctan2(x,y) + np.pi
-                target_mask = np.ones((self.annulus.texRes,self.annulus.texRes))
-
-                target_mask[np.where(r>params.annulus_outer-
-                                     params.ring_width/2)] = -1
-
-                target_mask[np.where(r<params.annulus_inner-
-                                     params.ring_width/2)] = -1
-
-                #Since the whole PatchStim is rotated according to annulus_ori,
-                #we need to adjust for that, so that the target locations
-                #remain invariant across different orientations (hence
-                #subtraction of annulus_ori):
-                target_mask[np.where(theta<target_loc*np.deg2rad(45)-
-                                     np.deg2rad(annulus_ori))] = -1
-                target_mask[np.where(theta>(target_loc+1)*np.deg2rad(45)-
-                                     np.deg2rad(target_ori))] = -1
-
-                #Now show the target contrast in the wedge, using that mask:
-                self.target = visual.PatchStim(self.win,tex="sin",
-                                               mask=target_mask,
-                                               texRes=self.tex_res,
-                                               color=target_co, 
-                                               size=(params.annulus_outer-
-                                                     params.ring_width/2,
-                                                     params.annulus_outer-
-                                                     params.ring_width/2),
-                                               sf=params.spatial_freq,
-                                               ori=target_ori)
-
-                #If you want to set the fixation target with a contrast value:
-                if fix_target_co is not None:
-                    if fix_target_loc == 1:
-                        pos = [0,self.fixation_size/2]
-                    else:
-                        pos = [0,-self.fixation_size/2]
-                        
-                    self.fixation_target = visual.PatchStim(self.win,
-                                            tex=None,
-                                            pos = pos,
-                                            opacity=1-fix_target_co)
-                    
-        def __call__(self,params,duration=0):
-            #Choose a random phase (btwn -pi and pi) to start the presentation
-            #with:
-            ph_rand = (np.random.rand(1) * 2*np.pi) - np.pi
-            #Start a clock 
-            clock = core.Clock()
-            while t<duration: #Keep going for the duration
-                t=clock.getTime()
-
-                self.annulus.setContrast(np.sin(ph_rand +
-                                                t*self.temporal_freq*np.pi*2))
-                self.inner_surround.setContrast(np.sin(ph_rand +
-                                                t*self.temporal_freq*np.pi*2))
-                self.outer_surround.setContrast(np.sin(ph_rand +
-                                                t*self.temporal_freq*np.pi*2))
-                
-                if self.target is not None: 
-                    self.target.setContrast(np.sin(ph_rand +
+            self.annulus.setContrast(np.sin(ph_rand +
+                                            t*self.temporal_freq*np.pi*2))
+            self.inner_surround.setContrast(np.sin(ph_rand +
+                                            t*self.temporal_freq*np.pi*2))
+            self.outer_surround.setContrast(np.sin(ph_rand +
                                             t*self.temporal_freq*np.pi*2))
 
-                #Draw them (order matters!)
-                if self.outer_surround is not None:
-                    self.outer_surround.draw()
-                self.ring1.draw()
-                self.annulus.draw()
-                if self.target is not None:
-                    self.target_wedge.draw()
-                for spoke in self.spokes:
-                    spoke.draw()
-                self.ring2.draw()
-                self.inner_surround.draw()
-                self.center_area.draw()
-                self.fixation.draw()
-                self.fixation_center.draw()
-                
-                win.flip() #update the screen
-                
-            #Return the object, so that we can inspect it:
-            return self
+            if self.target is not None: 
+                self.target.setContrast(np.sin(ph_rand +
+                                        t*self.temporal_freq*np.pi*2))
+
+            #Draw them (order matters!)
+            if self.outer_surround is not None:
+                self.outer_surround.draw()
+            self.ring1.draw()
+            self.annulus.draw()
+            if self.target is not None:
+                self.target.draw()
+            for spoke in self.spokes:
+                spoke.draw()
+            self.ring2.draw()
+            self.inner_surround.draw()
+            self.center_area.draw()
+            self.fixation.draw()
+            self.fixation_center.draw()
+
+            self.win.flip() #update the screen
+
+        #Return the object, so that we can inspect it:
+        return self
 
     
 class Text(Event):
@@ -571,16 +574,18 @@ class Response(Event):
     Getting responses from subjects and evaluating their correctness
     
     """
-    def __init__(win,params,keys=['1','2']):
+    def __init__(self,win,params,keys=['1','2']):
         """
 
         Initializer for the Response object. Listening only to '1' and '2',
         unless the keys input variable is set otherwise.
         
         """
+        self.win = win
         self.duration = params.response_duration
-
-    def finalize(correct_key=None):
+        self.keys=keys
+        
+    def finalize(self,correct_key=None):
         """
 
         Which key is the correct one in this trial? Defaults to '1'.
@@ -604,9 +609,6 @@ class Response(Event):
         t=0
         while t<self.duration: #Keep going for the duration
             t=clock.getTime()
-
-            self.text.draw()
-            self.win.flip()
             
             for key in event.getKeys():
                 if key in self.keys:
@@ -665,4 +667,26 @@ class Feedback(Event):
         while t<self.duration: #Keep going for the duration
             t=clock.getTime()
 
+
+class Trial(Event):
+    def __init__(self,win,params,target_loc,fix_or_annulus='annulus'):
+
+        """
+
+        This function prepares all the events that happen in one trial,
+        initializing all the objects and bringing them to a state where all is
+        needed is to finalize them and call them.    
+
+        Parameters
+        ----------
+
+        """
+
+        self.stimulus = Stimulus(win,params)
+        self.fixation = Stimulus(win,
+                                 params,
+                                 surround_contrast=0,
+                                 annulus_contrast=0)
+        self.response = Response(win,params)
+        self.feedback = Feedback(params)
         
