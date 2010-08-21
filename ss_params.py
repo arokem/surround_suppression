@@ -6,22 +6,30 @@
 """
 
 
-p = {
-    'annulus_inner' : 3,        # deg of visual angle, Default: 2.86
-    'annulus_outer' : 6,        # deg of visual angle, Default: 7.8
-    'annulus_contrast' : 0.75,  # relative contrast, Default: 0.75
-    'surround_outer' : 12.2,    # deg of visual angle, Default: 9.2
-    'surround_inner': 0.4,      # deg of visual angle 
-    'surround_contrast' : 1,    # relative contrast, Default: 0.75
-    'ring_width' : 0.1,         # deg of visual angle, Default: 0.1
-    'spoke_width' : 0.1,        # deg of visual angle, Default: 0.1
-    'spatial_freq' : 1.1,       # cycles/deg, Default: 1.1
-    'spatial_phase' : 0,        # seconds, Default: 0
-    'temporal_freq' : 4,        # Hz, Default: 4
-    'temporal_phase' : 0,       # seconds, Default: 0
-    'stim_duration' : 0.75,      # seconds, Default: 0
-    'response_duration' : 1.0, # seconds, Default:0
-    'feedback_duration' : 0.25,    # seconds, Default: 0
-    'fixation_size': .3 #deg of visual angle
-    }
+p = dict(
+    annulus_inner = 3,        # deg of visual angle, Default: 2.86
+    annulus_outer = 6,        # deg of visual angle, Default: 7.8
+    annulus_contrast = 0.75,  # relative contrast, Default: 0.75
+    surround_outer = 12.2,    # deg of visual angle, Default: 9.2
+    surround_inner = 0.4,      # deg of visual angle 
+    surround_contrast = 1,    # relative contrast, Default: 0.75
+    ring_width = 0.1,         # deg of visual angle, Default: 0.1
+    spoke_width =  0.1,        # deg of visual angle, Default: 0.1
+    spatial_freq = 1.1,       # cycles/deg, Default: 1.1
+    spatial_phase = 0,        # seconds, Default: 0
+    temporal_freq = 4,        # Hz, Default: 4
+    temporal_phase = 0,       # seconds, Default: 0
+    stim_duration = 0.75,      # seconds, Default: 0
+    response_duration = 1.0, # seconds, Default:0
+    feedback_duration = 0.25,    # seconds, Default: 0
+    fixation_size = 0.3, #deg of visual angle
+    contrast_increments = 15 #How many steps from the lowest to the highest
+                             #contrast 
+    target_contrast_min = .01
+    target_contrast_max = 0.75 #Should be the same as annulus_contrast
+    )
 
+#If this doesn't match what you want, remove it:
+if p['target_contrast_max'] != p['annulus_contrast']:
+    raise ValueError("The maximal target contrast should be the same as the
+    annulus contrast")

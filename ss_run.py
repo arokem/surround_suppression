@@ -13,7 +13,7 @@ from psychopy import gui
 
 #This brings in all of the classes defined in ss_classes:
 from ss_classes import *
-
+    
 if __name__ == "__main__":
     """ The main function. This actually runs the experiment """
 
@@ -28,11 +28,14 @@ if __name__ == "__main__":
     #This initializes the window (for now, this is just a part of monitor 0):
     win = visual.Window([800,600],allowGUI=True)
 
-
+    staircase = Staircase()
     #Compile a list of events
     #XXX TODO
+
+    #Send a message to the screen and wait for a subject keypress:
+    start_text(win) 
         
-    #Loop over this list, while consuming each event, by calling it:
+    #Loop over the event list, while consuming each event, by calling it:
     
 ##     for this_event in event_list:
         
