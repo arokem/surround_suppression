@@ -19,22 +19,23 @@ p = dict(
     spatial_phase = 0,        # seconds, Default: 0
     temporal_freq = 4,        # Hz, Default: 4
     temporal_phase = 0,       # seconds, Default: 0
-    stimulus_duration = 0.75,      # seconds, Default: 0
+    stimulus_duration = 5.75,      # seconds, Default: 0
     response_duration = 1.0, # seconds, Default:0
     feedback_duration = 0.25,    # seconds, Default: 0
     fixation_size = 0.3, #deg of visual angle
     contrast_increments = 15, #How many steps from the lowest to the highest
                              #contrast 
     target_contrast_min = .01,
-    target_contrast_max = 0.75, #Should be the same as annulus_contrast
     trials_per_block = 5,
     num_blocks = 16,
     dummy_blocks = 1,
+    fix_target_max = 1,
+    fix_target_min = 0,
+    fix_target_start = 0.75
     )
 
-#If this doesn't match what you want, remove it:
-if p['target_contrast_max'] != p['annulus_contrast']:
-    raise ValueError("The maximal target contrast should be the same as the annulus contrast")
+#This should be the same:
+p['target_contrast_max'] = p['annulus_contrast']
 
 #This is derived from the above settings: 
 p['trial_duration'] =  (p['stimulus_duration'] +
