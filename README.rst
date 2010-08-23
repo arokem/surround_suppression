@@ -124,14 +124,11 @@ classes. More about this below:
  Classes and their methods:
 ============================
 - Params class to hold the parameters of the experiments as properties. Setting
-  the parameters is done from the parameter file, but they are still kept as
-  properties of this object, so that they are immutable. Are properties a good
-  solution of that? Here's a little bit about python properties:
-
-  http://ptgmedia.pearsoncmg.com/images/art_deitel_pythonprops/elementLinks/python_properties.pdf
-
-  - This class might not have methods except getters for the properties in
-    it. We'll see if we need additional methods
+  the parameters is done from the parameter file ('ss_params.py'). In
+  addition, parameters that might change from one run to the next can be set
+  using a GUI. All the parameters of the object are kept as attributes, but
+  they are protected from writing, so that once a parameter is set, it cannot
+  be changed.
   
 - Event class
 
