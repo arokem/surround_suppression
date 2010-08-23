@@ -607,16 +607,20 @@ class Response(Event):
         """
         clock = core.Clock()
         t=0
-        while t<self.duration: #Keep going for the duration
+        correct = None
+        key_was_pressed = None
+        while t<self.duration:
             t=clock.getTime()
-            
-            for key in event.getKeys():
-                if key in self.keys:
-                    if key==self.correct_key:
-                        return 1
-                    else:
-                        return 0
-        return None
+            if key_was_pressed is None:                
+                for key in event.getKeys():
+                    if key in self.keys:
+                        key_was_pressed = 1
+                        if key==self.correct_key:
+                            correct = 1
+                        else:
+                            correct = 0
+        
+        return correct
     
 class Feedback(Event):
 
