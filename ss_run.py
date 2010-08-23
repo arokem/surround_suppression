@@ -13,6 +13,7 @@ from psychopy import gui
 
 #This brings in all of the classes defined in ss_classes:
 from ss_classes import *
+from ss_tools import start_data_file
     
 if __name__ == "__main__":
     """ The main function. This actually runs the experiment """
@@ -24,13 +25,22 @@ if __name__ == "__main__":
     app = wx.App()
     app.MainLoop()
     params.set_by_gui()
+
+    f = start_data_file(params.subject)
+
+    #Start by saving in the parameter setting:
+    params.save(f)
+    
+    #For now, assume that the target and the annulus are going to have the same
+    #orientation: 
     params.target_ori = params.annulus_ori
     
     #This initializes the window (for now, this is just a part of monitor 0):
     win = visual.Window([800,600],monitor='testMonitor',units='deg')
 
     #Make a trial list:
-    trial_list = [Trial(win,params,0),Trial(win,params,1),Trial(win,params,2)]
+    trial_list = [Trial(win,params,0,1),Trial(win,params,1,0),
+                  Trial(win,params,2,1)]
 
     #Initialize the staircase, depending on which task is performed
     if params.task == 'Annulus':
@@ -42,6 +52,8 @@ if __name__ == "__main__":
                             ub=params.target_contrast_max,
                             lb=params.target_contrast_min
                             )
+        #The fixation target appears but has a constant contrast set to the
+        #starting point 
         fix_target_co = np.ones(len(trial_list)) * params.fix_target_start
     
     elif params.task == 'Fixation':
@@ -51,6 +63,8 @@ if __name__ == "__main__":
                             ub=params.fix_target_max,
                             lb=params.fix_target_min
                             )
+        #The annulus target appears, but has a constant contrast set to the
+        #start contrast:
         target_co = np.ones(len(trial_list)) * params.start_target_contrast
         
 
@@ -59,6 +73,7 @@ if __name__ == "__main__":
         
     #Loop over the event list, while consuming each event, by calling it:
     for trial_idx,this_trial in enumerate(trial_list):
+
         if params.task=='Annulus':
             this_trial.stimulus.finalize(params,target_co=staircase.value,
                                          target_loc=0,fix_target_loc=1,
@@ -70,16 +85,27 @@ if __name__ == "__main__":
                                          fix_target_co=staircase.value)
 
         this_trial.stimulus()
-        this_trial.fixation()
 
+        #Doesn't need finalizing:
+        this_trial.fixation()
         
         this_trial.response.finalize(correct_key = '1')
-        correct = this_trial.response()
+        this_trial.response()
 
-        this_trial.feedback.finalize(correct)
+        this_trial.feedback.finalize(this_trial.response.correct)
         this_trial.feedback()
 
-        staircase.update(correct)
+        staircase.update(this_trial.response.correct)
 
+        if trial_idx == 0:
+            #On the first trial, insert the header: 
+            f = this_trial.save(f,insert_header=True)
+        else:
+            #On other trials, just insert the data:
+            f = this_trial.save(f)
+
+        this_trial.wait_iti()
+
+    f.close()
     win.close()
     

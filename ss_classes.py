@@ -89,6 +89,32 @@ class Params(object):
         for k in user_params.keys():
             self.__setattr__(k,user_params[k])
 
+    def save(self,f,open_and_close=False):
+        """
+
+        This saves the parameters to a text file.
+
+        Takes as an input an already opened file object and returns it in the
+        end. Does not open or close the file, unless the variable
+        open_and_close is set to True, in which case, the input should be a
+        file-name, not a file object
+
+        f is returned either way
+        """
+
+        if open_and_close:
+            f = file(file_name,'w')
+            for k in self.__dict__.keys():
+                if k[0]!='_': #Exclude 'private' variables ('_dont_touch')
+                    f.write('# %s : %s \n'%(k,self.__dict__[k]))
+            f.close()
+
+        else:
+            for k in self.__dict__.keys():
+                if k[0]!='_': #Exclude 'private' variables ('_dont_touch')
+                    f.write('# %s : %s \n'%(k,self.__dict__[k]))
+        return f
+        
 class Event(object):
 
     """This is the base clase for the events, which sets the template for all
@@ -198,31 +224,34 @@ class Staircase(object):
 
         Parameters
         ----------
-        correct: {True|False} 
+        correct: {True|False|None => don't update, but record the value} 
 
         """
+        #If none is the input, don't change anything (not even n!) and record
+        #the value in this trial:
+        if correct is not None:
+            if correct:
+                if self.n>=self.n_up-1:
+                    self.value += self.harder * self.step #'harder' sets the
+                                                          #sign of the change
+                                                          #to make it harder
+                    self.n = 0
+                else:
+                    self.n +=1
 
-        if correct:
-            if self.n>=self.n_up-1:
-                self.value += self.harder * self.step #'harder' sets the sign
-                                                      #of the change to make it
-                                                      #harder
-                self.n = 0
             else:
-                self.n +=1
-                
-        else:
-            self.n = 0
-            self.value -= self.harder * self.step #Change in the
-                                        #opposite direction than above to make
-                                        #it easier!
-        #Make sure to     
-        if self.value > self.ub:
-            self.value = self.ub
-        if self.value < self.lb:
-            self.value = self.lb
+                self.n = 0
+                self.value -= self.harder * self.step #Change in the
+                                            #opposite direction than above to
+                                            #make it easier!
+            #Make sure that the staircase doesn't     
+            if self.value > self.ub:
+                self.value = self.ub
+            if self.value < self.lb:
+                self.value = self.lb
             
-        #Add to the records the updated value: 
+        #Add to the records the updated value (even on trials where
+        #correct=None):
         self.record.append(self.value)
     
       
@@ -494,6 +523,11 @@ class Stimulus(Event):
                                                 size = [params.fixation_size/2,
                                                         params.fixation_size],
                                                 opacity=1-fix_target_co)
+            self.target_loc = target_loc
+            #This is the nominal target contrast, because in fact, the target
+            #contrast oscillates with the counter-phase flickering
+            self.nominal_target_co = target_co
+            self.fix_target_loc = fix_target_loc
                     
     def __call__(self):
         #Choose a random phase (btwn -pi and pi) to start the presentation
@@ -638,21 +672,33 @@ class Response(Event):
         """
         clock = core.Clock()
         t=0
-        correct = None
+        
+        #If nothing ever gets pressed the value of all these variables gets set
+        #to None:
+        self.key = None
+        self.correct = None
         key_was_pressed = None
+        self.response_time = None
+
+        #Loop over this for the duration:
         while t<self.duration:
             t=clock.getTime()
             if key_was_pressed is None:                
                 for key in event.getKeys():
                     if key in self.keys:
-                        key_was_pressed = 1
-                        if key==self.correct_key:
-                            correct = 1
-                        else:
-                            correct = 0
+                        #Record the fact that a key was pressed:
+                        key_was_pressed = 1 
+                        #Record the response time:
+                        self.response_time = clock.getTime()
+                        self.key = key
         
-        return correct
-    
+                        if key==self.correct_key:
+                            self.correct = 1
+                        else:
+                            self.correct = 0
+                        #But keep on going even after a key was pressed until
+                        #the entire duration has elapsed
+                            
 class Feedback(Event):
 
     def __init__(self,params):
@@ -704,7 +750,8 @@ class Feedback(Event):
 
 
 class Trial(Event):
-    def __init__(self,win,params,target_loc,fix_or_annulus='annulus'):
+    def __init__(self,win,params,target_loc,fix_target_location,
+                 iti=0):
 
         """
 
@@ -714,7 +761,13 @@ class Trial(Event):
 
         Parameters
         ----------
+        win: the psychopy window to be used
 
+        params: a Params object
+
+        target_loc: The location of the annulus target,
+        in which the target is to appear
+        
         """
 
         self.stimulus = Stimulus(win,params)
@@ -725,4 +778,39 @@ class Trial(Event):
                                  annulus_contrast=0)
         self.response = Response(win,params)
         self.feedback = Feedback(params)
+        self.iti = iti
+
+    def wait_iti(self):
+        core.wait(self.iti)
+    
+    def save(self,f,insert_header=False):
+
+        """ Save the trial information, including whether subjects got it right
+        or not to file
+
+        If insert_header is set to True, it will insert a header line, with the
+        variable names in each subsequent column.
         
+        """
+
+        if insert_header:
+            f.write('# Annulus target contrast\t ')
+            f.write('Fixation target contrast\t')
+            f.write('Annulus target location\t')
+            f.write('Fixation target location\t')
+            f.write('Response\t')
+            f.write('Correct\t')
+            f.write('Response time\n')
+                    
+        f.write('%s\t'%self.stimulus.nominal_target_co)
+        f.write('%s\t'%(1-self.stimulus.fixation_target.opacity)) #The contrast
+                                        #is set as the complement of the
+                                        #opacity (see Stimulus.initialize for
+                                        #details) 
+        f.write('%s\t'%self.stimulus.target_loc)
+        f.write('%s\t'%self.stimulus.fix_target_loc)
+        f.write('%s\t'%self.response.key)
+        f.write('%s\t'%self.response.correct)
+        f.write('%s\n'%self.response.response_time)
+        
+        return f

@@ -1,3 +1,6 @@
+import time
+import os
+
 import wx
 import numpy as np
 from matplotlib.mlab import window_hanning
@@ -112,4 +115,26 @@ class GetFromGui(wx.Dialog):
         self.Close()
     
 
+def start_data_file(subject_id):
+
+    """Start a file object into which you will write the data, while making
+    sure not to over-write previously existing files """
+    
+    #Check the data_file:
+    
+    list_data_dir = os.listdir('./data')
+
+    i=1
+    this_data_file = 'SS_%s_%s_%s.dat'%(subject_id,time.strftime('%m%d%Y'),i)
+
+    while this_data_file in list_data_dir:
+        i += 1
+        this_data_file='SS_%s_%s_%s.dat'%(subject_id,time.strftime('%m%d%Y'),i)
+        
+    #Open the file for writing into:
+    f = file('./data/%s'%this_data_file,'w')
+    #Write some header information
+    f.write('## Parameters: ##\n')
+    
+    return f
 
