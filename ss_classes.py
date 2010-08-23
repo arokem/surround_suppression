@@ -175,8 +175,11 @@ class Staircase(object):
                      1-down staircase 
 
         harder: {-1,1} The direction which would make the task harder. Defaults
-        to -1, which is true for the contrast decrement detection task.
+        to -1, which is true for a contrast detection detection task.
 
+        ub: float, the upper bound on possible values in the staircase
+        lb: float, the lower bound on possible values in the staircase
+        
         """
         self.value = start
         self.n_up = n_up
@@ -184,7 +187,8 @@ class Staircase(object):
         self.n = 0 #This is what will be compared to n_up for udpating.
         self.harder = np.sign(harder) #Make sure that this is only -1 or 1.
         self.record = [start]
-        
+        self.ub = ub
+        self.lb = lb
     def update(self,correct):
         """
 
@@ -212,7 +216,12 @@ class Staircase(object):
             self.value -= self.harder * self.step #Change in the
                                         #opposite direction than above to make
                                         #it easier!
-
+        #Make sure to     
+        if self.value > self.ub:
+            self.value = self.ub
+        if self.value < self.lb:
+            self.value = self.lb
+            
         #Add to the records the updated value: 
         self.record.append(self.value)
     
@@ -221,7 +230,8 @@ class Stimulus(Event):
 
     """The surround suppression stimulus, including everything """
 
-    def __init__(self,win,params,surround_contrast=None,surround_ori=None,
+    def __init__(self,win,params,duration=None,
+                 surround_contrast=None,surround_ori=None,
                  annulus_contrast=None, annulus_ori=None, fixation_ori=None,
                  fixation_color=None,fixation_shape=None,
                  tex_res = 256):
@@ -238,6 +248,9 @@ class Stimulus(Event):
         the units of size here need to be the units that were used to
         initialize the window object (should be degrees).
 
+        duration: float, The duration of presentation of this
+        stimulus. Defaults to None => params.stimulus_duration
+
         surround_contrast, surround_ori, annulus_contrast, annulus_ori: These
         variables can be used in order to over-ride the values of these
         variables in the params object. They cannot be set online, after the
@@ -253,19 +266,29 @@ class Stimulus(Event):
 
         fixation_shape: The shape of the mask applied to the fixation
         {None(default) => square | 'circle'}
+
         
         tex_res: the resolution (in pixels) at which the OpenGL texture is
         rendered (?).
         """
-
+        
         #Carry the window object around with you:
         self.win = win
         #The resolution for the textures:
         self.tex_res = tex_res
         #The temporal frequency of the flicker:
         self.temporal_freq = params.temporal_freq
-        #Per default set the target to None (to be replaced later if needed):
+        #Per default set the targets to None (to be replaced later if needed):
         self.target = None
+        self.fixation_target=None
+                
+        #Per default, set the duration to be the stimulus duration specified in
+        #the parameters:
+        if duration is None:
+            self.duration = params.stimulus_duration
+        else:
+            self.duration = duration
+
         
         #Set the params for the different components of the stimulus. The
         #default is to follow what is given by the params:
@@ -362,8 +385,9 @@ class Stimulus(Event):
                                          interpolate=True,
                                          ori=fixation_ori)
 
+        #Set the center to always be black:
         self.fixation_center = visual.PatchStim(self.win, tex=None,
-                                                color=0,
+                                                color=-1,
                                                 size=params.fixation_size/2,
                                                 interpolate=True,
                                                 ori=fixation_ori)
@@ -395,22 +419,16 @@ class Stimulus(Event):
         difference between white and black), so that it can serve as a
         target.
 
-        fix_target_loc: the location of the fixation target (right{1} or
-        left{otherwise})
+        fix_target_loc: the location of the fixation target (right{1,default
+        behavior if stays as None} or left{any other input})
 
         """
         if target_co is None: 
             #Set the target to None per default:
             self.target = None
+
         #If a target is to be shown, proceed on to set it:
         else: 
-            #Throw errors if the contrast values don't make sense:
-            if target_co > params.annulus_contrast:
-                raise ValueError ("Target contrast cannot be larger than the pedestal contrast: %s" %params.pedestal_contrast)
-
-            if target_co < params.target_contrast_min:
-                raise ValueError("Target contrast cannot be smaller than the minimal contrast: %s"%params.min_contrast) 
-
             if target_loc is None:
                 #Choose a random one between 0 and 7 (with equal
                 #probabilities):
@@ -445,6 +463,9 @@ class Stimulus(Event):
                                  np.deg2rad(target_ori))] = -1
             target_mask[np.where(theta>(target_loc+1)*np.deg2rad(45)-
                                  np.deg2rad(target_ori))] = -1
+            # 45 is hard-coded for now and depends on the number of
+            #targets/wedges we want to have in the annulus (corresponds to the
+            #number of spokes as well).
 
             #Now show the target contrast in the wedge, using that mask:
             self.target = visual.PatchStim(self.win,tex="sin",
@@ -460,24 +481,28 @@ class Stimulus(Event):
 
             #If you want to set the fixation target with a contrast value:
             if fix_target_co is not None:
-                if fix_target_loc == 1:
-                    pos = [0,self.fixation_size/2]
+                if fix_target_loc == 1 or fix_target_loc is None: #This is the
+                                                                  #default
+                    pos = [params.fixation_size/4,0]
                 else:
-                    pos = [0,-self.fixation_size/2]
-
-                self.fixation_target = visual.PatchStim(self.win,
-                                        tex=None,
-                                        pos = pos,
-                                        opacity=1-fix_target_co)
+                    pos = [-params.fixation_size/4,0]
                     
-    def __call__(self,duration=0):
+                self.fixation_target = visual.PatchStim(self.win,
+                                                        tex=None,
+                                                        pos = pos,
+                                                        color = 0,
+                                                size = [params.fixation_size/2,
+                                                        params.fixation_size],
+                                                opacity=1-fix_target_co)
+                    
+    def __call__(self):
         #Choose a random phase (btwn -pi and pi) to start the presentation
-        #with:
+        #with XXX Should this really be random?:
         ph_rand = (np.random.rand(1) * 2*np.pi) - np.pi
         #Start a clock 
         clock = core.Clock()
         t = 0
-        while t<duration: #Keep going for the duration
+        while t<self.duration: #Keep going for the duration
             t=clock.getTime()
 
             self.annulus.setContrast(np.sin(ph_rand +
@@ -505,6 +530,9 @@ class Stimulus(Event):
             self.center_area.draw()
             self.fixation.draw()
             self.fixation_center.draw()
+            if self.fixation_target is not None:
+                self.fixation_target.draw()
+                
 
             self.win.flip() #update the screen
 
@@ -556,16 +584,19 @@ class Text(Event):
                     return
 
 
-def start_text(win):
+def start_text(win,text=None):
     """
 
     This is a short-cut function to provide the default usage of the Text
     object
 
     """
-    
+
     #Initialize the object and call it in the same line:
-    T = Text(win)()
+    if text is not None:
+        T = Text(win,text=text)
+    else:
+        T = Text(win)()
 
                 
 class Response(Event):
@@ -689,6 +720,7 @@ class Trial(Event):
         self.stimulus = Stimulus(win,params)
         self.fixation = Stimulus(win,
                                  params,
+                                 duration = 0.01,
                                  surround_contrast=0,
                                  annulus_contrast=0)
         self.response = Response(win,params)
