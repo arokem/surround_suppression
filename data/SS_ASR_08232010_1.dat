@@ -1,0 +1,42 @@
+## Parameters: ##
+# num_blocks : 16 
+# surround_contrast : 1 
+# annulus_contrast : 0.75 
+# block_duration : 10.0 
+# surround_inner : 0.4 
+# annulus_inner : 3 
+# target_contrast_max : 0.75 
+# subject : ASR 
+# ring_width : 0.1 
+# stimulus_duration : 0.75 
+# temporal_phase : 0 
+# temporal_freq : 4 
+# surround_ori : 0 
+# contrast_increments : 15 
+# annulus_ori : 90 
+# spoke_width : 0.1 
+# dummy_blocks : 1 
+# start_target_contrast : 0.375 
+# trials_per_block : 5 
+# fixation_size : 0.3 
+# spatial_phase : 0 
+# fix_target_max : 1 
+# response_duration : 1.0 
+# task : Annulus 
+# surround_outer : 12.2 
+# spatial_freq : 1.1 
+# fix_target_start : 0.75 
+# annulus_outer : 6 
+# fix_target_min : 0 
+# target_contrast_min : 0.01 
+# feedback_duration : 0.25 
+# trial_duration : 2.0 
+# Annulus target contrast	 Fixation target contrast	Annulus target location	Fixation target location	Response	Correct	Response time
+0.375	0.75	0	1	1	1	0.789637088776
+0.375	0.75	1	0	2	0	0.367626190186
+0.325	0.75	2	1	1	1	0.263172864914
+0.325	0.75	3	1	1	1	0.0804710388184
+0.325	0.75	4	0	2	1	0.362730979919
+0.375	0.75	5	1	None	None	None
+0.375	0.75	6	0	2	1	0.000205993652344
+0.375	0.75	7	1	2	1	0.136891841888
