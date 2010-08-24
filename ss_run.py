@@ -40,7 +40,9 @@ if __name__ == "__main__":
 
     #Make a trial list:
     trial_list = [Trial(win,params,0,1),Trial(win,params,1,0),
-                  Trial(win,params,2,1)]
+                  Trial(win,params,2,1),Trial(win,params,3,1),
+                  Trial(win,params,4,0),Trial(win,params,5,1),
+                  Trial(win,params,6,0),Trial(win,params,7,1)]
 
     #Initialize the staircase, depending on which task is performed
     if params.task == 'Annulus':
@@ -58,7 +60,7 @@ if __name__ == "__main__":
     
     elif params.task == 'Fixation':
         staircase = Staircase(params.fix_target_start,
-                            params._contrast/params.contrast_increments,
+                            params.fix_target_start/params.contrast_increments,
                             harder = 1, 
                             ub=params.fix_target_max,
                             lb=params.fix_target_min
@@ -74,22 +76,33 @@ if __name__ == "__main__":
     #Loop over the event list, while consuming each event, by calling it:
     for trial_idx,this_trial in enumerate(trial_list):
 
+        #Preparing the stimulus depends on which task we are doing:
         if params.task=='Annulus':
             this_trial.stimulus.finalize(params,target_co=staircase.value,
-                                         target_loc=0,fix_target_loc=1,
-                                         fix_target_co=fix_target_co[trial_idx])
+                                    target_loc=this_trial.target_loc,
+                                    fix_target_loc=this_trial.fix_target_loc,
+                                    fix_target_co=fix_target_co[trial_idx])
+            if this_trial.target_loc in [0,1,2,3]:
+                correct_key = '1'
+            else:
+                correct_key = '2'
 
         elif params.task=='Fixation':
             this_trial.stimulus.finalize(params,target_co=target_co[trial_idx],
-                                         target_loc=0,fix_target_loc=1,
-                                         fix_target_co=staircase.value)
-
+                                    target_loc=this_trial.target_loc,
+                                    fix_target_loc=this_trial.fix_target_loc,
+                                    fix_target_co=staircase.value)
+            if this_trial.fix_target_loc == 1:
+                correct_key = '2'
+            else:
+                correct_key = '1'
+            
         this_trial.stimulus()
 
         #Doesn't need finalizing:
         this_trial.fixation()
         
-        this_trial.response.finalize(correct_key = '1')
+        this_trial.response.finalize(correct_key = correct_key)
         this_trial.response()
 
         this_trial.feedback.finalize(this_trial.response.correct)

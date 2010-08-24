@@ -15,6 +15,7 @@ from psychopy import core, visual, event, gui
 from psychopy.sound import SoundPyglet as Sound
 from ss_tools import sound_freq_sweep, GetFromGui
 
+rgb = np.array([1.0,1.0,1.0])
 
 class Params(object):
     """
@@ -333,7 +334,7 @@ class Stimulus(Event):
         #Set both parts of the surround
         self.outer_surround = visual.PatchStim(self.win,tex="sin",mask="circle",
                                            texRes=tex_res,
-                                           color=surround_contrast,
+                                               color=surround_contrast * rgb,
                                            size=(params.surround_outer-
                                                  params.ring_width/2,
                                                  params.surround_outer-
@@ -343,7 +344,7 @@ class Stimulus(Event):
 
         self.inner_surround = visual.PatchStim(self.win,tex="sin",mask="circle",
                                                texRes=tex_res,
-                                               color=surround_contrast,
+                                               color=surround_contrast * rgb,
                                                size=(params.annulus_inner-
                                                      params.ring_width/2,
                                                      params.annulus_inner-
@@ -354,7 +355,7 @@ class Stimulus(Event):
         #Set the annulus:
         self.annulus = visual.PatchStim(self.win,tex="sin",mask="circle",
                                         texRes=tex_res,
-                                        color=annulus_contrast,
+                                        color=annulus_contrast * rgb,
                                         size=(params.annulus_outer-
                                               params.ring_width/2,
                                               params.annulus_outer-
@@ -416,7 +417,7 @@ class Stimulus(Event):
 
         #Set the center to always be black:
         self.fixation_center = visual.PatchStim(self.win, tex=None,
-                                                color=-1,
+                                                color=-1  * rgb,
                                                 size=params.fixation_size/2,
                                                 interpolate=True,
                                                 ori=fixation_ori)
@@ -500,7 +501,11 @@ class Stimulus(Event):
             self.target = visual.PatchStim(self.win,tex="sin",
                                            mask=target_mask,
                                            texRes=self.tex_res,
-                                           contrast=target_co, 
+                                           color=target_co  * rgb,
+                                           #Need to set the
+                                           #color, because the contrast is
+                                           #time-dependent (for the
+                                           #counter-phase flickering)
                                            size=(params.annulus_outer-
                                                  params.ring_width/2,
                                                  params.annulus_outer-
@@ -519,7 +524,7 @@ class Stimulus(Event):
                 self.fixation_target = visual.PatchStim(self.win,
                                                         tex=None,
                                                         pos = pos,
-                                                        color = 0,
+                                                        color = 0  * rgb,
                                                 size = [params.fixation_size/2,
                                                         params.fixation_size],
                                                 opacity=1-fix_target_co)
@@ -750,7 +755,7 @@ class Feedback(Event):
 
 
 class Trial(Event):
-    def __init__(self,win,params,target_loc,fix_target_location,
+    def __init__(self,win,params,target_loc,fix_target_loc,
                  iti=0):
 
         """
@@ -770,6 +775,8 @@ class Trial(Event):
         
         """
 
+        self.target_loc = target_loc
+        self.fix_target_loc = fix_target_loc
         self.stimulus = Stimulus(win,params)
         self.fixation = Stimulus(win,
                                  params,

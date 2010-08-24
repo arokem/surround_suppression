@@ -5,7 +5,6 @@
 
 """
 
-
 p = dict(
     annulus_inner = 3,        # deg of visual angle, Default: 2.86
     annulus_outer = 6,        # deg of visual angle, Default: 7.8
