@@ -12,7 +12,7 @@ Classes for the surround suppression experiment
 import wx
 import numpy as np
 from psychopy import core, visual, event, gui
-from psychopy.sound import SoundPyglet as Sound
+from psychopy.sound import Sound as Sound
 from ss_tools import sound_freq_sweep, GetFromGui
 
 rgb = np.array([1.0,1.0,1.0])
