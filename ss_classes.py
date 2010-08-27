@@ -938,7 +938,7 @@ def make_trial_list(win,params):
 
     #This is simple:
     if params.paradigm == 'rapid_fire':
-        for i in range(param.trials_per_block*params.num_blocks):
+        for i in range(params.trials_per_block*params.num_blocks):
             trial_list.append( Trial(win,params,
                 target_loc = int(np.random.rand(1) * 8), 
                 fix_target_loc= int(np.random.rand(1) * 2) ) )

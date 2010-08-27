@@ -34,7 +34,7 @@ p = dict(
     window_res = [800,600],
     monitor = 'testMonitor',
     display_units = 'deg',
-    paradigm = 'block' #'block' or 'rapid_fire'
+    paradigm = 'rapid_fire'#'block' #'block' or 'rapid_fire'
     )
 
 #This should be the same:
