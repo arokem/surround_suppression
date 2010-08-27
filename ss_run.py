@@ -73,7 +73,7 @@ if __name__ == "__main__":
         
 
     #Send a message to the screen and wait for a subject keypress:
-    Text(win,text=message,height=1)() 
+    Text(win,text=message,height=0.7)() 
 
     #If this is in the scanner, we would want to wait for the ttl pulse right
     #here:
