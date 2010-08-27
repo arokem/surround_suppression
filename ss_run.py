@@ -36,7 +36,9 @@ if __name__ == "__main__":
     params.target_ori = params.annulus_ori
     
     #This initializes the window (for now, this is just a part of monitor 0):
-    win = visual.Window([800,600],monitor='testMonitor',units='deg')
+    win = visual.Window(params.window_res,
+                        monitor=params.monitor,
+                        units=params.display_units)
 
     #Make a trial list:
     trial_list = [Trial(win,params,0,1),Trial(win,params,1,0),
