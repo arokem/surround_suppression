@@ -9,7 +9,7 @@ And on the Psychtoolbox version used to get the data in Yoon et al. (2009 and
 import wx
 import numpy as np
 from ss_classes import Params
-from psychopy import gui
+from psychopy import core
 
 #This brings in all of the classes defined in ss_classes:
 from ss_classes import *
@@ -39,15 +39,13 @@ if __name__ == "__main__":
     win = visual.Window(params.window_res,
                         monitor=params.monitor,
                         units=params.display_units)
-
+    
     #Make a trial list:
-    trial_list = [Trial(win,params,0,1),Trial(win,params,1,0),
-                  Trial(win,params,2,1),Trial(win,params,3,1),
-                  Trial(win,params,4,0),Trial(win,params,5,1),
-                  Trial(win,params,6,0),Trial(win,params,7,1)]
+    trial_list = make_trial_list(win,params)
 
     #Initialize the staircase, depending on which task is performed
     if params.task == 'Annulus':
+        message = """ On which side are the targets in the GRATING?\n Press 1 for left and 2 for right\n Press any key to start""" 
         staircase = Staircase(params.start_target_contrast,
                             params.annulus_contrast/params.contrast_increments,
                             harder = 1, #For this task, higher values are
@@ -58,9 +56,11 @@ if __name__ == "__main__":
                             )
         #The fixation target appears but has a constant contrast set to the
         #starting point 
-        fix_target_co = np.ones(len(trial_list)) * params.fix_target_start
+        other_contrast = np.ones(len(trial_list)) * params.fix_target_start
     
     elif params.task == 'Fixation':
+        message = """ On which side are the targets in the FIXATION?\n Press 1 for left and 2 for right\n Press any key to start"""
+        
         staircase = Staircase(params.fix_target_start,
                             params.fix_target_start/params.contrast_increments,
                             harder = 1, 
@@ -69,58 +69,53 @@ if __name__ == "__main__":
                             )
         #The annulus target appears, but has a constant contrast set to the
         #start contrast:
-        target_co = np.ones(len(trial_list)) * params.start_target_contrast
+        other_contrast = np.ones(len(trial_list)) * params.start_target_contrast
         
 
     #Send a message to the screen and wait for a subject keypress:
-    start_text(win) 
-        
+    Text(win,text=message,height=1)() 
+
+    #If this is in the scanner, we would want to wait for the ttl pulse right
+    #here:
+    #if params.monitor == 'scanner':
+    #    start_text(win,text='',keys=['5']) #Assuming a TTL is a '5' key
+    
     #Loop over the event list, while consuming each event, by calling it:
     for trial_idx,this_trial in enumerate(trial_list):
 
-        #Preparing the stimulus depends on which task we are doing:
-        if params.task=='Annulus':
-            this_trial.stimulus.finalize(params,target_co=staircase.value,
-                                    target_loc=this_trial.target_loc,
-                                    fix_target_loc=this_trial.fix_target_loc,
-                                    fix_target_co=fix_target_co[trial_idx])
-            if this_trial.target_loc in [0,1,2,3]:
-                correct_key = '1'
-            else:
-                correct_key = '2'
-
-        elif params.task=='Fixation':
-            this_trial.stimulus.finalize(params,target_co=target_co[trial_idx],
-                                    target_loc=this_trial.target_loc,
-                                    fix_target_loc=this_trial.fix_target_loc,
-                                    fix_target_co=staircase.value)
-            if this_trial.fix_target_loc == 1:
-                correct_key = '2'
-            else:
-                correct_key = '1'
-            
+        this_trial.finalize(staircase,other_contrast[trial_idx])            
         this_trial.stimulus()
 
         #Doesn't need finalizing:
         this_trial.fixation()
-        
-        this_trial.response.finalize(correct_key = correct_key)
+
+        #We pass the file to the response, so that the file can be cleanly
+        #closed in case of quitting:
+        this_trial.response.finalize(correct_key = this_trial.correct_key,
+                                     file_name=f)
         this_trial.response()
 
-        this_trial.feedback.finalize(this_trial.response.correct)
+        #Finalize the feedback in cases a correct_key was defined (on trials on
+        #which some response was expected):
+        if this_trial.correct_key is not None:
+            this_trial.feedback.finalize(this_trial.response.correct)
+
+        #This will do something only in cases in which there was a task:
         this_trial.feedback()
 
-        staircase.update(this_trial.response.correct)
-
-        if trial_idx == 0:
-            #On the first trial, insert the header: 
-            f = this_trial.save(f,insert_header=True)
-        else:
-            #On other trials, just insert the data:
-            f = this_trial.save(f)
+        #Update and save only on trials in which there was a target:
+        if this_trial.target_loc is not None:
+            if len(staircase.record)==1:
+               #On the first trial, insert the header: 
+               f = this_trial.save(f,insert_header=True)
+            else:
+               #On other trials, just insert the data:
+               f = this_trial.save(f)
+            #update after saving:
+            staircase.update(this_trial.response.correct)
 
         this_trial.wait_iti()
 
     f.close()
-    win.close()
+    core.quit()
     

@@ -453,16 +453,15 @@ class Stimulus(Event):
         behavior if stays as None} or left{any other input})
 
         """
+        #If either target location or contrast is set to the default, there
+        #will be no target:
+        if target_loc is None:
+            self.target = None        
         if target_co is None: 
-            #Set the target to None per default:
             self.target = None
 
-        #If a target is to be shown, proceed on to set it:
-        else: 
-            if target_loc is None:
-                #Choose a random one between 0 and 7 (with equal
-                #probabilities):
-                target_loc = int(np.random.rand(1) * 8)
+        #Now, if there is an annulus target, proceed to setting it:
+        if self.target is not None:
             if target_ori is None:
                 #Get it from the params:
                 target_ori = params.target_ori
@@ -513,26 +512,26 @@ class Stimulus(Event):
                                            sf=params.spatial_freq,
                                            ori=target_ori)
 
-            #If you want to set the fixation target with a contrast value:
-            if fix_target_co is not None:
-                if fix_target_loc == 1 or fix_target_loc is None: #This is the
-                                                                  #default
-                    pos = [params.fixation_size/4,0]
-                else:
-                    pos = [-params.fixation_size/4,0]
-                    
-                self.fixation_target = visual.PatchStim(self.win,
-                                                        tex=None,
-                                                        pos = pos,
-                                                        color = 0  * rgb,
-                                                size = [params.fixation_size/2,
-                                                        params.fixation_size],
-                                                opacity=1-fix_target_co)
-            self.target_loc = target_loc
-            #This is the nominal target contrast, because in fact, the target
-            #contrast oscillates with the counter-phase flickering
-            self.nominal_target_co = target_co
-            self.fix_target_loc = fix_target_loc
+        #Independtly, set the fixation target with a contrast value:
+        if fix_target_co is not None:
+            if fix_target_loc == 1 or fix_target_loc is None: #This is the
+                                                              #default
+                pos = [params.fixation_size/4,0]
+            else:
+                pos = [-params.fixation_size/4,0]
+
+            self.fixation_target = visual.PatchStim(self.win,
+                                                    tex=None,
+                                                    pos = pos,
+                                                    color = 0  * rgb,
+                                            size = [params.fixation_size/2,
+                                                    params.fixation_size],
+                                            opacity=1-fix_target_co)
+        self.target_loc = target_loc
+        #This is the nominal target contrast, because in fact, the target
+        #contrast oscillates with the counter-phase flickering
+        self.nominal_target_co = target_co
+        self.fix_target_loc = fix_target_loc
                     
     def __call__(self):
         #Choose a random phase (btwn -pi and pi) to start the presentation
@@ -623,7 +622,7 @@ class Text(Event):
                     return
 
 
-def start_text(win,text=None):
+def start_text(win,text=None,keys=['1','2']):
     """
 
     This is a short-cut function to provide the default usage of the Text
@@ -633,9 +632,9 @@ def start_text(win,text=None):
 
     #Initialize the object and call it in the same line:
     if text is not None:
-        T = Text(win,text=text)
+        T = Text(win,text=text,keys=keys)
     else:
-        T = Text(win)()
+        T = Text(win,keys=keys)()
 
                 
 class Response(Event):
@@ -644,28 +643,25 @@ class Response(Event):
     Getting responses from subjects and evaluating their correctness
     
     """
-    def __init__(self,win,params,keys=['1','2']):
+    def __init__(self,params,keys=['1','2']):
         """
 
         Initializer for the Response object. Listening only to '1' and '2',
         unless the keys input variable is set otherwise.
         
         """
-        self.win = win
         self.duration = params.response_duration
         self.keys=keys
         
-    def finalize(self,correct_key=None):
+    def finalize(self,correct_key=None,file_name=None):
         """
 
         Which key is the correct one in this trial? Defaults to '1'.
         
         """
-        if correct_key is None:
-            self.correct_key = '1'
-        else:
-            self.correct_key = correct_key
-
+        self.correct_key = correct_key
+        self.file_name = file_name
+        
     def __call__(self):
         """
         
@@ -701,8 +697,14 @@ class Response(Event):
                             self.correct = 1
                         else:
                             self.correct = 0
-                        #But keep on going even after a key was pressed until
-                        #the entire duration has elapsed
+                    #Quit cleanly:
+                    if key=='q':
+                        if self.file_name is not None:
+                            self.file_name.close()
+                        core.quit()
+                        
+                    #But keep on going even after a key was pressed until
+                    #the entire duration has elapsed
                             
 class Feedback(Event):
 
@@ -749,15 +751,18 @@ class Feedback(Event):
         
         self.feedback.play()
         self.feedback.play() #For some reason need to call play twice 
+
+        #Discount the time that's already passed:
+        t = clock.getTime()-t
         
         while t<self.duration: #Keep going for the duration
             t=clock.getTime()
 
 
 class Trial(Event):
-    def __init__(self,win,params,target_loc,fix_target_loc,
-                 iti=0):
-
+    def __init__(self,win,params,target_loc=None,fix_target_loc=None,
+                 fix_ori=None,fix_color=None,fix_color_switch=None,
+                 fix_ori_switch=None,iti=0):
         """
 
         This function prepares all the events that happen in one trial,
@@ -770,23 +775,110 @@ class Trial(Event):
 
         params: a Params object
 
-        target_loc: The location of the annulus target,
-        in which the target is to appear
+        target_loc: The location of the annulus target, in which the target is
+        to appear. Locations 0,1,2,3 are on the left side and locations
+        4,5,6,7 are on the right side of the annulus. Defaults to None, in
+        which case no annulus is presented and no response is recorded.
+
+        fix_target_loc: One of two locations in which the fixation target can
+        appear: left (1)  or right (2). Defaults to None, in which case no
+        target is presented.
+
+        fix_ori: The orientation of the fixation at the beginning of the
+        trial. Defaults to None - just take the values from the params.
+
+        fix_color: The color of the fixation at the beginning of the
+        trial. Defaults to None - just take the values from the params.
+
+        fix_ori_switch: If switching fixation orientation, this is the
+        orientation of the fixation after the switch (occurs during the
+        iti). Defaults to None, in which case, no switch occurs.
+        
+        fix_color_switch: If switching fixation color, this is the color after
+        the switch. Defaults to None - no switch occurs.
         
         """
-
+        self.params = params
         self.target_loc = target_loc
         self.fix_target_loc = fix_target_loc
-        self.stimulus = Stimulus(win,params)
-        self.fixation = Stimulus(win,
-                                 params,
-                                 duration = 0.01,
-                                 surround_contrast=0,
-                                 annulus_contrast=0)
-        self.response = Response(win,params)
-        self.feedback = Feedback(params)
-        self.iti = iti
 
+        #If no switch occurs, set the post-switch values to the pre-switch
+        #values: 
+        if fix_color_switch is None:
+            fix_color_switch = fix_color
+        if fix_ori_switch is None:
+            fix_ori_switch = fix_ori
+        
+        #This is a "null" trial - only present the annulus stimulus and don't
+        #collect responses: 
+        if target_loc is None:
+            self.stimulus = Stimulus(win,params,annulus_contrast=0,
+                                     fixation_color=fix_color,
+                                     fixation_ori=fix_ori)
+            
+            self.fixation = Stimulus(win,params,
+                                     duration=0.01,
+                                     surround_contrast=0,
+                                     annulus_contrast=0,
+                                     fixation_color=fix_color_switch,
+                                     fixation_ori=fix_ori_switch)
+            #Don't get responses:
+            self.response = Response(params,keys=[])
+            #Set the feedback to be a generic event, with nothing in it:
+            self.feedback = Event(win,duration=0)
+            #Instead have an iti with the feedback duration:
+            self.iti = params.feedback_duration
+            
+        #This is a real trial: 
+        else:
+            self.stimulus = Stimulus(win,params,
+                                     fixation_color=fix_color,
+                                     fixation_ori=fix_ori)
+            
+            self.fixation = Stimulus(win,params,
+                                     duration=0.01,
+                                     surround_contrast=0,
+                                     annulus_contrast=0,
+                                     fixation_color=fix_color_switch,
+                                     fixation_ori=fix_ori_switch)
+
+            self.response = Response(params)
+            self.feedback = Feedback(params)
+            self.iti = iti
+        
+            
+    def finalize(self,staircase,other_contrast):
+        """ Finalize the Trial"""
+
+        if self.target_loc is None:
+            #All you need to do is make sure that the correct key is set:
+            self.correct_key = None
+            return #No need to finalize the stimulus
+
+        #Preparing the stimulus depends on which task we are doing:
+        if self.params.task=='Annulus':
+            self.stimulus.finalize(self.params,target_co=staircase.value,
+                                    target_loc=self.target_loc,
+                                    fix_target_loc=self.fix_target_loc,
+                                    fix_target_co=other_contrast)
+            
+            if self.target_loc in [0,1,2,3]:
+                self.correct_key = '1'
+            else:
+                self.correct_key = '2'
+
+    
+        elif self.params.task=='Fixation':
+            self.stimulus.finalize(self.params,target_co=other_contrast,
+                                    target_loc=self.target_loc,
+                                    fix_target_loc=self.fix_target_loc,
+                                    fix_target_co=staircase.value)
+            if self.fix_target_loc == 1:
+                self.correct_key = '2'
+            else:
+                self.correct_key = '1'
+        
+        
     def wait_iti(self):
         core.wait(self.iti)
     
@@ -821,3 +913,112 @@ class Trial(Event):
         f.write('%s\n'%self.response.response_time)
         
         return f
+
+def make_trial_list(win,params):
+    """
+
+    This function strings together a bunch of Trial objects to generate a list
+    of trials, according to the following rules:
+
+    XXX Write down the logic of this.
+
+    Parameters
+    ----------
+    win: a window object
+    params: a Params object
+
+    Returns
+    -------
+
+    trial_list: list of Trial objects. Ready to be iterated on :-) 
+    
+    """ 
+    #This will hold all the Trial objects:
+    trial_list = []
+
+    #This is simple:
+    if params.paradigm == 'rapid_fire':
+        for i in range(param.trials_per_block*params.num_blocks):
+            trial_list.append( Trial(win,params,
+                target_loc = int(np.random.rand(1) * 8), 
+                fix_target_loc= int(np.random.rand(1) * 2) ) )
+
+
+    #This is a bit more complicated:
+    elif params.paradigm == 'block':
+        #Red fixation for annulus task:
+        if params.task == 'Annulus':
+            fix_color = [1,0,0]
+        #Green fixation for fixation task:
+        elif params.task == 'Fixation':
+            fix_color = [0,1,0]
+
+        #Start by appending the "dummy blocks" in which subjects don't
+        #perform the task (actually hemi-blocks):
+        for block in range(params.dummy_blocks):
+            #For the dummy blocks, keep the fixation orientation at 45
+            #degrees:
+            fix_ori = 45
+            fix_ori_switch = fix_ori + 45
+            for n_trial in range(params.trials_per_block):
+                #In the last block, omit one trial:                 
+                if (block >= params.dummy_blocks-1 and
+                    n_trial >= params.trials_per_block-1):
+                                 break
+                #Othewise, append a non-task trial:
+                else:
+                    trial_list.append(Trial(win,params,
+                                       fix_ori = fix_ori,
+                                       fix_color = fix_color))
+
+        #Append the trial with the switch in the fixation orientation: 
+        trial_list.append(Trial(win,params,
+                        fix_ori = fix_ori,
+                        fix_color = fix_color,
+                        fix_ori_switch = fix_ori_switch))
+
+        #Switch around fix_ori and fix_ori_switch:
+        fix_ori = fix_ori_switch
+        fix_ori_switch += 45
+
+        #Now append all the rest of the blocks:    
+        for block in range(params.num_blocks):
+            #Task hemi-block:
+            for n_trial in range(params.trials_per_block-1):
+                trial_list.append(
+                        Trial(win,params,
+                              fix_ori=fix_ori,
+                              fix_color=fix_color,
+                              target_loc=int(np.random.rand(1)*8),
+                              fix_target_loc=int(np.random.rand(1)*2))
+                              )
+            #The last trial in the block contains the switch:
+            trial_list.append(Trial(win,params,
+                              fix_ori=fix_ori,
+                              fix_color=fix_color,
+                              target_loc=int(np.random.rand(1)*8),
+                              fix_target_loc=int(np.random.rand(1)*2),
+                              fix_ori_switch = fix_ori_switch))
+
+            fix_ori = fix_ori_switch
+            fix_ori_switch += 45
+
+            #Non-Task hemi-block:
+            for n_trial in range(params.trials_per_block-1):
+                trial_list.append(Trial(win,params,
+                              fix_ori=fix_ori,
+                              fix_color=fix_color))
+
+            #The last trial in the block contains the switch:
+            trial_list.append(Trial(win,params,
+                          fix_ori=fix_ori,
+                          fix_color=fix_color,
+                          fix_ori_switch = fix_ori_switch))
+            fix_ori = fix_ori_switch
+            fix_ori_switch += 45
+
+    #If the input is not valid throw and error:
+    else:
+            raise ValueError("Need to set params.paradigm to a valid value (in ss_params.py")
+
+    return trial_list

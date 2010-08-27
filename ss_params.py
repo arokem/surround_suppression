@@ -33,7 +33,8 @@ p = dict(
     fix_target_start = 0.75,
     window_res = [800,600],
     monitor = 'testMonitor',
-    display_units = 'deg'
+    display_units = 'deg',
+    paradigm = 'block' #'block' or 'rapid_fire'
     )
 
 #This should be the same:
