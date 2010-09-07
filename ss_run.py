@@ -10,6 +10,8 @@ import wx
 import numpy as np
 from ss_classes import Params
 from psychopy import core
+import psychopy.monitors.calibTools as calib
+
 
 #This brings in all of the classes defined in ss_classes:
 from ss_classes import *
@@ -35,9 +37,16 @@ if __name__ == "__main__":
     #orientation: 
     params.target_ori = params.annulus_ori
     
-    #This initializes the window (for now, this is just a part of monitor 0):
+    #This initializes the window:
+
+    #This is the folder where we keep the calibration data:
+    calib.monitorFolder = './calibration/'# over-ride the usual setting of
+                                          # where monitors are stored
+    mon = calib.Monitor(params.monitor) #Get the monitor object and pass that
+                                        #as an argument to win:
+
     win = visual.Window(params.window_res,
-                        monitor=params.monitor,
+                        monitor=mon,
                         units=params.display_units)
     
     #Make a trial list:

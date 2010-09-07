@@ -32,7 +32,7 @@ p = dict(
     fix_target_min = 0,
     fix_target_start = 0.75,
     window_res = [800,600],
-    monitor = 'testMonitor',
+    monitor = 'NNL',#'testMonitor',
     display_units = 'deg',
     paradigm = 'rapid_fire'#'block' #'block' or 'rapid_fire'
     )

@@ -12,7 +12,6 @@ import psychopy.monitors.calibTools as T
 # Set runtime parameters for monitor:
 path = './calibration/'     # where monitors will be stored
 
-
 monitors = {
 'NNL':#Information for the NNL goggles: 
 dict(monitor_name = 'NNL', # name of the new monitor
@@ -38,7 +37,7 @@ for m in monitors.keys():
         'R' : [],
         'G' : [],
         'B' : [] } 
-    gamma_vals = lums.copy()
+
     # Read input levels and luminescence values from file
     for row in csv_read:
         input_levels.append(float(row[0]))
@@ -49,13 +48,11 @@ for m in monitors.keys():
 
     # Calculate the gamma grid based on given lums
     gammaGrid = []
-    for val in lums.keys():
+    gamma_vals = {'R':[],'G':[],'B':[]}
+    for val in ['R','G','B']: # We are not interested in the grayscale value 
         calculator = T.GammaCalculator(inputs = input_levels, lums = lums[val])
-        gamma_vals[val] = [calculator.gammaModel[0], 
-            calculator.gammaModel[1], calculator.gammaModel[2]]
+        gamma_vals[val] = [calculator.a,calculator.b, calculator.gammaVal]
         gammaGrid.append(gamma_vals[val])
-    # We are not interested in the grayscale value
-    del gammaGrid[0]
 
     # Create the new monitor, set values and save
     newMon = T.Monitor(monitor['monitor_name'],
