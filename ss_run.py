@@ -45,8 +45,7 @@ if __name__ == "__main__":
     mon = calib.Monitor(params.monitor) #Get the monitor object and pass that
                                         #as an argument to win:
 
-    win = visual.Window(params.window_res,
-                        monitor=mon,
+    win = visual.Window(monitor=mon,
                         units=params.display_units)
     
     #Make a trial list:
