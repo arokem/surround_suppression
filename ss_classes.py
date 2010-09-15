@@ -400,7 +400,8 @@ class Stimulus(Event):
                                              -params.annulus_outer/2),
                                             (params.spoke_width/2,
                                              params.annulus_outer/2)),
-                                ori=i*45))
+                                ori=i*45,
+                                interpolate = True))
 
         # Fixation (made out of two concentric squares):
         # Set the fixation parameters from the input or the defaults:
@@ -457,11 +458,10 @@ class Stimulus(Event):
         #will be no target:
         if target_loc is None:
             self.target = None        
-        if target_co is None: 
+        elif target_co is None: 
             self.target = None
-
+        else:
         #Now, if there is an annulus target, proceed to setting it:
-        if self.target is not None:
             if target_ori is None:
                 #Get it from the params:
                 target_ori = params.target_ori
@@ -550,10 +550,10 @@ class Stimulus(Event):
             self.outer_surround.setContrast(np.sin(ph_rand +
                                             t*self.temporal_freq*np.pi*2))
 
-            if self.target is not None: 
+            if self.target is not None:
                 self.target.setContrast(np.sin(ph_rand +
                                         t*self.temporal_freq*np.pi*2))
-
+            
             #Draw them (order matters!)
             if self.outer_surround is not None:
                 self.outer_surround.draw()
