@@ -58,36 +58,40 @@ class GetFromGui(wx.Dialog):
         wx.Dialog.__init__(self, parent, id, title, size=(280, 300))
         # Add text labels
         wx.StaticText(self, -1, 'Subject ID:', pos=(10,20))
-        wx.StaticText(self, -1, 'Surround Orientation:', pos=(10,60))
-        wx.StaticText(self, -1, 'Annulus Orientation:', pos=(10, 120))
-        wx.StaticText(self, -1, 'Task:', pos=(30,200))
-
+        wx.StaticText(self, -1, 'Surround Orientation:', pos=(10,65))
+        wx.StaticText(self, -1, 'Annulus Orientation:', pos=(10, 110))
+        wx.StaticText(self, -1, 'Task:', pos=(10,155))
+        self.replayStat = wx.StaticText(self, -1, 'No Replay Contrast Set', pos=(98, 197))
         # Add the subj id text box, drop down menu, radio buttons
         self.textbox = wx.TextCtrl(self, -1, pos=(100,18), size=(150, -1))
-
+        self.replay_contrast = -1
+        
         #Spin control for the surround orientation:
-        self.sc_surround = wx.SpinCtrl(self, -1, '', (140,80))
+        self.sc_surround = wx.SpinCtrl(self, -1, '', (155,58))
         self.sc_surround.SetRange(0,180)
         self.sc_surround.SetValue(0)
 
         #Spin control for the annulus orientation:
-        self.sc_annulus = wx.SpinCtrl(self, -1, '', (140,140))
+        self.sc_annulus = wx.SpinCtrl(self, -1, '', (155,103))
         self.sc_annulus.SetRange(0,180)
         self.sc_annulus.SetValue(0)
                       
         #Radio buttons for the different tasks:
-        self.rb_task1 = wx.RadioButton(self, -1, 'Annulus', (95, 200),
+        self.rb_task1 = wx.RadioButton(self, -1, 'Annulus', (55, 155),
                                   style=wx.RB_GROUP)
-        self.rb_task2 = wx.RadioButton(self, -1, 'Fixation', (175, 200))
+        self.rb_task2 = wx.RadioButton(self, -1, 'Fixation', (143, 155))
         self.rb_task1.SetValue(1)
 
-        # Add OK/Cancel buttons
-        wx.Button(self, 1, 'Done', (60, 240))
-        wx.Button(self, 2, 'Quit', (150, 240))
-        
+        # Add OK/Cancel/Replay buttons
+        wx.Button(self, 1, 'Done', (20, 240))
+        wx.Button(self, 2, 'Quit', (180, 240))
+        wx.Button(self, 3, 'Replay...', (10, 195))
+        wx.Button(self,4, 'Clear', (100, 240))
         # Bind button press events to class methods for execution
         self.Bind(wx.EVT_BUTTON, self.OnDone, id=1)
         self.Bind(wx.EVT_BUTTON, self.OnClose, id=2)
+        self.Bind(wx.EVT_BUTTON, self.OnReplay, id=3)
+        self.Bind(wx.EVT_BUTTON, self.OnClear, id=4)
         self.Centre()
         self.ShowModal()        
 
@@ -109,11 +113,67 @@ class GetFromGui(wx.Dialog):
         
         self.Close()
 
+    # If "Clear" is pressed, all values are set to defaults
+    def OnClear(self, event):
+        self.textbox.Clear()
+        self.rb_task1.SetValue(1)
+        self.sc_annulus.SetValue(0)
+        self.sc_surround.SetValue(0)
+        self.replayStat.SetLabel('No Replay Contrast Set')
+        self.replay_contrast = -1
+
     # If "Exit is pressed", toggle failure and close the window
     def OnClose(self, event):
         self.success = False
         self.Close()
-    
+
+    # If "Replay" is pressed, user can choose a file from which we will extract
+    # the relevant contrast value (fix_target_start if user chooses annulus, 
+    # start_target_contrast if user chooses fixation task)
+    def OnReplay(self, event):
+        # this will be our file dialog:
+        dlg = wx.FileDialog(self, message="Choose SS Data File", defaultFile='',
+            style=wx.OPEN)
+        # if the user presses OK after choosing a file:
+        if dlg.ShowModal() == wx.ID_OK:
+            fileobj = open(dlg.GetPath(), 'rU')
+            # if "annulus" is picked, other_contrast comes from fix_target_start
+            if self.rb_task1.GetValue(): self.replay_id = 'fix_target_start'
+            # if "fixation" is picked, other_contrast comes from start_target_contrast
+            else: self.replay_id = 'start_target_contrast'
+            self.replay_contrast = float(param_from_file(fileobj, self.replay_id))
+            fileobj.close()
+            self.replayStat.SetLabel(self.replay_id + ': ' + str(self.replay_contrast))
+            
+            
+def param_from_file(fileobj, paramName=None):
+    """ Reads in parameters from a saved data file and returns the specified
+        parameter value. If no value is given, returns the entire read dict """
+    #intialize vars we will add to:
+    read_params = {}
+    raw_list = []
+    #iterate over the file. We are interested in lines beginning with a hash:
+    for line in fileobj:
+        if line[0]=='#':
+            #strip unnecessary chars and append line to our list:
+            line = line.lstrip('#')
+            line = line.rstrip('\n')
+            raw_list.append(line)
+    #the first and last lines are trash:
+    raw_list =  raw_list[1:-1]
+    for val in raw_list:
+            #split string around the ':' and append to dict:
+            val = val.split(':')
+            read_params[val[0].strip()] = val[1].strip()
+     #return the requested param, if it exists:
+    if paramName is None:
+        return read_params
+    elif paramName in read_params.keys():
+        return read_params[paramName]
+    else:
+        return None
+        
+
 
 def start_data_file(subject_id):
 
