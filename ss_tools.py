@@ -3,7 +3,7 @@ import os
 
 import wx
 import numpy as np
-from matplotlib.mlab import window_hanning
+from matplotlib.mlab import window_hanning,csv2rec
 
 #Sound-generation function:
 def sound_freq_sweep(startFreq, endFreq, duration, samples_per_sec=None):
@@ -64,7 +64,7 @@ class GetFromGui(wx.Dialog):
         self.replayStat = wx.StaticText(self, -1, 'No Replay Contrast Set', pos=(98, 197))
         # Add the subj id text box, drop down menu, radio buttons
         self.textbox = wx.TextCtrl(self, -1, pos=(100,18), size=(150, -1))
-        self.replay_contrast = -1
+        self.replay_contrast = None
         
         #Spin control for the surround orientation:
         self.sc_surround = wx.SpinCtrl(self, -1, '', (155,58))
@@ -120,7 +120,7 @@ class GetFromGui(wx.Dialog):
         self.sc_annulus.SetValue(0)
         self.sc_surround.SetValue(0)
         self.replayStat.SetLabel('No Replay Contrast Set')
-        self.replay_contrast = -1
+        self.replay_contrast = None
 
     # If "Exit is pressed", toggle failure and close the window
     def OnClose(self, event):
@@ -136,15 +136,18 @@ class GetFromGui(wx.Dialog):
             style=wx.OPEN)
         # if the user presses OK after choosing a file:
         if dlg.ShowModal() == wx.ID_OK:
-            fileobj = open(dlg.GetPath(), 'rU')
-            # if "annulus" is picked, other_contrast comes from fix_target_start
-            if self.rb_task1.GetValue(): self.replay_id = 'fix_target_start'
-            # if "fixation" is picked, other_contrast comes from start_target_contrast
-            else: self.replay_id = 'start_target_contrast'
-            self.replay_contrast = float(param_from_file(fileobj, self.replay_id))
-            fileobj.close()
-            self.replayStat.SetLabel(self.replay_id + ': ' + str(self.replay_contrast))
-            
+            file_name = dlg.GetPath()
+            # if "annulus" is picked, other_contrast comes from
+            # fix_target_contrast:
+            if self.rb_task1.GetValue():
+                self.replay_id = 'fixation_target_contrast'
+            # if "fixation" is picked, other_contrast comes from
+            # start_target_contrast:
+            else:
+                self.replay_id = 'annulus_target_contrast'
+            self.replay_contrast = staircase_from_file(file_name,self.replay_id)
+
+            self.replayStat.SetLabel(self.replay_id)
             
 def param_from_file(fileobj, paramName=None):
     """ Reads in parameters from a saved data file and returns the specified
@@ -173,7 +176,11 @@ def param_from_file(fileobj, paramName=None):
     else:
         return None
         
+def staircase_from_file(file_name,param_name):
+    """Get a staircase from a previous run"""
 
+    rec = csv2rec(file_name)
+    return rec[param_name]
 
 def start_data_file(subject_id):
 

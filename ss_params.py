@@ -24,6 +24,7 @@ p = dict(
     fixation_size = 0.3, #deg of visual angle
     contrast_increments = 15, #How many steps from the lowest to the highest
                              #contrast 
+    start_target_contrast = 0.5,
     target_contrast_min = .01,
     trials_per_block = 5,
     num_blocks = 16,
@@ -46,8 +47,4 @@ p['trial_duration'] =  (p['stimulus_duration'] +
 
 
 p['block_duration'] = p['trials_per_block'] * p['trial_duration']
-
-p['start_target_contrast'] = p['annulus_contrast']/10 #This should somehow be
-                                        #adjusted according to #the subjects
-                                        #prior performance 
 

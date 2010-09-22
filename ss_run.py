@@ -62,10 +62,15 @@ if __name__ == "__main__":
                             ub=params.target_contrast_max,
                             lb=params.target_contrast_min
                             )
-        #The fixation target appears but has a constant contrast set to the
-        #starting point 
-        other_contrast = np.ones(len(trial_list)) * params.fix_target_start
-    
+
+        if params._replay is None:
+            #The fixation target appears but has a constant contrast set to the
+            #starting point 
+            other_contrast = np.ones(len(trial_list)) * params.fix_target_start
+        else:
+            #Replay a previous run
+            other_contrast = params._replay
+            
     elif params.task == 'Fixation':
         message = """ On which side are the targets in the FIXATION?\n Press 1 for left and 2 for right\n Press any key to start"""
         
@@ -75,10 +80,14 @@ if __name__ == "__main__":
                             ub=params.fix_target_max,
                             lb=params.fix_target_min
                             )
-        #The annulus target appears, but has a constant contrast set to the
-        #start contrast:
-        other_contrast = np.ones(len(trial_list)) * params.start_target_contrast
-        
+
+        if params._replay is None:
+            #The annulus target appears and has a constant contrast set to the
+            #starting point: 
+            other_contrast = np.ones(len(trial_list)) * params.fix_target_start
+        else:
+            #Replay a previous run:
+            other_contrast = params._replay
 
     #Send a message to the screen and wait for a subject keypress:
     Text(win,text=message,height=0.7)() 

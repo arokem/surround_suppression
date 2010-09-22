@@ -80,7 +80,8 @@ class Params(object):
                     "subject" : user_choice.subject,
                     "surround_ori" : user_choice.surround_ori,
                     "annulus_ori" : user_choice.annulus_ori,
-                    "task" : user_choice.TaskType}
+                    "task" : user_choice.TaskType,
+                    "_replay":user_choice.replay_contrast}
         else:
             user_choice.Destroy()
             raise ValueError("Program stopped by user")
@@ -106,13 +107,14 @@ class Params(object):
         if open_and_close:
             f = file(file_name,'w')
             for k in self.__dict__.keys():
-                if k[0]!='_': #Exclude 'private' variables ('_dont_touch')
+                if k[0]!='_': #Exclude 'private' variables ('_dont_touch' and
+                              #'_replay'):
                     f.write('# %s : %s \n'%(k,self.__dict__[k]))
             f.close()
 
         else:
             for k in self.__dict__.keys():
-                if k[0]!='_': #Exclude 'private' variables ('_dont_touch')
+                if k[0]!='_':
                     f.write('# %s : %s \n'%(k,self.__dict__[k]))
         return f
         
@@ -893,23 +895,27 @@ class Trial(Event):
         """
 
         if insert_header:
-            f.write('# Annulus target contrast\t ')
-            f.write('Fixation target contrast\t')
-            f.write('Annulus target location\t')
-            f.write('Fixation target location\t')
-            f.write('Response\t')
-            f.write('Correct\t')
+            f.write('Annulus target contrast, ')
+            f.write('Fixation target contrast, ')
+            f.write('Annulus target location, ')
+            f.write('Fixation target location, ')
+            f.write('Response, ')
+            f.write('Correct, ')
             f.write('Response time\n')
                     
-        f.write('%s\t'%self.stimulus.nominal_target_co)
-        f.write('%s\t'%(1-self.stimulus.fixation_target.opacity)) #The contrast
+        f.write('%s, '%self.stimulus.nominal_target_co)
+        f.write('%s, '%(1-self.stimulus.fixation_target.opacity)) #The contrast
                                         #is set as the complement of the
                                         #opacity (see Stimulus.initialize for
                                         #details) 
-        f.write('%s\t'%self.stimulus.target_loc)
-        f.write('%s\t'%self.stimulus.fix_target_loc)
-        f.write('%s\t'%self.response.key)
-        f.write('%s\t'%self.response.correct)
+        f.write('%s, '%self.stimulus.target_loc)
+        f.write('%s, '%self.stimulus.fix_target_loc)
+        f.write('%s, '%self.response.key)
+        #Record no-response trials as a -1:
+        if self.response.correct is None:
+            f.write('%s, '%-1)
+        else:
+            f.write('%s, '%self.response.correct)
         f.write('%s\n'%self.response.response_time)
         
         return f
