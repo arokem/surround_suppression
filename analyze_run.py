@@ -27,9 +27,9 @@ if __name__=="__main__":
     correct = data_rec['correct']
     #Which staircase to analyze:
     if p['task'] == ' Fixation ':
-        contrast = p[' annulus_contrast']-data_rec['fixation_target_contrast']
+        contrast = 1-data_rec['fixation_target_contrast']
     elif p['task']== ' Annulus ':
-        contrast = 1-data_rec['annulus_target_contrast']
+        contrast = p[' annulus_contrast']-data_rec['annulus_target_contrast']
     
     hit_amps = contrast[correct==1]
     miss_amps = contrast[correct==0]
@@ -40,16 +40,13 @@ if __name__=="__main__":
     n_correct = [len(np.where(hit_amps==i)[0]) for i in stim_intensities]
     n_trials = [len(np.where(all_amps==i)[0]) for i in stim_intensities]
 
-    nafc = 1 #This is the setting for a yes/no 
-    constraints = ( 'unconstrained', 'unconstrained',
-    'unconstrained',0.5 ) #No constraints on the distributions of
-                                      #the four parameters for the psychometric
-                                      #curve 
+    constraints = ( 'unconstrained', 'unconstrained', 'unconstrained') 
 
     #Do the psignifit thing for the psychometric curve:
     data = zip(stim_intensities,n_correct,n_trials)
 
-    B = BootstrapInference ( data, priors=constraints, nafc=1 )
+    #Both tasks are honest-to-god 2AFC:
+    B = BootstrapInference ( data, priors=constraints, nafc=2 )
     B.sample()
     P = ParameterPlot(B)
     G = GoodnessOfFit(B)
