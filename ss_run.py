@@ -94,8 +94,8 @@ if __name__ == "__main__":
 
     #If this is in the scanner, we would want to wait for the ttl pulse right
     #here:
-    #if params.monitor == 'scanner':
-    #    start_text(win,text='',keys=['5']) #Assuming a TTL is a '5' key
+    if params.scanner == 'scanner':
+       start_text(win,text='',keys=['5']) #Assuming a TTL is a '5' key
     
     #Loop over the event list, while consuming each event, by calling it:
     for trial_idx,this_trial in enumerate(trial_list):

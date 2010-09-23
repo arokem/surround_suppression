@@ -33,6 +33,7 @@ p = dict(
     fix_target_min = 0,
     fix_target_start = 0.75,
     monitor = 'NNL',#'testMonitor',
+    scanner = False,
     display_units = 'deg',
     paradigm = 'rapid_fire'#'block' #'block' or 'rapid_fire'
     )
