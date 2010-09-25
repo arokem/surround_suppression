@@ -32,10 +32,12 @@ p = dict(
     fix_target_max = 1,
     fix_target_min = 0,
     fix_target_start = 0.75,
-    monitor = 'NNL',#'testMonitor',
-    scanner = False,
+    monitor = 'NNL'
+    screen = 0,
+    fullscreen =False,
+    scanner = True,
     display_units = 'deg',
-    paradigm = 'rapid_fire'#'block' #'block' or 'rapid_fire'
+    paradigm = 'block' #'block' or 'rapid_fire'
     )
 
 #This should be the same:
@@ -48,4 +50,3 @@ p['trial_duration'] =  (p['stimulus_duration'] +
 
 
 p['block_duration'] = p['trials_per_block'] * p['trial_duration']
-

@@ -45,7 +45,10 @@ if __name__ == "__main__":
     mon = calib.Monitor(params.monitor) #Get the monitor object and pass that
                                         #as an argument to win:
 
+    
     win = visual.Window(monitor=mon,
+                        screen=params.screen,
+                        fullscr=params.fullscreen,
                         units=params.display_units)
     
     #Make a trial list:
@@ -92,11 +95,13 @@ if __name__ == "__main__":
     #Send a message to the screen and wait for a subject keypress:
     Text(win,text=message,height=0.7)() 
 
+    win.flip()
+    
     #If this is in the scanner, we would want to wait for the ttl pulse right
     #here:
-    if params.scanner == 'scanner':
-       start_text(win,text='',keys=['5']) #Assuming a TTL is a '5' key
-    
+    if params.scanner:
+       Text(win,text='',keys=['t'])() #Assuming a TTL is a 't' key
+       
     #Loop over the event list, while consuming each event, by calling it:
     for trial_idx,this_trial in enumerate(trial_list):
 
