@@ -20,7 +20,17 @@ dict(monitor_name = 'NNL', # name of the new monitor
      distance = 120, # (virtural) distance from the screen (cm)
      size = [800, 600], # size of the screen (px)
      # We can also save notes to our monitor:
-     notes = """ The NNL MR-safegoggles with calibration""")
+     notes = """ The NNL MR-safegoggles with calibration"""),
+
+#Just for testing:
+'testMonitor':
+    dict(monitor_name = 'testMonitor', # name of the new monitor
+    calib_file = './calibration/NNLGamma_111409_average.txt', # photometer data
+    width = 32, # width of the screen (cm)
+    distance = 80, # (virtural) distance from the screen (cm)
+    size = [800, 600], # size of the screen (px)
+    # We can also save notes to our monitor:
+    notes = """ Rough estimate of parameters on a laptop, just for testing""")
 }
 
 # Make sure to change monitorFolder in this module for custom save location
