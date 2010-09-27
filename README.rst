@@ -3,9 +3,149 @@
 ==============
 
 This is a 2nd version of the stimulus used for the surround suppression
-experiments, as described in Yoon et al. 2009. Recoded in psychopy
-(http://psychopy.org), we are hoping to make a maintainable, readable, modern
-program that will serve us for years to come!
+experiments, as described in Yoon et al. 2009. 
+
+
+==============
+ Instructions
+==============
+
+The program is a real memory hog, so be sure to close all the other programs
+you are running on the computer before starting it. Otherwise, stimulus timing
+problems might ensue.
+
+
+Setting parameters
+------------------
+There are two sets of parameters that need to be set in order to run the
+experiment. The first set of parameters is set in the file
+`ss_params.py`. These are parameters that are typically changed only once per
+day of running the program. The following is a description of each of these
+parameters. Where curly braces appear, the values in the braces are the
+possible values of the parameter. 
+
+- paradigm: {'block'|'rapid_fire'}: The program can be run in two different
+  modes. In one ('block', the task-design is a block design, meant for use in
+  the scanner. In this case, there are interleaved blocks of the surround
+  suppression task and blocks where no task is performed. In this mode, the
+  fixation color and shape indicates what task should be performed. In the
+  other mode ('rapid_fire'), the subject is simply asked to continuously
+  perform the task, with short ITI. 
+
+- monitor: {'NNL' | 'testMonitor'}: This is the name of a monitor with a
+  psychopy `.calib` file in the calibration folder. 
+
+- screen {0 | 1 |...}: The number of the screen on which to display the
+  stimuli. 0 indicates the main screen of the computer. 1 indicates an attached
+  auxillary monitor.
+
+- fullscreen {True | False}: Whether or not to show the stimulus in fullscreen
+  mode.
+
+- scanner {True | False}: Whether or not to wait for a ttl pulse to trigger the
+  beginning of stimulus presentation
+
+- start_target_contrast {0-1}: The contrast to start the staircase with for the
+  annulus target.
+
+- fix_target_start {0-1}: Ditto for the fixation target
+  
+- display_units {'deg' | 'cm' | 'pix'}: What units to use for stimulus
+  representations. Will determine the units in which the following parameters
+  will be interpreted.
+
+- annulus_inner {float}: The inner radius of the target annulus
+
+- annulus_outer {float}: The outer radius of the target annulus
+
+- annulus_contrast {0-1}: The contrast of the target annulus
+
+- surround_outer {float}: The outer radius of the outer surround annulus
+
+- surround_inner {float}: The inner radius of the inner surround annulus
+
+- surround_contrast {0-1}: The contrast of the surround stimuli.
+
+- ring_width {float}: The width of the black rings between the stimuli.
+
+- spoke_width {float}: The width of the black spokes separating the different
+  segments of the target annulus.
+
+- spatial_freq {float}: The spatial frequency of the gratings
+
+- spatial_phase{0-2*pi}: The spatial phase of the gratings (relative to the
+  display).
+
+- temporal_freq {float}: The temporal frequency (in Hz) of the counter-phase
+  flickering.
+
+- stimulus_duration {float}: The duration (in sec) of the stimulus.
+
+- response_duration {float}: The duration (in sec) during which a response can
+  be made
+
+- feedback_duration {float}: The duration (in sec) between the
+  response_duration and the start of the next trial (during which feedback is
+  given).
+
+- fixation_size {float}: The size (in deg) of the fixation stimulus.  
+
+- contrast_increments {int}: The number of contrast increments in the
+  staircase.
+
+- target_contrast_min {0-1}: The minimal contrast to show as a target.
+
+- fix_target_max {0-1}: The maximal value of the fixation target.
+
+- fix_target_min {0-1}: The minimal value of the fixation target.
+
+- trials_per_block {int}: The number of trials in a block in the 'block' mode.
+
+- num_blocks {int}: The number of blocks to run. The number of trials will be
+  equal to: trials_per_block * num_blocks.
+
+- dummy_blocks {int}: In 'rapid_fire' mode, this is the number of dummy blocks
+  at the very beginning of the run.
+
+At the beginning of a day of experimentation, choose the paradigm you want to
+use and set the monitor to the one you are using. Also set whether that monitor
+is screen 0 or screen 1 of the computer.
+
+Running the program
+-------------------
+
+In order to run the program open an instance of the Terminal app, change your
+working directory to the directory in which the program is and enter 'python
+ss_run.py' at the prompt. When you do that, a GUI will appear, asking you for
+details of this run. Enter the subject ID, the surround and annulus
+orientation. Choose the task to be performed. The replay button allows you to
+read a previous runs contrast values for the task not performed in this run and
+will replay these contrast values. If replay is not set, the other task
+contrast values will be set to the parameter setting the start of the staircase
+for that other task. Press 'Done'. Initialization of the program may take a
+minute or so, because the stimuli are generated in memory during this
+period.
+
+The experiment begins with a text prompting subject to press any key to
+start. When the key is pressed, if the scanner parameter is set to 'True', the
+program waits for a ttl pulse to start running. A fixation appears and after
+that, the first trial starts. Each trial is composed of the following events: A
+stimulus is presented for some duration. After the stimulus is presented, the
+program waits for a response from the subject (but this wait is terminated
+after a certain amount of time). Auditory feedback is played and the staircase
+is updated.
+
+===================
+Monitor calibration
+===================
+
+Calibration of new monitors is done using the file `new_monitor.py`. Edit the
+file by adding the details needed (see the already existing monitors). Then run
+the script by entering 'python new_monitor.py' in a terminal. This should
+create a new psychopy .calib file in the calibration directory, which you can
+now use in subsequent runs of the experiment
+
+
 
 =================
  Version control
@@ -72,92 +212,11 @@ git pull
 This updates your local version of the code, with all the changes commited and
 pushed into the repo by others.
 
-=========================================
- Narrative description of the experiment
-=========================================
 
-At the beginning of a day of experimentation, the experimenter sets params that
-are encoded into a params file. Upon running the script, an additional GUI
-opens up which allows setting of run-specific parameters (like the particular
-condition to be run).
-
-The experiment begins with a text prompting subject to press any key to
-start. When the key is pressed, the program waits for a ttl pulse to start
-running. A fixation appears and after that, the first trial starts. Each trial
-is composed of the following events: A stimulus is presented for some
-duration. After the stimulus is presented, the program waits for a response
-from the subject (but this wait is terminated after a certain amount of
-time). Auditory feedback is played and the staircase is updated.  
-
-
-Event types
------------
-
-- Blank screen (waiting for a duration)
-- Blank screen (waiting for a subject keypress)
-- Text
-- Spokes and rings + fixation 
-- Annulus + surround (target/no-target)
-- Surround without annulus. 
-- Rings and spokes (waiting for duration/keypress)
-- Feedback (auditory)
-- Surround only
-
-
-Fixation events
-~~~~~~~~~~~~~~~
-
-- Fixation
-- Fixation + target (what is the target here?)
-- Fixation indicating 'go' (perform task)
-- Fixation indication 'no-go'
 
 ===================
  Program structure
 ===================
 
-For now, we have two files. One is called ss_run and will contains the main. The
-other, ss_classes will contain the implementation of the different
-classes. More about this below: 
 
-============================
- Classes and their methods:
-============================
-- Params class to hold the parameters of the experiments as properties. Setting
-  the parameters is done from the parameter file ('ss_params.py'). In
-  addition, parameters that might change from one run to the next can be set
-  using a GUI. All the parameters of the object are kept as attributes, but
-  they are protected from writing, so that once a parameter is set, it cannot
-  be changed.
-  
-- Event class
-
-  This runs the different events. I suggest that it take as an input a 'code'
-  for which event it should be (+params, +potentially a stimulus object) and
-  then initialize accordingly (this will be an ugly and long initializer) and
-  then have the method 'go' which makes that event happen, according to the
-  contents of the object and the different events that could take
-  place. COMMENT: we might want to split this one into different things that
-  happen at different time-points in the trial (such as stimulus and response
-  gathering). Just a thought.   
-  
-- Stimulus class 
-
-  This will receive a psychopy window object as input and some instructions
-  telling it what to show. Should have am method 'show' which simply shows the
-  appropriate thing on the screen
-  
-- Staircase. There is a simple implementation of that alreay in the ss_classes
-  file 
-
-
-============
- Questions:
-============
-
-- 2 AFC or present/absent?
-- Feedback: auditory, visual or both?
-- fixation target: How about a uniform contrast decrement of an entire half?  
-- Do we foresee a situation in which we would want more than 8 segments in the
-  annulus?
-  
+ 
