@@ -572,9 +572,14 @@ class Stimulus(Event):
             self.fixation_center.draw()
             if self.fixation_target is not None:
                 self.fixation_target.draw()
-                
 
-            self.win.flip() #update the screen
+            #Make sure that all the above operations aren't causing you to be
+            #over time
+            if clock.getTime>=self.duration:
+                break
+            #If you didn't go over time, flip the screen.
+            else: 
+                self.win.flip() #update the screen
 
         #Return the object, so that we can inspect it:
         return self
