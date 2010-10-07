@@ -104,7 +104,8 @@ if __name__ == "__main__":
        
     #Loop over the event list, while consuming each event, by calling it:
     for trial_idx,this_trial in enumerate(trial_list):
-
+        trial_clock = core.Clock()
+        
         this_trial.finalize(staircase,other_contrast[trial_idx])            
         this_trial.stimulus()
 
@@ -136,7 +137,9 @@ if __name__ == "__main__":
             #update after saving:
             staircase.update(this_trial.response.correct)
 
-        this_trial.wait_iti()
+        this_trial.wait_iti(trial_clock)
+        #dbg
+        #print trial_clock.getTime()
 
     f.close()
     core.quit()

@@ -573,12 +573,11 @@ class Stimulus(Event):
             if self.fixation_target is not None:
                 self.fixation_target.draw()
 
-            #Make sure that all the above operations aren't causing you to be
-            #over time
-            if clock.getTime>=self.duration:
+            #If there is no time left:
+            if clock.getTime()>=self.duration:
                 break
-            #If you didn't go over time, flip the screen.
-            else: 
+            #Otherwise, show the stimulus
+            else:
                 self.win.flip() #update the screen
 
         #Return the object, so that we can inspect it:
@@ -650,14 +649,17 @@ class Response(Event):
     Getting responses from subjects and evaluating their correctness
     
     """
-    def __init__(self,params,keys=['1','2']):
+    def __init__(self,params,keys=['1','2'],duration=None):
         """
 
         Initializer for the Response object. Listening only to '1' and '2',
         unless the keys input variable is set otherwise.
         
         """
-        self.duration = params.response_duration
+        if duration is None:
+            self.duration = params.response_duration
+        else:
+            self.duration = duration
         self.keys=keys
         
     def finalize(self,correct_key=None,file_name=None):
@@ -720,7 +722,7 @@ class Feedback(Event):
 
         self.incorrect_sound = Sound(sound_freq_sweep(8000, 200, .1))
         self.correct_sound = Sound(sound_freq_sweep(1000,1000,.1))
-        self.no_respones_sound = Sound(sound_freq_sweep(200, 300, .1))   
+        self.no_response_sound = Sound(sound_freq_sweep(200, 300, .1))   
         #This will be how long to wait when issued:
         self.duration = params.feedback_duration
         #set the default state to be None
@@ -738,7 +740,7 @@ class Feedback(Event):
         correct: {1|0} for correct incorrect. Default: None => no-response
         """
         if correct is None:
-            self.feedback = self.no_respones_sound
+            self.feedback = self.no_response_sound
         elif correct==1:
             self.feedback = self.correct_sound
         elif correct==0:
@@ -754,17 +756,12 @@ class Feedback(Event):
         
         #If the object wasn't properly finalized for some reason:
         if self.feedback is None:
-            self.feedback = self.no_respones_sound
+            self.feedback = self.no_response_sound
         
         self.feedback.play()
         self.feedback.play() #For some reason need to call play twice 
 
-        #Discount the time that's already passed:
-        t = clock.getTime()-t
-        
-        while t<self.duration: #Keep going for the duration
-            t=clock.getTime()
-
+        core.wait(clock.getTime()-t) #Wait for the remainder            
 
 class Trial(Event):
     def __init__(self,win,params,target_loc=None,fix_target_loc=None,
@@ -824,17 +821,15 @@ class Trial(Event):
                                      fixation_ori=fix_ori)
             
             self.fixation = Stimulus(win,params,
-                                     duration=0.01,
+                                     duration=params.fixation_duration,
                                      surround_contrast=0,
                                      annulus_contrast=0,
                                      fixation_color=fix_color_switch,
                                      fixation_ori=fix_ori_switch)
             #Don't get responses:
-            self.response = Response(params,keys=[])
+            self.response = Response(params,keys=[],duration=0)
             #Set the feedback to be a generic event, with nothing in it:
             self.feedback = Event(win,duration=0)
-            #Instead have an iti with the feedback duration:
-            self.iti = params.feedback_duration
             
         #This is a real trial: 
         else:
@@ -843,16 +838,14 @@ class Trial(Event):
                                      fixation_ori=fix_ori)
             
             self.fixation = Stimulus(win,params,
-                                     duration=0.01,
+                                     duration=params.fixation_duration,
                                      surround_contrast=0,
                                      annulus_contrast=0,
                                      fixation_color=fix_color_switch,
                                      fixation_ori=fix_ori_switch)
 
             self.response = Response(params)
-            self.feedback = Feedback(params)
-            self.iti = iti
-        
+            self.feedback = Feedback(params)        
             
     def finalize(self,staircase,other_contrast):
         """ Finalize the Trial"""
@@ -886,8 +879,10 @@ class Trial(Event):
                 self.correct_key = '1'
         
         
-    def wait_iti(self):
-        core.wait(self.iti)
+    def wait_iti(self,trial_clock):
+        now = trial_clock.getTime()
+        wait_time = (self.params.trial_duration) - now
+        core.wait(wait_time)
     
     def save(self,f,insert_header=False):
 

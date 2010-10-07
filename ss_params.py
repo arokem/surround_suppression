@@ -38,7 +38,8 @@ p = dict(
     temporal_freq = 4,           # Hz, Default: 4
     temporal_phase = 0,          # seconds, Default: 0
     stimulus_duration = 0.75,    # seconds, Default: 0.75
-    response_duration = 1.0,     # seconds, Default:1.0
+    fixation_duration = 0.1,     # seconds, Default: 0.1
+    response_duration = 0.9,     # seconds, Default: 0.9
     feedback_duration = 0.25,    # seconds, Default: 0.25
     fixation_size = 0.3,         # deg of visual angle, Standard: 0.3
     contrast_increments = 15,    # How many steps from the lowest to the highest
@@ -58,6 +59,7 @@ p['target_contrast_max'] = p['annulus_contrast']
 
 #This is derived from the above settings: 
 p['trial_duration'] =  (p['stimulus_duration'] +
+                        p['fixation_duration'] +
                         p['response_duration'] +
                         p['feedback_duration'])
 
