@@ -11,6 +11,7 @@ two_pi = 2*np.pi
 
 #Read a params object from the localizer params file:
 p = Params(p_file='localizer_params')
+ss_p = Params(p_file='ss_params')
 
 calib.monitorFolder = './calibration/'# over-ride the usual setting of where
                                       # monitors are stored
@@ -22,9 +23,10 @@ win = visual.Window(monitor=mon,units='deg',
               screen=p.screen_number,
               fullscr=p.full_screen)
 
-c_board = visual.RadialStim(win,size=p.size,radialCycles=p.radial_cyc,
+annulus = visual.RadialStim(win,size=ss_p.annulus_outer,
+                            radialCycles=p.radial_cyc,
                             angularCycles=p.angular_cyc)
-c_board.setSF = p.sf
+annulus.setSF = p.sf
 
 fixation = visual.PatchStim(win, tex=None, mask = 'circle',color=1*rgb,
                                 size=p.fixation_size)
@@ -33,7 +35,21 @@ fixation_surround = visual.PatchStim(win, tex=None, mask='circle',
                                          color=-1*rgb,
                                          size=p.fixation_size*1.5)
 
+inner_gray = visual.PatchStim(win,tex=None,mask='circle',color=0*rgb,
+                              size = ss_p.annulus_inner)
 
+inner_surround = visual.RadialStim(win,size=ss_p.annulus_inner,
+                            radialCycles=p.radial_cyc,
+                            angularCycles=p.angular_cyc)
+inner_surround.setSF = p.sf
+
+outer_surround = visual.RadialStim(win,size=p.size,
+                            radialCycles=p.radial_cyc,
+                            angularCycles=p.angular_cyc)
+outer_surround.setSF = p.sf
+
+annulus_gray = visual.PatchStim(win,tex=None,mask='circle',color=0*rgb,
+                              size = ss_p.annulus_outer)
 
 message = """READY? \n Press a key and then be ready to FIXATE!"""
 #Initialize and call in one:
@@ -57,18 +73,8 @@ for block in xrange(p.n_blocks):
         t = block_clock.getTime()
         t_diff = t-t_previous 
 
+        #Annulus block:
         if np.mod(block,2)==0:
-            #Keep checking for time:
-            if block_clock.getTime()>=p.block_duration:
-                break
-
-            fixation_surround.setColor(-1*rgb)
-
-            #Keep checking for time:
-            if block_clock.getTime()>=p.block_duration:
-                break
-            
-            fixation.setColor(1*rgb)
 
             if t>1 and np.mod(int(t),2)==0:
                 if switcheroo:
@@ -79,41 +85,69 @@ for block in xrange(p.n_blocks):
             if np.mod(int(t)-1,2)==0:
                 switcheroo = True
 
-            #Keep checking for time:
-            if block_clock.getTime()>=p.block_duration:
-                break
-
             #The contrast just reverses (no randomness)
-            c_board.setContrast(np.sin(t*p.temporal_freq*np.pi*2))
+            annulus.setContrast(np.sin(t*p.temporal_freq*np.pi*2))
 
             #Keep checking for time:
             if block_clock.getTime()>=p.block_duration:
                 break
-            c_board.setRadialPhase(c_board.radialPhase +
+
+            annulus.setRadialPhase(annulus.radialPhase +
                                    r_phase_sign*t_diff*two_pi/p.temporal_freq)
 
             #Keep checking for time:
             if block_clock.getTime()>=p.block_duration:
                 break
-            c_board.setAngularPhase(c_board.angularPhase  +
+            annulus.setAngularPhase(annulus.angularPhase  +
                                    a_phase_sign*t_diff*two_pi/p.temporal_freq)
 
 
             #Keep checking for time:
             if block_clock.getTime()>=p.block_duration:
                 break
-            c_board.draw()
+            annulus.draw()
+            inner_gray.draw()
 
         else:
-            #Keep checking for time:
-            if block_clock.getTime()>=p.block_duration:
-                break
-            fixation_surround.setColor(-1*np.sin(t*p.temporal_freq*np.pi*2)*rgb)
+            if t>1 and np.mod(int(t),2)==0:
+                if switcheroo:
+                    r_phase_sign = np.sign(np.random.randn(1))
+                    a_phase_sign = np.sign(np.random.randn(1))
+                    switcheroo = False
+
+            if np.mod(int(t)-1,2)==0:
+                switcheroo = True
+
+            #The contrast just reverses (no randomness)
+            surround_outer.setContrast(np.sin(t*p.temporal_freq*np.pi*2))
+            surround_inner.setContrast(np.sin(t*p.temporal_freq*np.pi*2))
 
             #Keep checking for time:
             if block_clock.getTime()>=p.block_duration:
                 break
-            fixation.setColor(np.sin(t*p.temporal_freq*np.pi*2)*rgb)
+
+            surround_outer.setRadialPhase(surround_outer.radialPhase +
+                                   r_phase_sign*t_diff*two_pi/p.temporal_freq)
+            surround_inner.setRadialPhase(surround_inner.radialPhase +
+                                   r_phase_sign*t_diff*two_pi/p.temporal_freq)
+
+            #Keep checking for time:
+            if block_clock.getTime()>=p.block_duration:
+                break
+            surround_outer.setAngularPhase(surround_outer.angularPhase  +
+                                   a_phase_sign*t_diff*two_pi/p.temporal_freq)
+            surround_inner.setAngularPhase(surround_inner.angularPhase  +
+                                   a_phase_sign*t_diff*two_pi/p.temporal_freq)
+
+
+            #Keep checking for time:
+            if block_clock.getTime()>=p.block_duration:
+                break
+            
+            surround_outer.draw()
+            annulus_gray.draw()
+            surround_inner.draw()
+            
             
         #Keep checking for time:
         if block_clock.getTime()>=p.block_duration:
