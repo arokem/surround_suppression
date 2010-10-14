@@ -3,7 +3,8 @@ import numpy as np
 from psychopy import visual,core,event
 import psychopy.monitors.calibTools as calib
 
-from tools import *
+from ss_tools import *
+from ss_classes import Params,Text
 
 rgb = np.array([1.,1.,1.])
 two_pi = 2*np.pi
@@ -119,24 +120,24 @@ for block in xrange(p.n_blocks):
                 switcheroo = True
 
             #The contrast just reverses (no randomness)
-            surround_outer.setContrast(np.sin(t*p.temporal_freq*np.pi*2))
-            surround_inner.setContrast(np.sin(t*p.temporal_freq*np.pi*2))
+            outer_surround.setContrast(np.sin(t*p.temporal_freq*np.pi*2))
+            inner_surround.setContrast(np.sin(t*p.temporal_freq*np.pi*2))
 
             #Keep checking for time:
             if block_clock.getTime()>=p.block_duration:
                 break
 
-            surround_outer.setRadialPhase(surround_outer.radialPhase +
+            outer_surround.setRadialPhase(outer_surround.radialPhase +
                                    r_phase_sign*t_diff*two_pi/p.temporal_freq)
-            surround_inner.setRadialPhase(surround_inner.radialPhase +
+            inner_surround.setRadialPhase(inner_surround.radialPhase +
                                    r_phase_sign*t_diff*two_pi/p.temporal_freq)
 
             #Keep checking for time:
             if block_clock.getTime()>=p.block_duration:
                 break
-            surround_outer.setAngularPhase(surround_outer.angularPhase  +
+            outer_surround.setAngularPhase(outer_surround.angularPhase  +
                                    a_phase_sign*t_diff*two_pi/p.temporal_freq)
-            surround_inner.setAngularPhase(surround_inner.angularPhase  +
+            inner_surround.setAngularPhase(inner_surround.angularPhase  +
                                    a_phase_sign*t_diff*two_pi/p.temporal_freq)
 
 
@@ -144,9 +145,9 @@ for block in xrange(p.n_blocks):
             if block_clock.getTime()>=p.block_duration:
                 break
             
-            surround_outer.draw()
+            outer_surround.draw()
             annulus_gray.draw()
-            surround_inner.draw()
+            inner_surround.draw()
             
             
         #Keep checking for time:
