@@ -6,6 +6,8 @@ And on the Psychtoolbox version used to get the data in Yoon et al. (2009 and
 2010).
 
 """ 
+import gc
+
 import wx
 import numpy as np
 from ss_classes import Params
@@ -27,7 +29,7 @@ if __name__ == "__main__":
     app = wx.App()
     app.MainLoop()
     params.set_by_gui()
-
+    
     f = start_data_file(params.subject)
 
     #Start by saving in the parameter setting:
@@ -130,17 +132,19 @@ if __name__ == "__main__":
         if this_trial.target_loc is not None:
             if len(staircase.record)==1:
                #On the first trial, insert the header: 
-               f = this_trial.save(f,insert_header=True)
+               this_trial.save(f,insert_header=True)
             else:
                #On other trials, just insert the data:
-               f = this_trial.save(f)
+               this_trial.save(f)
             #update after saving:
             staircase.update(this_trial.response.correct)
 
+
         this_trial.wait_iti(trial_clock)
+
         #dbg
         #print trial_clock.getTime()
-
+    
     f.close()
     core.quit()
     

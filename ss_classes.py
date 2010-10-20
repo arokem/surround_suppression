@@ -9,10 +9,13 @@ Classes for the surround suppression experiment
 
 
 """ 
+import gc
+
 import wx
 import numpy as np
 from psychopy import core, visual, event, gui
 from psychopy.sound import Sound as Sound
+
 from ss_tools import sound_freq_sweep, GetFromGui
 
 rgb = np.array([1.0,1.0,1.0])
@@ -266,7 +269,7 @@ class Stimulus(Event):
                  surround_contrast=None,surround_ori=None,
                  annulus_contrast=None, annulus_ori=None, fixation_ori=None,
                  fixation_color=None,fixation_shape=None,
-                 tex_res = 256):
+                 tex_res = 128):
         """
 
         Initialize the object, by setting all the various subobjects
@@ -342,7 +345,8 @@ class Stimulus(Event):
                                                  params.surround_outer-
                                                  params.ring_width/2),
                                            sf=params.spatial_freq,
-                                           ori = surround_ori)
+                                           ori = surround_ori,
+                                               interpolate=True)
 
         self.inner_surround = visual.PatchStim(self.win,tex="sin",mask="circle",
                                                texRes=tex_res,
@@ -352,7 +356,8 @@ class Stimulus(Event):
                                                      params.annulus_inner-
                                                      params.ring_width/2),
                                                sf=params.spatial_freq,
-                                               ori = surround_ori)
+                                               ori = surround_ori,
+                                               interpolate=True)
 
         #Set the annulus:
         self.annulus = visual.PatchStim(self.win,tex="sin",mask="circle",
@@ -363,7 +368,8 @@ class Stimulus(Event):
                                               params.annulus_outer-
                                               params.ring_width/2),
                                         sf=params.spatial_freq,
-                                        ori = annulus_ori)
+                                        ori = annulus_ori,
+                                        interpolate=True)
 
         #Set the rings abutting the annulus on both sides:
         ring_width = params.ring_width
@@ -415,8 +421,8 @@ class Stimulus(Event):
         self.fixation = visual.PatchStim(self.win, tex=None,
                                          color=fixation_color,
                                          size=params.fixation_size,
-                                         interpolate=True,
-                                         ori=fixation_ori)
+                                         ori=fixation_ori,
+                                         interpolate=True)
 
         #Set the center to always be black:
         self.fixation_center = visual.PatchStim(self.win, tex=None,
@@ -501,7 +507,7 @@ class Stimulus(Event):
             #Now show the target contrast in the wedge, using that mask:
             self.target = visual.PatchStim(self.win,tex="sin",
                                            mask=target_mask,
-                                           texRes=self.tex_res,
+                                           #texRes=self.tex_res,
                                            color=target_co  * rgb,
                                            #Need to set the
                                            #color, because the contrast is
@@ -512,7 +518,8 @@ class Stimulus(Event):
                                                  params.annulus_outer-
                                                  params.ring_width/2),
                                            sf=params.spatial_freq,
-                                           ori=target_ori)
+                                           ori=target_ori,
+                                           )
 
         #Independtly, set the fixation target with a contrast value:
         if fix_target_co is not None:
@@ -802,61 +809,66 @@ class Trial(Event):
         the switch. Defaults to None - no switch occurs.
         
         """
+        #Upon initilzation set only very light variables, leaving
+        #initialization of the stimulus to the finalization step, below.
+        self.win = win
         self.params = params
         self.target_loc = target_loc
         self.fix_target_loc = fix_target_loc
+        self.fix_color = fix_color
+        self.fix_ori = fix_ori
 
         #If no switch occurs, set the post-switch values to the pre-switch
         #values: 
         if fix_color_switch is None:
-            fix_color_switch = fix_color
-        if fix_ori_switch is None:
-            fix_ori_switch = fix_ori
-        
-        #This is a "null" trial - only present the annulus stimulus and don't
-        #collect responses: 
-        if target_loc is None:
-            self.stimulus = Stimulus(win,params,annulus_contrast=0,
-                                     fixation_color=fix_color,
-                                     fixation_ori=fix_ori)
-            
-            self.fixation = Stimulus(win,params,
-                                     duration=params.fixation_duration,
-                                     surround_contrast=0,
-                                     annulus_contrast=0,
-                                     fixation_color=fix_color_switch,
-                                     fixation_ori=fix_ori_switch)
-            #Don't get responses:
-            self.response = Response(params,keys=[],duration=0)
-            #Set the feedback to be a generic event, with nothing in it:
-            self.feedback = Event(win,duration=0)
-            
-        #This is a real trial: 
+            self.fix_color_switch = fix_color
         else:
-            self.stimulus = Stimulus(win,params,
-                                     fixation_color=fix_color,
-                                     fixation_ori=fix_ori)
-            
-            self.fixation = Stimulus(win,params,
-                                     duration=params.fixation_duration,
-                                     surround_contrast=0,
-                                     annulus_contrast=0,
-                                     fixation_color=fix_color_switch,
-                                     fixation_ori=fix_ori_switch)
-
-            self.response = Response(params)
-            self.feedback = Feedback(params)        
+            self.fix_color_switch = fix_color_switch
+        if fix_ori_switch is None:
+            self.fix_ori_switch = fix_ori
+        else:
+            self.fix_ori_switch = fix_ori_switch
+                    
             
     def finalize(self,staircase,other_contrast):
         """ Finalize the Trial"""
 
         if self.target_loc is None:
-            #All you need to do is make sure that the correct key is set:
+            #Don't get responses:
+            self.response = Response(self.params,keys=[],duration=0)
+            #Set the feedback to be a generic event, with nothing in it:
+            self.feedback = Event(self.win,duration=0)
+
+            self.stimulus = Stimulus(self.win,self.params,annulus_contrast=0,
+                                     fixation_color=self.fix_color,
+                                     fixation_ori=self.fix_ori)
+            
+            self.fixation = Stimulus(self.win,self.params,
+                                     duration=self.params.fixation_duration,
+                                     surround_contrast=0,
+                                     annulus_contrast=0,
+                                     fixation_color=self.fix_color_switch,
+                                     fixation_ori=self.fix_ori_switch)
             self.correct_key = None
             return #No need to finalize the stimulus
-
+        else:
+            #The response and the feedback are real 
+            self.response = Response(self.params)
+            self.feedback = Feedback(self.params)        
+            
         #Preparing the stimulus depends on which task we are doing:
         if self.params.task=='Annulus':
+            self.stimulus = Stimulus(self.win,self.params,
+                                     fixation_color=self.fix_color,
+                                     fixation_ori=self.fix_ori)
+            
+            self.fixation = Stimulus(self.win,self.params,
+                                     duration=self.params.fixation_duration,
+                                     surround_contrast=0,
+                                     annulus_contrast=0,
+                                     fixation_color=self.fix_color_switch,
+                                     fixation_ori=self.fix_ori_switch)
+
             self.stimulus.finalize(self.params,target_co=staircase.value,
                                     target_loc=self.target_loc,
                                     fix_target_loc=self.fix_target_loc,
@@ -866,7 +878,6 @@ class Trial(Event):
                 self.correct_key = '1'
             else:
                 self.correct_key = '2'
-
     
         elif self.params.task=='Fixation':
             self.stimulus.finalize(self.params,target_co=other_contrast,
@@ -918,8 +929,8 @@ class Trial(Event):
             f.write('%s, '%self.response.correct)
         f.write('%s\n'%self.response.response_time)
         
-        return f
-
+        #return f
+    
 def make_trial_list(win,params):
     """
 

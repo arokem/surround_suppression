@@ -16,7 +16,7 @@ p = dict(
     monitor = 'NNL',              # 'NNL'
     screen = 0,                  # 0 is for the primary screen, 1 for auxillary
     fullscreen =False,           # True if fullscreen, False otherwise 
-    scanner = True,              # True if the stimulus presentation should be
+    scanner = False,              # True if the stimulus presentation should be
                                  # triggered by a scanner ttl pulse
 
     start_target_contrast = 0.5, # Where to start the staircase.
