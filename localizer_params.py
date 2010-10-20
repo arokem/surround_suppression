@@ -2,7 +2,7 @@
 p = dict(
     #Fixation size (in degrees):
     fixation_size = 0.2,
-    monitor='testMonitor',#'NNL',
+    monitor='NNL',
     scanner=True,
     screen_number = 0,
     full_screen = False,

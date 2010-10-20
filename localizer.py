@@ -9,7 +9,6 @@ from ss_classes import Params,Text
 rgb = np.array([1.,1.,1.])
 two_pi = 2*np.pi
 
-
 #Read a params object from the localizer params file:
 p = Params(p_file='localizer_params')
 ss_p = Params(p_file='ss_params')

@@ -880,6 +880,18 @@ class Trial(Event):
                 self.correct_key = '2'
     
         elif self.params.task=='Fixation':
+            
+            self.stimulus = Stimulus(self.win,self.params,
+                                     fixation_color=self.fix_color,
+                                     fixation_ori=self.fix_ori)
+            
+            self.fixation = Stimulus(self.win,self.params,
+                                     duration=self.params.fixation_duration,
+                                     surround_contrast=0,
+                                     annulus_contrast=0,
+                                     fixation_color=self.fix_color_switch,
+                                     fixation_ori=self.fix_ori_switch)
+            
             self.stimulus.finalize(self.params,target_co=other_contrast,
                                     target_loc=self.target_loc,
                                     fix_target_loc=self.fix_target_loc,
