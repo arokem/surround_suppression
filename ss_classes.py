@@ -828,7 +828,7 @@ class Trial(Event):
             self.fix_ori_switch = fix_ori
         else:
             self.fix_ori_switch = fix_ori_switch
-                    
+
             
     def finalize(self,staircase,other_contrast):
         """ Finalize the Trial"""
