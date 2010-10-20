@@ -55,9 +55,17 @@ message = """READY? \n Press a key and then be ready to FIXATE!"""
 #Initialize and call in one:
 Text(win,text=message,height=0.5)() 
 
-if p.scanner:
-    core.wait(1)
-    Text(win,text='',height=0.5)() 
+fixation_surround.draw()
+fixation.draw()
+win.flip()
+#Wait 1 sec, to avoid running off:
+core.wait(1)
+ttl = 0
+#After that, wait for the ttl pulse:
+while ttl<1:
+    for key in event.getKeys():
+        if key:
+            ttl = 1
 
 # Initialize to True:
 switcheroo = True
