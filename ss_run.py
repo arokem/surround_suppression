@@ -52,7 +52,10 @@ if __name__ == "__main__":
                         screen=params.screen,
                         fullscr=params.fullscreen,
                         units=params.display_units)
-    
+
+    #Initialize all the instances of stimulus bits and pieces for reuse: 
+    bank = StimulusBank(win,params)
+
     #Make a trial list:
     trial_list = make_trial_list(win,params)
 
@@ -108,9 +111,10 @@ if __name__ == "__main__":
     for trial_idx,this_trial in enumerate(trial_list):
         trial_clock = core.Clock()
         
-        this_trial.finalize(staircase,other_contrast[trial_idx])            
+        this_trial.finalize_stim(params,bank,staircase,other_contrast[trial_idx])            
         this_trial.stimulus()
 
+        this_trial.finalize_fix(params,bank,staircase,other_contrast[trial_idx])
         #Doesn't need finalizing:
         this_trial.fixation()
 

@@ -260,47 +260,103 @@ class Staircase(object):
         #correct=None):
         self.record.append(self.value)
 
-class StimulusFactory(): 
-
-    def __init__(self,params,tex_res=256):
-        self.outer_surround = visual.PatchStim(self.win,tex="sin",mask="circle",
+class StimulusBank(): 
+    def __init__(self,win,params,tex_res=256):
+        
+        self.outer_surround = visual.PatchStim(win,tex="sin",mask="circle",
                                           texRes=tex_res,
+                                          color=params.surround_contrast,
+                                          ori=params.surround_ori,
                                           size=(params.surround_outer-
                                                 params.ring_width/2,
                                                 params.surround_outer-
                                                 params.ring_width/2),
                                           sf=params.spatial_freq,
-                                          ori = surround_ori,
                                           interpolate=True)
 
-        self.inner_surround = visual.PatchStim(self.win,tex="sin",mask="circle",
+        self.inner_surround = visual.PatchStim(win,tex="sin",mask="circle",
                                                texRes=tex_res,
-                                               color=surround_contrast * rgb,
+                                               color=params.surround_contrast,
+                                               ori=params.surround_ori,
                                                size=(params.annulus_inner-
                                                      params.ring_width/2,
                                                      params.annulus_inner-
                                                      params.ring_width/2),
                                                sf=params.spatial_freq,
-                                               ori = surround_ori,
                                                interpolate=True)
 
-        self.annulus = visual.PatchStim(self.win,tex="sin",mask="circle",
+        self.annulus = visual.PatchStim(win,tex="sin",mask="circle",
                                                 texRes=tex_res,
-                                                color=annulus_contrast * rgb,
                                                 size=(params.annulus_outer-
                                                       params.ring_width/2,
                                                       params.annulus_outer-
                                                       params.ring_width/2),
                                                 sf=params.spatial_freq,
-                                                ori = annulus_ori,
                                                 interpolate=True)
+
+        #Set the rings abutting the annulus on both sides:
+        ring_width = params.ring_width
+
+        #This is the bit between the annulus and the outer surround: 
+        self.ring1 = visual.PatchStim(win, tex=None, mask='circle',
+                                      color=-1, #Always black
+                                      size=[params.annulus_outer+ring_width/2,
+                                            params.annulus_outer+ring_width/2],
+                                      interpolate=True)
+
+        #This is the bit between the annulus and the inner surround: 
+        self.ring2 = visual.PatchStim(win, tex=None, mask='circle',
+                                      color=-1, #Always black
+                                      size=[params.annulus_inner+ring_width/2,
+                                            params.annulus_inner+ring_width/2],
+                                      interpolate=True)
+
+        #This is the central area, between the inner surround and the fixation: 
+        self.center_area = visual.PatchStim(win, tex=None, mask='circle',
+                                            color=0, #Always gray
+                                            size=params.surround_inner,
+                                            interpolate=True)
+
+
+        #Set the spokes:
+        spoke_width = params.spoke_width
+
+        self.spokes = []
+        num_spokes = 8 #This is hard-coded for now
+        for i in np.arange(num_spokes/2):
+            self.spokes.append(visual.ShapeStim(win,
+                                fillColor = -1,
+                                lineColor = -1,
+                                vertices = ((-params.spoke_width/2,
+                                              params.annulus_outer/2),
+                                            (params.spoke_width/2,
+                                             -params.annulus_outer/2),
+                                            (-params.spoke_width/2,
+                                             -params.annulus_outer/2),
+                                            (params.spoke_width/2,
+                                             params.annulus_outer/2)),
+                                ori=i*45,
+                                interpolate = True))
+
+        self.fixation = visual.PatchStim(win, tex=None,
+                                         size=params.fixation_size,
+                                         interpolate=True)
+
+        #Set the center to always be black:
+        self.fixation_center = visual.PatchStim(win, tex=None,
+                                                color=-1  * rgb,
+                                                size=params.fixation_size/2,
+                                                interpolate=True,
+                                                )
+
+
         
 class Stimulus(Event):
 
     """The surround suppression stimulus, including everything """
 
     def __init__(self,win,params,
-                 factory,
+                 bank,
                  duration=None,
                  surround_contrast=None,surround_ori=None,
                  annulus_contrast=None, annulus_ori=None, fixation_ori=None,
@@ -319,7 +375,7 @@ class Stimulus(Event):
         the units of size here need to be the units that were used to
         initialize the window object (should be degrees).
 
-        factory: A StimulusFactory object.
+        bank : A StimulusBank object.
         
         duration: float, The duration of presentation of this
         stimulus. Defaults to None => params.stimulus_duration
@@ -373,79 +429,39 @@ class Stimulus(Event):
             annulus_contrast = params.annulus_contrast
         if annulus_ori is None:
             annulus_ori = params.annulus_ori
-        
+
         #Set both parts of the surround
-        self.outer_surround = outer_surround
+        self.outer_surround = bank.outer_surround
         self.outer_surround.setColor(surround_contrast)
         self.outer_surround.setOri(surround_ori)
 
-        self.inner_surround = inner_surround 
+        self.inner_surround = bank.inner_surround 
         self.inner_surround.setColor(surround_contrast)
         self.inner_surround.setOri(surround_ori)
         
         #Set the annulus:
-        self.annulus = annulus 
-        self.annulus.se
-        #Set the rings abutting the annulus on both sides:
-        ring_width = params.ring_width
-        spoke_width = params.spoke_width
+        self.annulus = bank.annulus 
+        self.annulus.setColor(annulus_contrast)
+        self.annulus.setOri(annulus_ori)
+        
         #This is the bit between the annulus and the outer surround: 
-        self.ring1 = visual.PatchStim(self.win, tex=None, mask='circle',
-                                      color=-1, #Always black
-                                      size=[params.annulus_outer+ring_width/2,
-                                            params.annulus_outer+ring_width/2],
-                                      interpolate=True)
-
+        self.ring1 = bank.ring1
         #This is the bit between the annulus and the inner surround: 
-        self.ring2 = visual.PatchStim(self.win, tex=None, mask='circle',
-                                      color=-1, #Always black
-                                      size=[params.annulus_inner+ring_width/2,
-                                            params.annulus_inner+ring_width/2],
-                                      interpolate=True)
-
+        self.ring2 = bank.ring2
+        
         #This is the central area, between the inner surround and the fixation: 
-        self.center_area = visual.PatchStim(self.win, tex=None, mask='circle',
-                                            color=0, #Always gray
-                                            size=params.surround_inner,
-                                            interpolate=True)
+        self.center_area = bank.center_area
 
-        self.spokes = []
-        num_spokes = 8 #This is hard-coded for now
-        for i in np.arange(num_spokes/2):
-            self.spokes.append(visual.ShapeStim(self.win,
-                                fillColor = -1,
-                                lineColor = -1,
-                                vertices = ((-params.spoke_width/2,
-                                              params.annulus_outer/2),
-                                            (params.spoke_width/2,
-                                             -params.annulus_outer/2),
-                                            (-params.spoke_width/2,
-                                             -params.annulus_outer/2),
-                                            (params.spoke_width/2,
-                                             params.annulus_outer/2)),
-                                ori=i*45,
-                                interpolate = True))
+        self.spokes = bank.spokes
 
-        # Fixation (made out of two concentric squares):
-        # Set the fixation parameters from the input or the defaults:
-        if fixation_color is None:
-            fixation_color = 1
-        if fixation_ori is None:
-            fixation_ori = 0
-
-        self.fixation = visual.PatchStim(self.win, tex=None,
-                                         color=fixation_color,
-                                         size=params.fixation_size,
-                                         ori=fixation_ori,
-                                         interpolate=True)
-
-        #Set the center to always be black:
-        self.fixation_center = visual.PatchStim(self.win, tex=None,
-                                                color=-1  * rgb,
-                                                size=params.fixation_size/2,
-                                                interpolate=True,
-                                                ori=fixation_ori)
-
+        self.fixation = bank.fixation
+        self.fixation.setOri(fixation_ori)
+        self.fixation.setColor(rgb*fixation_color)
+        
+        #The center is always set to be black:
+        self.fixation_center = bank.fixation_center
+        self.fixation_center.setOri(fixation_ori)
+        
     def finalize(self,params,target_co=None,target_loc=None,
                      target_ori=None,fix_target_co=None,fix_target_loc=None):
 
@@ -566,7 +582,7 @@ class Stimulus(Event):
         t = 0
         while t<self.duration: #Keep going for the duration
             t=clock.getTime()
-
+            
             self.annulus.setContrast(np.sin(ph_rand +
                                             t*self.temporal_freq*np.pi*2))
             self.inner_surround.setContrast(np.sin(ph_rand +
@@ -847,7 +863,7 @@ class Trial(Event):
             self.fix_ori_switch = fix_ori_switch
 
 
-    def finalize(self,staircase,other_contrast):
+    def finalize_stim(self,params,bank,staircase,other_contrast):
         """ Finalize the Trial"""
 
         if self.target_loc is None:
@@ -857,16 +873,12 @@ class Trial(Event):
             self.feedback = Event(self.win,duration=0)
 
             self.stimulus = Stimulus(self.win,self.params,
+                                     bank,
                                      annulus_contrast=0,
+                                     surround_contrast=params.surround_contrast,
                                      fixation_color=self.fix_color,
                                      fixation_ori=self.fix_ori)
             
-            self.fixation = Stimulus(self.win,self.params,
-                                     duration=self.params.fixation_duration,
-                                     surround_contrast=0,
-                                     annulus_contrast=0,
-                                     fixation_color=self.fix_color_switch,
-                                     fixation_ori=self.fix_ori_switch)
             self.correct_key = None
             return #No need to finalize the stimulus
         else:
@@ -877,16 +889,12 @@ class Trial(Event):
         #Preparing the stimulus depends on which task we are doing:
         if self.params.task=='Annulus':
             self.stimulus = Stimulus(self.win,self.params,
+                                     bank,
+                                     surround_contrast=params.surround_contrast,
+                                     annulus_contrast=params.annulus_contrast,
                                      fixation_color=self.fix_color,
                                      fixation_ori=self.fix_ori)
-            
-            self.fixation = Stimulus(self.win,self.params,
-                                     duration=self.params.fixation_duration,
-                                     surround_contrast=0,
-                                     annulus_contrast=0,
-                                     fixation_color=self.fix_color_switch,
-                                     fixation_ori=self.fix_ori_switch)
-
+       
             self.stimulus.finalize(self.params,target_co=staircase.value,
                                     target_loc=self.target_loc,
                                     fix_target_loc=self.fix_target_loc,
@@ -900,16 +908,10 @@ class Trial(Event):
         elif self.params.task=='Fixation':
             
             self.stimulus = Stimulus(self.win,self.params,
+                                     bank,
                                      fixation_color=self.fix_color,
                                      fixation_ori=self.fix_ori)
-            
-            self.fixation = Stimulus(self.win,self.params,
-                                     duration=self.params.fixation_duration,
-                                     surround_contrast=0,
-                                     annulus_contrast=0,
-                                     fixation_color=self.fix_color_switch,
-                                     fixation_ori=self.fix_ori_switch)
-            
+                 
             self.stimulus.finalize(self.params,target_co=other_contrast,
                                     target_loc=self.target_loc,
                                     fix_target_loc=self.fix_target_loc,
@@ -919,6 +921,16 @@ class Trial(Event):
             else:
                 self.correct_key = '1'
         
+    def finalize_fix(self,params,bank,staircase,other_contrast):
+        """ Finalize only the fixation"""
+
+        self.fixation = Stimulus(self.win,self.params,
+                                     bank,
+                                     duration=self.params.fixation_duration,
+                                     surround_contrast=0,
+                                     annulus_contrast=0,
+                                     fixation_color=self.fix_color_switch,
+                                     fixation_ori=self.fix_ori_switch)
         
     def wait_iti(self,trial_clock):
         now = trial_clock.getTime()
