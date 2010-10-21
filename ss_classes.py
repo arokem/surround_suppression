@@ -1000,7 +1000,9 @@ def make_trial_list(win,params):
         for i in range(params.trials_per_block*params.num_blocks):
             trial_list.append( Trial(win,params,
                 target_loc = int(np.random.rand(1) * 8), 
-                fix_target_loc= int(np.random.rand(1) * 2) ) )
+                fix_target_loc= int(np.random.rand(1) * 2),
+                fix_color=[1,1,1],
+                fix_ori = 0) )
 
 
     #This is a bit more complicated:

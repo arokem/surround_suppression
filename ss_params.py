@@ -6,7 +6,7 @@
 """
 
 p = dict(
-    paradigm = 'block',           # 'block' for the fmri block design
+    paradigm = 'rapid_fire',     # 'block' for the fmri block design
                                  #(trials_per_block of trials in which the
                                  #subject performs the task, followed by
                                  #trials_per_block of no-task trials or
