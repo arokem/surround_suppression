@@ -259,13 +259,49 @@ class Staircase(object):
         #Add to the records the updated value (even on trials where
         #correct=None):
         self.record.append(self.value)
-    
-      
+
+class StimulusFactory(): 
+
+    def __init__(self,params,tex_res=256):
+        self.outer_surround = visual.PatchStim(self.win,tex="sin",mask="circle",
+                                          texRes=tex_res,
+                                          size=(params.surround_outer-
+                                                params.ring_width/2,
+                                                params.surround_outer-
+                                                params.ring_width/2),
+                                          sf=params.spatial_freq,
+                                          ori = surround_ori,
+                                          interpolate=True)
+
+        self.inner_surround = visual.PatchStim(self.win,tex="sin",mask="circle",
+                                               texRes=tex_res,
+                                               color=surround_contrast * rgb,
+                                               size=(params.annulus_inner-
+                                                     params.ring_width/2,
+                                                     params.annulus_inner-
+                                                     params.ring_width/2),
+                                               sf=params.spatial_freq,
+                                               ori = surround_ori,
+                                               interpolate=True)
+
+        self.annulus = visual.PatchStim(self.win,tex="sin",mask="circle",
+                                                texRes=tex_res,
+                                                color=annulus_contrast * rgb,
+                                                size=(params.annulus_outer-
+                                                      params.ring_width/2,
+                                                      params.annulus_outer-
+                                                      params.ring_width/2),
+                                                sf=params.spatial_freq,
+                                                ori = annulus_ori,
+                                                interpolate=True)
+        
 class Stimulus(Event):
 
     """The surround suppression stimulus, including everything """
 
-    def __init__(self,win,params,duration=None,
+    def __init__(self,win,params,
+                 factory,
+                 duration=None,
                  surround_contrast=None,surround_ori=None,
                  annulus_contrast=None, annulus_ori=None, fixation_ori=None,
                  fixation_color=None,fixation_shape=None,
@@ -283,6 +319,8 @@ class Stimulus(Event):
         the units of size here need to be the units that were used to
         initialize the window object (should be degrees).
 
+        factory: A StimulusFactory object.
+        
         duration: float, The duration of presentation of this
         stimulus. Defaults to None => params.stimulus_duration
 
@@ -337,40 +375,17 @@ class Stimulus(Event):
             annulus_ori = params.annulus_ori
         
         #Set both parts of the surround
-        self.outer_surround = visual.PatchStim(self.win,tex="sin",mask="circle",
-                                           texRes=tex_res,
-                                               color=surround_contrast * rgb,
-                                           size=(params.surround_outer-
-                                                 params.ring_width/2,
-                                                 params.surround_outer-
-                                                 params.ring_width/2),
-                                           sf=params.spatial_freq,
-                                           ori = surround_ori,
-                                               interpolate=True)
+        self.outer_surround = outer_surround
+        self.outer_surround.setColor(surround_contrast)
+        self.outer_surround.setOri(surround_ori)
 
-        self.inner_surround = visual.PatchStim(self.win,tex="sin",mask="circle",
-                                               texRes=tex_res,
-                                               color=surround_contrast * rgb,
-                                               size=(params.annulus_inner-
-                                                     params.ring_width/2,
-                                                     params.annulus_inner-
-                                                     params.ring_width/2),
-                                               sf=params.spatial_freq,
-                                               ori = surround_ori,
-                                               interpolate=True)
-
+        self.inner_surround = inner_surround 
+        self.inner_surround.setColor(surround_contrast)
+        self.inner_surround.setOri(surround_ori)
+        
         #Set the annulus:
-        self.annulus = visual.PatchStim(self.win,tex="sin",mask="circle",
-                                        texRes=tex_res,
-                                        color=annulus_contrast * rgb,
-                                        size=(params.annulus_outer-
-                                              params.ring_width/2,
-                                              params.annulus_outer-
-                                              params.ring_width/2),
-                                        sf=params.spatial_freq,
-                                        ori = annulus_ori,
-                                        interpolate=True)
-
+        self.annulus = annulus 
+        self.annulus.se
         #Set the rings abutting the annulus on both sides:
         ring_width = params.ring_width
         spoke_width = params.spoke_width
@@ -770,7 +785,9 @@ class Feedback(Event):
 
         core.wait(clock.getTime()-t) #Wait for the remainder            
 
+
 class Trial(Event):
+    
     def __init__(self,win,params,target_loc=None,fix_target_loc=None,
                  fix_ori=None,fix_color=None,fix_color_switch=None,
                  fix_ori_switch=None,iti=0):
@@ -829,7 +846,7 @@ class Trial(Event):
         else:
             self.fix_ori_switch = fix_ori_switch
 
-            
+
     def finalize(self,staircase,other_contrast):
         """ Finalize the Trial"""
 
@@ -839,7 +856,8 @@ class Trial(Event):
             #Set the feedback to be a generic event, with nothing in it:
             self.feedback = Event(self.win,duration=0)
 
-            self.stimulus = Stimulus(self.win,self.params,annulus_contrast=0,
+            self.stimulus = Stimulus(self.win,self.params,
+                                     annulus_contrast=0,
                                      fixation_color=self.fix_color,
                                      fixation_ori=self.fix_ori)
             

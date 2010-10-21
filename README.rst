@@ -145,8 +145,6 @@ the script by entering 'python new_monitor.py' in a terminal. This should
 create a new psychopy .calib file in the calibration directory, which you can
 now use in subsequent runs of the experiment
 
-
-
 =================
  Version control
 =================
@@ -218,5 +216,43 @@ pushed into the repo by others.
  Program structure
 ===================
 
+In order to run the program, use 'ss_run.py'. One way of running this is by
+opening a Terminal, changing the working directory into the directory where the
+program is stored and issuing 'python ss_run.py' at the command prompt. Another
+way is to open the psychopy application (which should be in the Applications
+folder), opening ss_run.py in the coder and pressing on the green button with
+the running man icon.
 
- 
+ss_classes contains the main classes used in the program:
+
+- Params: This object initializes params from a given file, which contains a
+  dict with variables. For every variable in the dict, an attribute of the
+  Params object will be created. Notice that attributes of a params, once they
+  are set, cannot be changed, unless their name is explicitely removed from a
+  special attribute, which is a list called '_dont_touch'. The 'set_by_gui'
+  method of this object opens a gui made by the tool "GetFromGui". The 'save'
+  method saves the parameters into an already opened file (and can optionally
+  close that file). 
+  
+- Event: This is an abstract base-class outlining the kinds of things that an
+  event in the experiment could have:
+  - __init__ initializes the object with a window object and with key-word
+    args. 
+  - finalize : this allows to change parameters of an already initialized
+    object
+  - __call__ : this usually triggers '.draw()' methods in attributes of the
+    object that have '.draw' methods (psychopy stimuli) and calls '.flip()' on
+    the window object held by the object
+
+- Staircase: This object represents a psychophysical staircase. Initializing it
+  generates an attribute record, which is a list with, at initialization, only
+  the start value of the staircase. The 'update' method updates the staircase,
+  based on a correctness value.
+  
+- Stimulus: This class represents and holds all of the stimulus. This includes
+  the surround and the annulus gratings, as well as the fixation and the spokes
+  and rings. Upon initialization, all of this gets allocated in
+  memory. Finalization of the stimulus adds the target to the  setting additional stuff in the
+  stimulus, such as
+
+  
