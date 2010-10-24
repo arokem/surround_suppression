@@ -887,55 +887,36 @@ class Trial(Event):
             self.response = Response(self.params)
             self.feedback = Feedback(self.params)        
             
-        #Preparing the stimulus depends on which task we are doing:
-        if self.params.task=='Annulus':
-            if self.block_type == 'A':
-                            self.stimulus = Stimulus(self.win,self.params,
-                                     bank,
-                                     surround_contrast=params.surround_contrast,
-                                     annulus_contrast=params.annulus_contrast,
-                                     fixation_color=self.fix_color,
-                                     fixation_ori = self.fix_ori)
-                            self.stimulus.finalize(self.params,target_co=staircase.value,
-                                    target_loc=self.target_loc,
-                                    fix_target_loc=self.fix_target_loc,
-                                    fix_target_co=other_contrast)
-                            if self.target_loc in [0,1,2,3]:
-                                self.correct_key = '1'
-                            else:
-                                self.correct_key = '2'
-            elif self.block_type == 'B':
-                            self.stimulus = Stimulus(self.win,self.params,
-                                     bank,
-                                     surround_contrast=params.surround_contrast,
-                                     annulus_contrast=0,
-                                     fixation_color=self.fix_color,
-                                     fixation_ori = self.fix_ori)
-                            self.stimulus.finalize(self.params,target_co=staircase.value,
-                                    target_loc=self.target_loc,
-                                    fix_target_loc=self.fix_target_loc,
-                                    fix_target_co=other_contrast)
-                            if self.target_loc in [0,1,2,3]:
-                                self.correct_key = '1'
-                            else:
-                                self.correct_key = '2'
+        #Preparing the stimulus doesn't depend on which task we are doing:
+        if self.block_type == 'A':
+                        self.stimulus = Stimulus(self.win,self.params,
+                                 bank,
+                                 surround_contrast=params.surround_contrast,
+                                 annulus_contrast=params.annulus_contrast,
+                                 fixation_color=self.fix_color,
+                                 fixation_ori = self.fix_ori)
+        elif self.block_type == 'B':
+                        self.stimulus = Stimulus(self.win,self.params,
+                                 bank,
+                                 surround_contrast=params.surround_contrast,
+                                 annulus_contrast=0,
+                                 fixation_color=self.fix_color,
+                                 fixation_ori = self.fix_ori)
 
-#            if self.target_loc in [0,1,2,3]:
-#                self.correct_key = '1'
-#            else:
-#                self.correct_key = '2'
+        #The following steps look the same for either block:
+        self.stimulus.finalize(self.params,target_co=staircase.value,
+                                target_loc=self.target_loc,
+                                fix_target_loc=self.fix_target_loc,
+                                fix_target_co=other_contrast)
+        if self.params.task=='Annulus':
+
+           if self.target_loc in [0,1,2,3]:
+               self.correct_key = '1'
+           else:
+               self.correct_key = '2'
     
         elif self.params.task=='Fixation':
             
-            self.stimulus = Stimulus(self.win,self.params,
-                                     bank,
-                                     fixation_color=self.fix_color,
-                                     fixation_ori=self.fix_ori)
-                 
-            self.stimulus.finalize(self.params,target_co=other_contrast,
-                                    target_loc=self.target_loc,
-                                    fix_target_loc=self.fix_target_loc,
-                                    fix_target_co=staircase.value)
             print self.fix_target_loc
             if self.fix_target_loc == 1:
                 self.correct_key = '2'
@@ -956,9 +937,6 @@ class Trial(Event):
             now = trial_clock.getTime()
             wait_time = (self.params.trial_duration) - now
             core.wait(wait_time)
-    
-
-        
 
     def save(self,f,insert_header=False):
 
@@ -1048,8 +1026,10 @@ def make_trial_list(win,params):
 #                              target_loc=None,
 #                              fix_target_loc=int(np.random.rand(1)*2))
 #                              )
-        fix_ori = fix_ori_switch
-        fix_ori_switch += 90        #Append the blocks:    
+        #fix_ori = fix_ori_switch
+        #fix_ori_switch += 90
+
+        #Append the blocks:    
         for block in range(params.num_blocks/2):
             #Block B Task hemi-block:
 
@@ -1057,7 +1037,7 @@ def make_trial_list(win,params):
                 trial_list.append(
                         Trial(win,params,
                               fix_color=fix_color,
-                              fix_ori = fix_ori,
+                              #fix_ori = fix_ori,
                               block_type = 'B',
                               target_loc=int(np.random.rand(1)*8),
                               fix_target_loc=int(np.random.rand(1)*2))
@@ -1067,7 +1047,7 @@ def make_trial_list(win,params):
                 trial_list.append(
                         Trial(win,params,
                               fix_color=fix_color,
-                              fix_ori = fix_ori,
+                              #fix_ori = fix_ori,
                               block_type = 'A',
                               target_loc=int(np.random.rand(1)*8),
                               fix_target_loc=int(np.random.rand(1)*2))
@@ -1078,7 +1058,7 @@ def make_trial_list(win,params):
             trial_list.append(
                 Trial(win,params,
                     fix_color=fix_color,
-                    fix_ori = fix_ori,
+                    #fix_ori = fix_ori,
                     block_type = 'B',
                     target_loc=int(np.random.rand(1)*8),
                     fix_target_loc=int(np.random.rand(1)*2))

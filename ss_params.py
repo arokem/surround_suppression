@@ -6,7 +6,7 @@
 """
 
 p = dict(
-    paradigm = 'rapid_fire',#'rapid_fire',     # 'block' for the fmri block design
+    paradigm = 'block',#'rapid_fire',     # 'block' for the fmri block design
                                  #(trials_per_block of trials in which the
                                  #subject performs the task, followed by
                                  #trials_per_block of no-task trials or
@@ -51,7 +51,7 @@ p = dict(
     fix_target_max = 1,          #
     fix_target_min = 0,       #
     trials_per_block = 5,        #
-    num_blocks = 2,#16,             # Number of trials will be num_blocks *
+    num_blocks = 4,#16,             # Number of trials will be num_blocks *
                                  # trials_per_block 
     dummy_blocks = 1,            # In 'block' mode, the number of dummy blocks
                                  # at the beginning of the run.

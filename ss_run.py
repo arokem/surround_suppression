@@ -95,8 +95,9 @@ if __name__ == "__main__":
             
     elif params.task == 'Fixation':
         message = """ On which side are the targets in the FIXATION?\n Press 1 for left and 2 for right\n Press any key to start"""
-        
-        staircaseA = Staircase(params.fix_target_start,
+
+        #Just one staircase:
+        staircaseA = staircaseB = Staircase(params.fix_target_start,
                             params.fix_target_start/params.contrast_increments,
                             harder = 1, 
                             ub=params.fix_target_max,
