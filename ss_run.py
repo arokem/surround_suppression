@@ -1,5 +1,4 @@
 """
-
 Surround suppression experiment, based on Zenger-Landolt and Heeger (2003)
 
 And on the Psychtoolbox version used to get the data in Yoon et al. (2009 and
@@ -62,15 +61,30 @@ if __name__ == "__main__":
     #Initialize the staircase, depending on which task is performed
     if params.task == 'Annulus':
         message = """ On which side are the targets in the GRATING?\n Press 1 for left and 2 for right\n Press any key to start""" 
-        staircase = Staircase(params.start_target_contrast,
+        staircaseA = Staircase(params.start_target_contrastA,
                             params.annulus_contrast/params.contrast_increments,
-                            harder = 1, #For this task, higher values are
+                            harder = -1, #For this task, higher values are
                                       #actually harder => closer to the annulus
                                       #value
-                            ub=params.target_contrast_max,
-                            lb=params.target_contrast_min
+                            ub=params.targetA_contrast_max,
+                            lb=params.targetA_contrast_min
                             )
-
+        staircaseB = Staircase(params.start_target_contrastB,
+                            params.annulus_contrast/params.contrast_increments,
+                            harder = -1, #For this task, higher values are
+                                      #actually harder => closer to the annulus
+                                      #value
+                            ub=params.targetB_contrast_max,
+                            lb=params.targetB_contrast_min
+                            )
+#        staircase = Staircase(params.start_target_contrastB,
+#                            params.annulus_contrast/params.contrast_increments,
+#                            harder = -1, #For this task, higher values are
+#                                      #actually harder => closer to the annulus
+#                                      #value
+#                            ub=params.target_contrast_max,
+#                            lb=params.target_contrast_min
+#2                            )
         if params._replay is None:
             #The fixation target appears but has a constant contrast set to the
             #starting point 
@@ -82,7 +96,7 @@ if __name__ == "__main__":
     elif params.task == 'Fixation':
         message = """ On which side are the targets in the FIXATION?\n Press 1 for left and 2 for right\n Press any key to start"""
         
-        staircase = Staircase(params.fix_target_start,
+        staircaseA = Staircase(params.fix_target_start,
                             params.fix_target_start/params.contrast_increments,
                             harder = 1, 
                             ub=params.fix_target_max,
@@ -97,6 +111,7 @@ if __name__ == "__main__":
             #Replay a previous run:
             other_contrast = params._replay
 
+
     #Send a message to the screen and wait for a subject keypress:
     Text(win,text=message,height=0.7)() 
 
@@ -110,44 +125,40 @@ if __name__ == "__main__":
     #Loop over the event list, while consuming each event, by calling it:
     for trial_idx,this_trial in enumerate(trial_list):
         trial_clock = core.Clock()
-        
-        this_trial.finalize_stim(params,bank,staircase,other_contrast[trial_idx])            
+        if this_trial.block_type == 'A':
+            this_trial.finalize_stim(params,bank,staircaseA,other_contrast[trial_idx])
+        elif this_trial.block_type == 'B':
+            this_trial.finalize_stim(params,bank,staircaseB,other_contrast[trial_idx])
         this_trial.stimulus()
-
-        this_trial.finalize_fix(params,bank,staircase,other_contrast[trial_idx])
-        #Doesn't need finalizing:
+        if this_trial.block_type == 'A':
+            this_trial.finalize_fix(params,bank,staircaseA,other_contrast[trial_idx])
+        if this_trial.block_type == 'B':
+            this_trial.finalize_fix(params,bank,staircaseB,other_contrast[trial_idx])
         this_trial.fixation()
-
-        #We pass the file to the response, so that the file can be cleanly
-        #closed in case of quitting:
         this_trial.response.finalize(correct_key = this_trial.correct_key,
                                      file_name=f)
         this_trial.response()
-
-        #Finalize the feedback in cases a correct_key was defined (on trials on
-        #which some response was expected):
         if this_trial.correct_key is not None:
             this_trial.feedback.finalize(this_trial.response.correct)
-
-        #This will do something only in cases in which there was a task:
         this_trial.feedback()
 
-        #Update and save only on trials in which there was a target:
-        if this_trial.target_loc is not None:
-            if len(staircase.record)==1:
+
+#Update and save only on trials in which there was a target:
+        if trial_idx % params.trials_per_block == 0:
                #On the first trial, insert the header: 
-               this_trial.save(f,insert_header=True)
-            else:
+            this_trial.save(f,insert_header=True)
+        else:
                #On other trials, just insert the data:
-               this_trial.save(f)
+            this_trial.save(f)
             #update after saving:
-            staircase.update(this_trial.response.correct)
-
-
+        if this_trial.block_type == 'A':
+            staircaseA.update(this_trial.response.correct)
+        elif this_trial.block_type == 'B':
+            staircaseB.update(this_trial.response.correct)
         this_trial.wait_iti(trial_clock)
 
         #dbg
-        #print trial_clock.getTime()
+        # trial_clock.getTime()
     
     f.close()
     core.quit()

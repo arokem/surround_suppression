@@ -553,20 +553,21 @@ class Stimulus(Event):
                                            )
 
         #Independtly, set the fixation target with a contrast value:
-        if fix_target_co is not None:
-            if fix_target_loc == 1 or fix_target_loc is None: #This is the
+        #if fix_target_co is not None:
+        if fix_target_loc == 1 or fix_target_loc is None: #This is the
                                                               #default
                 pos = [params.fixation_size/4,0]
-            else:
+        else:
                 pos = [-params.fixation_size/4,0]
 
-            self.fixation_target = visual.PatchStim(self.win,
+        self.fixation_target = visual.PatchStim(self.win,
                                                     tex=None,
                                                     pos = pos,
                                                     color = 0  * rgb,
-                                            size = [params.fixation_size/2,
+                                                    size = [params.fixation_size/2,
                                                     params.fixation_size],
-                                            opacity=1-fix_target_co)
+                                                    opacity=1-fix_target_co)
+        print self.fixation_target
         self.target_loc = target_loc
         #This is the nominal target contrast, because in fact, the target
         #contrast oscillates with the counter-phase flickering
@@ -805,8 +806,8 @@ class Feedback(Event):
 class Trial(Event):
     
     def __init__(self,win,params,target_loc=None,fix_target_loc=None,
-                 fix_ori=None,fix_color=None,fix_color_switch=None,
-                 fix_ori_switch=None,iti=0):
+                 fix_color=None,fix_color_switch=None,fix_ori =None,
+                 fix_ori_switch=None,iti=0,block_type = 'A'):
         """
 
         This function prepares all the events that happen in one trial,
@@ -849,7 +850,8 @@ class Trial(Event):
         self.target_loc = target_loc
         self.fix_target_loc = fix_target_loc
         self.fix_color = fix_color
-        self.fix_ori = fix_ori
+        self.fix_ori = 90#fix_ori
+        self.block_type = block_type
 
         #If no switch occurs, set the post-switch values to the pre-switch
         #values: 
@@ -858,15 +860,14 @@ class Trial(Event):
         else:
             self.fix_color_switch = fix_color_switch
         if fix_ori_switch is None:
-            self.fix_ori_switch = fix_ori
+            self.fix_ori_switch = 0#fix_ori
         else:
             self.fix_ori_switch = fix_ori_switch
 
 
     def finalize_stim(self,params,bank,staircase,other_contrast):
-        """ Finalize the Trial"""
-
         if self.target_loc is None:
+            """ Finalize the Trial"""
             #Don't get responses:
             self.response = Response(self.params,keys=[],duration=0)
             #Set the feedback to be a generic event, with nothing in it:
@@ -888,22 +889,41 @@ class Trial(Event):
             
         #Preparing the stimulus depends on which task we are doing:
         if self.params.task=='Annulus':
-            self.stimulus = Stimulus(self.win,self.params,
+            if self.block_type == 'A':
+                            self.stimulus = Stimulus(self.win,self.params,
                                      bank,
                                      surround_contrast=params.surround_contrast,
                                      annulus_contrast=params.annulus_contrast,
                                      fixation_color=self.fix_color,
-                                     fixation_ori=self.fix_ori)
-       
-            self.stimulus.finalize(self.params,target_co=staircase.value,
+                                     fixation_ori = self.fix_ori)
+                            self.stimulus.finalize(self.params,target_co=staircase.value,
                                     target_loc=self.target_loc,
                                     fix_target_loc=self.fix_target_loc,
                                     fix_target_co=other_contrast)
-            
-            if self.target_loc in [0,1,2,3]:
-                self.correct_key = '1'
-            else:
-                self.correct_key = '2'
+                            if self.target_loc in [0,1,2,3]:
+                                self.correct_key = '1'
+                            else:
+                                self.correct_key = '2'
+            elif self.block_type == 'B':
+                            self.stimulus = Stimulus(self.win,self.params,
+                                     bank,
+                                     surround_contrast=params.surround_contrast,
+                                     annulus_contrast=0,
+                                     fixation_color=self.fix_color,
+                                     fixation_ori = self.fix_ori)
+                            self.stimulus.finalize(self.params,target_co=staircase.value,
+                                    target_loc=self.target_loc,
+                                    fix_target_loc=self.fix_target_loc,
+                                    fix_target_co=other_contrast)
+                            if self.target_loc in [0,1,2,3]:
+                                self.correct_key = '1'
+                            else:
+                                self.correct_key = '2'
+
+#            if self.target_loc in [0,1,2,3]:
+#                self.correct_key = '1'
+#            else:
+#                self.correct_key = '2'
     
         elif self.params.task=='Fixation':
             
@@ -916,6 +936,7 @@ class Trial(Event):
                                     target_loc=self.target_loc,
                                     fix_target_loc=self.fix_target_loc,
                                     fix_target_co=staircase.value)
+            print self.fix_target_loc
             if self.fix_target_loc == 1:
                 self.correct_key = '2'
             else:
@@ -923,7 +944,6 @@ class Trial(Event):
         
     def finalize_fix(self,params,bank,staircase,other_contrast):
         """ Finalize only the fixation"""
-
         self.fixation = Stimulus(self.win,self.params,
                                      bank,
                                      duration=self.params.fixation_duration,
@@ -931,12 +951,15 @@ class Trial(Event):
                                      annulus_contrast=0,
                                      fixation_color=self.fix_color_switch,
                                      fixation_ori=self.fix_ori_switch)
-        
+
     def wait_iti(self,trial_clock):
-        now = trial_clock.getTime()
-        wait_time = (self.params.trial_duration) - now
-        core.wait(wait_time)
+            now = trial_clock.getTime()
+            wait_time = (self.params.trial_duration) - now
+            core.wait(wait_time)
     
+
+        
+
     def save(self,f,insert_header=False):
 
         """ Save the trial information, including whether subjects got it right
@@ -999,10 +1022,10 @@ def make_trial_list(win,params):
     if params.paradigm == 'rapid_fire':
         for i in range(params.trials_per_block*params.num_blocks):
             trial_list.append( Trial(win,params,
+                block_type = 'A',
                 target_loc = int(np.random.rand(1) * 8), 
                 fix_target_loc= int(np.random.rand(1) * 2),
-                fix_color=[1,1,1],
-                fix_ori = 0) )
+                fix_color=[1,1,1]))
 
 
     #This is a bit more complicated:
@@ -1014,69 +1037,53 @@ def make_trial_list(win,params):
         elif params.task == 'Fixation':
             fix_color = [0,1,0]
 
-        #Start by appending the "dummy blocks" in which subjects don't
-        #perform the task (actually hemi-blocks):
-        for block in range(params.dummy_blocks):
-            #For the dummy blocks, keep the fixation orientation at 45
-            #degrees:
-            fix_ori = 45
-            fix_ori_switch = fix_ori + 45
-            for n_trial in range(params.trials_per_block):
-                #In the last block, omit one trial:                 
-                if (block >= params.dummy_blocks-1 and
-                    n_trial >= params.trials_per_block-1):
-                                 break
-                #Othewise, append a non-task trial:
-                else:
-                    trial_list.append(Trial(win,params,
-                                       fix_ori = fix_ori,
-                                       fix_color = fix_color))
-
-        #Append the trial with the switch in the fixation orientation: 
-        trial_list.append(Trial(win,params,
-                        fix_ori = fix_ori,
-                        fix_color = fix_color,
-                        fix_ori_switch = fix_ori_switch))
-
-        #Switch around fix_ori and fix_ori_switch:
+#        #Start by appending the "dummy blocks" in which subjects don't
+#        #perform the task (actually hemi-blocks):
+#        for block in range(params.dummy_blocks):
+#            for n_trial in range(params.trials_per_block):
+#                trial_list.append(
+#                        Trial(win,params,
+#                              fix_color=fix_color,
+#                              block_type = 'C',
+#                              target_loc=None,
+#                              fix_target_loc=int(np.random.rand(1)*2))
+#                              )
         fix_ori = fix_ori_switch
-        fix_ori_switch += 45
+        fix_ori_switch += 90        #Append the blocks:    
+        for block in range(params.num_blocks/2):
+            #Block B Task hemi-block:
 
-        #Now append all the rest of the blocks:    
-        for block in range(params.num_blocks):
-            #Task hemi-block:
-            for n_trial in range(params.trials_per_block-1):
+            for n_trial in range(params.trials_per_block):
                 trial_list.append(
                         Trial(win,params,
-                              fix_ori=fix_ori,
                               fix_color=fix_color,
+                              fix_ori = fix_ori,
+                              block_type = 'B',
                               target_loc=int(np.random.rand(1)*8),
                               fix_target_loc=int(np.random.rand(1)*2))
                               )
-            #The last trial in the block contains the switch:
-            trial_list.append(Trial(win,params,
-                              fix_ori=fix_ori,
+            #Block A Task hemi-block:
+            for n_trial in range(params.trials_per_block):
+                trial_list.append(
+                        Trial(win,params,
                               fix_color=fix_color,
+                              fix_ori = fix_ori,
+                              block_type = 'A',
                               target_loc=int(np.random.rand(1)*8),
-                              fix_target_loc=int(np.random.rand(1)*2),
-                              fix_ori_switch = fix_ori_switch))
+                              fix_target_loc=int(np.random.rand(1)*2))
+                              )
 
-            fix_ori = fix_ori_switch
-            fix_ori_switch += 45
+        #Add a final Block B hemi-block:
+        for n_trial in range(params.trials_per_block):
+            trial_list.append(
+                Trial(win,params,
+                    fix_color=fix_color,
+                    fix_ori = fix_ori,
+                    block_type = 'B',
+                    target_loc=int(np.random.rand(1)*8),
+                    fix_target_loc=int(np.random.rand(1)*2))
+                              )
 
-            #Non-Task hemi-block:
-            for n_trial in range(params.trials_per_block-1):
-                trial_list.append(Trial(win,params,
-                              fix_ori=fix_ori,
-                              fix_color=fix_color))
-
-            #The last trial in the block contains the switch:
-            trial_list.append(Trial(win,params,
-                          fix_ori=fix_ori,
-                          fix_color=fix_color,
-                          fix_ori_switch = fix_ori_switch))
-            fix_ori = fix_ori_switch
-            fix_ori_switch += 45
 
     #If the input is not valid throw and error:
     else:
