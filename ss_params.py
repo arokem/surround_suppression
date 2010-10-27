@@ -20,15 +20,15 @@ p = dict(
                                  # triggered by a scanner ttl pulse
 
     start_target_contrastA = 0.9, # Where to start the staircase.
-    start_target_contrastB = 0.1, # Where to start the staircase.
-    fix_target_start = 0.75,     # Where to start the staircase.    
+    start_target_contrastB = 0.05, # Where to start the staircase.
+    fix_target_start = 0.65,     # Where to start the staircase.    
 
     display_units = 'deg',       # 'deg' means all the units below are in
                                  # degrees of visual angle.
 
     annulus_inner = 2*3,           # deg of visual angle, Default: 2.86
     annulus_outer = 2*6,           # deg of visual angle, Default: 7.8
-    annulus_contrast = 0.5,     # relative contrast, Default: 0.75
+    annulus_contrast = 0.75,     # relative contrast, Default: 0.75
     surround_outer = 2*12.2,       # deg of visual angle, Default: 12.2
     surround_inner = 2*0.4,        # deg of visual angle 
     surround_contrast = 1,     # relative contrast, Default: 0.75
@@ -47,11 +47,12 @@ p = dict(
                                  #contrast, Standard: 15 
        #
     targetA_contrast_max = 1.0,
-    targetB_contrast_min = 0.1,
+    targetA_contrast_min = 0.75,
+    targetB_contrast_min = 0.001,
     fix_target_max = 1,          #
-    fix_target_min = 0,       #
+    fix_target_min = 0.5,       #
     trials_per_block = 5,        #
-    num_blocks = 4,#16,             # Number of trials will be num_blocks *
+    num_blocks = 8,#16,             # Number of trials will be num_blocks *
                                  # trials_per_block 
     dummy_blocks = 1,            # In 'block' mode, the number of dummy blocks
                                  # at the beginning of the run.

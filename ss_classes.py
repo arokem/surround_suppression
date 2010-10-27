@@ -349,7 +349,11 @@ class StimulusBank():
                                                 interpolate=True,
                                                 )
 
-
+        self.fixation_cross = visual.TextStim(win, text='+',
+                                                color=1  * rgb,
+                                                height = .5,
+                                                bold = True,
+                                                )
         
 class Stimulus(Event):
 
@@ -455,9 +459,11 @@ class Stimulus(Event):
         self.spokes = bank.spokes
 
         self.fixation = bank.fixation
+        self.fixation_cross = bank.fixation_cross
         self.fixation.setOri(fixation_ori)
-        self.fixation.setColor(rgb*fixation_color)
-        
+        #self.fixation.setColor(rgb*fixation_color)
+        self.fixation.setColor(0.5)
+        self.fixation_cross.setColor(fixation_color)
         #The center is always set to be black:
         self.fixation_center = bank.fixation_center
         self.fixation_center.setOri(fixation_ori)
@@ -563,11 +569,11 @@ class Stimulus(Event):
         self.fixation_target = visual.PatchStim(self.win,
                                                     tex=None,
                                                     pos = pos,
-                                                    color = 0  * rgb,
+                                                    color = fix_target_co* rgb,
                                                     size = [params.fixation_size/2,
-                                                    params.fixation_size],
-                                                    opacity=1-fix_target_co)
-        print self.fixation_target
+                                                    params.fixation_size])#,
+#                                                    opacity=1-fix_target_co)
+        self.fixation_target.SetColor = fix_target_co
         self.target_loc = target_loc
         #This is the nominal target contrast, because in fact, the target
         #contrast oscillates with the counter-phase flickering
@@ -608,9 +614,10 @@ class Stimulus(Event):
             self.inner_surround.draw()
             self.center_area.draw()
             self.fixation.draw()
-            self.fixation_center.draw()
             if self.fixation_target is not None:
                 self.fixation_target.draw()
+            self.fixation_center.draw()
+            self.fixation_cross.draw()
 
             #If there is no time left:
             if clock.getTime()>=self.duration:
@@ -904,20 +911,23 @@ class Trial(Event):
                                  fixation_ori = self.fix_ori)
 
         #The following steps look the same for either block:
-        self.stimulus.finalize(self.params,target_co=staircase.value,
+
+        if self.params.task=='Annulus':
+           self.stimulus.finalize(self.params,target_co=staircase.value,
                                 target_loc=self.target_loc,
                                 fix_target_loc=self.fix_target_loc,
                                 fix_target_co=other_contrast)
-        if self.params.task=='Annulus':
-
            if self.target_loc in [0,1,2,3]:
                self.correct_key = '1'
            else:
                self.correct_key = '2'
     
         elif self.params.task=='Fixation':
-            
-            print self.fix_target_loc
+            self.stimulus.finalize(self.params,target_co=other_contrast,
+                                target_loc=self.target_loc,
+                                fix_target_loc=self.fix_target_loc,
+                                fix_target_co=staircase.value)            
+            print staircase.value
             if self.fix_target_loc == 1:
                 self.correct_key = '2'
             else:
@@ -1032,7 +1042,6 @@ def make_trial_list(win,params):
         #Append the blocks:    
         for block in range(params.num_blocks/2):
             #Block B Task hemi-block:
-
             for n_trial in range(params.trials_per_block):
                 trial_list.append(
                         Trial(win,params,
