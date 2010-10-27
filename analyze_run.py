@@ -6,6 +6,7 @@ import numpy as np
 from pypsignifit import (BootstrapInference,GoodnessOfFit,ParameterPlot,
                          ThresholdPlot)
 
+
 if __name__=="__main__":
     
     file_name = sys.argv[1]
@@ -48,8 +49,8 @@ if __name__=="__main__":
     #Both tasks are honest-to-god 2AFC:
     B = BootstrapInference ( data, priors=constraints, nafc=2 )
     B.sample()
-    P = ParameterPlot(B)
-    G = GoodnessOfFit(B)
-    T = ThresholdPlot(B)
-    plt.show()    
-            
+    print 'Threshold: %s'%(B.getThres())
+    print 'CI: [%s,  %s]'%(B.getCI(1)[0],
+                           B.getCI(1)[1])
+    print 'Last value in the staircase: %s'%contrast[-1]
+           
