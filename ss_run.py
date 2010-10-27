@@ -141,15 +141,14 @@ if __name__ == "__main__":
             this_trial.feedback.finalize(this_trial.response.correct)
         this_trial.feedback()
 
-
-#Update and save only on trials in which there was a target:
-        if trial_idx % params.trials_per_block == 0:
-               #On the first trial, insert the header: 
+        #On the first trial, insert the header: 
+        if trial_idx == 0:
             this_trial.save(f,insert_header=True)
         else:
-               #On other trials, just insert the data:
+            #On other trials, just insert the data:
             this_trial.save(f)
-            #update after saving:
+
+        #update after saving:
         if this_trial.block_type == 'A':
             staircaseA.update(this_trial.response.correct)
         elif this_trial.block_type == 'B':

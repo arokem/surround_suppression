@@ -567,12 +567,12 @@ class Stimulus(Event):
                 pos = [-params.fixation_size/4,0]
 
         self.fixation_target = visual.PatchStim(self.win,
-                                                    tex=None,
-                                                    pos = pos,
-                                                    color = fix_target_co* rgb,
-                                                    size = [params.fixation_size/2,
-                                                    params.fixation_size])#,
-#                                                    opacity=1-fix_target_co)
+                                                tex=None,
+                                                pos = pos,
+                                                color = fix_target_co* rgb,
+                                                size = [params.fixation_size/2,
+                                                        params.fixation_size])
+
         self.fixation_target.SetColor = fix_target_co
         self.target_loc = target_loc
         #This is the nominal target contrast, because in fact, the target
@@ -927,7 +927,9 @@ class Trial(Event):
                                 target_loc=self.target_loc,
                                 fix_target_loc=self.fix_target_loc,
                                 fix_target_co=staircase.value)            
-            print staircase.value
+            #dbg:
+            #print staircase.value
+
             if self.fix_target_loc == 1:
                 self.correct_key = '2'
             else:
@@ -968,10 +970,7 @@ class Trial(Event):
             f.write('Response time\n')
                     
         f.write('%s, '%self.stimulus.nominal_target_co)
-        f.write('%s, '%(1-self.stimulus.fixation_target.opacity)) #The contrast
-                                        #is set as the complement of the
-                                        #opacity (see Stimulus.initialize for
-                                        #details) 
+        f.write('%s, '%(1-self.stimulus.fixation_target.color[0]))
         f.write('%s, '%self.stimulus.target_loc)
         f.write('%s, '%self.stimulus.fix_target_loc)
         f.write('%s, '%self.response.key)

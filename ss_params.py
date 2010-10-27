@@ -15,7 +15,7 @@ p = dict(
 
     monitor = 'testMonitor',#'NNL',              # 'NNL'
     screen = 0,                  # 0 is for the primary screen, 1 for auxillary
-    fullscreen =True,           # True if fullscreen, False otherwise 
+    fullscreen =False,           # True if fullscreen, False otherwise 
     scanner = True,              # True if the stimulus presentation should be
                                  # triggered by a scanner ttl pulse
 
