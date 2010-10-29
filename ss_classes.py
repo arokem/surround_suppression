@@ -338,21 +338,27 @@ class StimulusBank():
                                 ori=i*45,
                                 interpolate = True))
 
-        self.fixation = visual.PatchStim(win, tex=None,
+        self.fixation_surround = visual.PatchStim(win, tex= None,
+                                         color = -1*rgb,
                                          size=params.fixation_size,
+                                         interpolate = True,
+                                         )
+
+        self.fixation = visual.PatchStim(win, tex=None,
+                                         size=params.fixation_size*3/4,
                                          interpolate=True)
 
         #Set the center to always be black:
         self.fixation_center = visual.PatchStim(win, tex=None,
                                                 color=-1  * rgb,
-                                                size=params.fixation_size/2,
+                                                size=params.fixation_size/4,
                                                 interpolate=True,
                                                 )
 
-        self.fixation_cross = visual.TextStim(win, text='+',
+        self.fixation_square = visual.PatchStim(win, tex=None,
                                                 color=1  * rgb,
-                                                height = .5,
-                                                bold = True,
+                                                size=params.fixation_size/8,
+                                                interpolate=True,
                                                 )
         
 class Stimulus(Event):
@@ -459,12 +465,13 @@ class Stimulus(Event):
         self.spokes = bank.spokes
 
         self.fixation = bank.fixation
-        self.fixation_cross = bank.fixation_cross
+        self.fixation_square = bank.fixation_square
         self.fixation.setOri(fixation_ori)
         #self.fixation.setColor(rgb*fixation_color)
         self.fixation.setColor(0.5)
-        self.fixation_cross.setColor(fixation_color)
+        self.fixation_square.setColor(fixation_color)
         #The center is always set to be black:
+        self.fixation_surround = bank.fixation_surround
         self.fixation_center = bank.fixation_center
         self.fixation_center.setOri(fixation_ori)
         
@@ -562,16 +569,16 @@ class Stimulus(Event):
         #if fix_target_co is not None:
         if fix_target_loc == 1 or fix_target_loc is None: #This is the
                                                               #default
-                pos = [params.fixation_size/4,0]
+                pos = [params.fixation_size*3/16,0]
         else:
-                pos = [-params.fixation_size/4,0]
+                pos = [-params.fixation_size*3/16,0]
 
         self.fixation_target = visual.PatchStim(self.win,
                                                     tex=None,
                                                     pos = pos,
                                                     color = fix_target_co* rgb,
-                                                    size = [params.fixation_size/2,
-                                                    params.fixation_size])#,
+                                                    size = [params.fixation_size*3/8,
+                                                    params.fixation_size*3/4])#,
 #                                                    opacity=1-fix_target_co)
         self.fixation_target.SetColor = fix_target_co
         self.target_loc = target_loc
@@ -613,11 +620,12 @@ class Stimulus(Event):
             self.ring2.draw()
             self.inner_surround.draw()
             self.center_area.draw()
+            self.fixation_surround.draw()
             self.fixation.draw()
             if self.fixation_target is not None:
                 self.fixation_target.draw()
             self.fixation_center.draw()
-            self.fixation_cross.draw()
+            self.fixation_square.draw()
 
             #If there is no time left:
             if clock.getTime()>=self.duration:
