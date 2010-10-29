@@ -30,7 +30,7 @@ p = dict(
     annulus_outer = 2*6,           # deg of visual angle, Default: 7.8
     annulus_contrast = 0.75,     # relative contrast, Default: 0.75
     surround_outer = 2*12.2,       # deg of visual angle, Default: 12.2
-    surround_inner = 2*0.4,        # deg of visual angle 
+    surround_inner = 2*0.8,        # deg of visual angle 
     surround_contrast = 1,     # relative contrast, Default: 0.75
     ring_width = 2*0.1,            # deg of visual angle, Default: 0.1
     spoke_width =  2*0.1,          # deg of visual angle, Default: 0.1
@@ -42,7 +42,7 @@ p = dict(
     fixation_duration = 0.1,     # seconds, Default: 0.1
     response_duration = 0.9,     # seconds, Default: 0.9
     feedback_duration = 0.25,    # seconds, Default: 0.25
-    fixation_size = 1.0,#0.3,         # deg of visual angle, Standard: 0.3
+    fixation_size = 0.8,#0.3,         # deg of visual angle, Standard: 0.3
     contrast_increments = 15,    # How many steps from the lowest to the highest
                                  #contrast, Standard: 15 
        #
