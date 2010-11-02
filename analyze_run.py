@@ -88,7 +88,7 @@ if __name__=="__main__":
                 y = np.hstack([y,this[2] * [this[1]/float(this[2])]])
 
         initial = np.mean(x),slope
-        this_fit , msg = leastsq(err_func,initial)
+        this_fit , msg = leastsq(err_func,initial,warning=False)
         fig = plt.figure()
         ax = fig.add_subplot(1,1,1)
         ax.plot(x,y,'o')
@@ -114,7 +114,7 @@ if __name__=="__main__":
             x = keep_x[b_idx]
             y = keep_y[b_idx]
             initial = np.mean(x),slope
-            this_fit , msg = leastsq(err_func,initial)
+            this_fit , msg = leastsq(err_func,initial,warning=False)
             bootstrap_th.append(this_fit[0])
             bootstrap_slope.append(this_fit[0])
         upper = np.sort(bootstrap_th)[bootstrap_n*0.975]
