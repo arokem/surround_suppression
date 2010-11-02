@@ -57,6 +57,7 @@ if __name__=="__main__":
     elif p['task']== ' Annulus ':
         contrast_all = data_rec['annulus_target_contrast']
 
+    labelit = ['annulus_off','annulus_on']
     #Switch on the two annulus tasks (annulus on vs. annulus off):
     for idx,operator in enumerate(['<','>=']):
         contrast = eval('contrast_all[annulus_target_contrast%s0.75]'%operator)
@@ -99,8 +100,10 @@ if __name__=="__main__":
                                    flake))
         ax.set_title('%s task::thresh=%1.2f::slope=%1.2f'
                      %(p['task'],this_fit[0],this_fit[1]))
-        plt.show()
-    
+
+        file_stem = file_name.split('/')[-1].split('.')[0]
+        fig.savefig('%s_%s.png'%(file_stem,labelit[idx]))
+        
 ##     bootstrap_th = []
 ##     bootstrap_slope = []
 ##     for b in bootstrap_n:
