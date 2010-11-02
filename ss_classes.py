@@ -574,12 +574,11 @@ class Stimulus(Event):
                 pos = [-params.fixation_size*3/16,0]
 
         self.fixation_target = visual.PatchStim(self.win,
-                                                    tex=None,
-                                                    pos = pos,
-                                                    color = fix_target_co* rgb,
-                                                    size = [params.fixation_size*3/8,
-                                                    params.fixation_size*3/4])#,
-#                                                    opacity=1-fix_target_co)
+                                                tex=None,
+                                                pos=pos,
+                                                color=fix_target_co* rgb,
+                                                size=[params.fixation_size*3/8,
+                                                      params.fixation_size*3/4])
 
         self.fixation_target.SetColor = fix_target_co
         self.target_loc = target_loc
@@ -979,7 +978,7 @@ class Trial(Event):
             f.write('Response time\n')
                     
         f.write('%s, '%self.stimulus.nominal_target_co)
-        f.write('%s, '%(1-self.stimulus.fixation_target.color[0]))
+        f.write('%s, '%(self.stimulus.fixation_target.color[0]))
         f.write('%s, '%self.stimulus.target_loc)
         f.write('%s, '%self.stimulus.fix_target_loc)
         f.write('%s, '%self.response.key)
