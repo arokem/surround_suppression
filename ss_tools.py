@@ -192,12 +192,13 @@ def start_data_file(subject_id):
     list_data_dir = os.listdir('./data')
 
     i=1
-    this_data_file = 'SS_%s_%s_%s.dat'%(subject_id,time.strftime('%m%d%Y'),i)
+    this_data_file = 'SS_%s_%s_%s.psydat'%(subject_id,time.strftime('%m%d%Y'),i)
 
     #This makes sure that you don't over-write previous data:
     while this_data_file in list_data_dir:
         i += 1
-        this_data_file='SS_%s_%s_%s.dat'%(subject_id,time.strftime('%m%d%Y'),i)
+        this_data_file='SS_%s_%s_%s.psydat'%(subject_id,
+                                             time.strftime('%m%d%Y'),i)
         
     #Open the file for writing into:
     f = file('./data/%s'%this_data_file,'w')

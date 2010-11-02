@@ -13,7 +13,7 @@ p = dict(
                                  #'rapid_fire' for a continuous stream of task
                                  #trials. 
 
-    monitor = 'testMonitor',#'NNL',              # 'NNL'
+    monitor = 'testMonitor',     # 'NNL'
     screen = 0,                  # 0 is for the primary screen, 1 for auxillary
     fullscreen =False,           # True if fullscreen, False otherwise 
     scanner = True,              # True if the stimulus presentation should be
@@ -42,7 +42,7 @@ p = dict(
     fixation_duration = 0.1,     # seconds, Default: 0.1
     response_duration = 0.9,     # seconds, Default: 0.9
     feedback_duration = 0.25,    # seconds, Default: 0.25
-    fixation_size = 0.8,#0.3,         # deg of visual angle, Standard: 0.3
+    fixation_size = 0.8,         # deg of visual angle, Standard: 0.8
     contrast_increments = 15,    # How many steps from the lowest to the highest
                                  #contrast, Standard: 15 
        #
@@ -52,7 +52,7 @@ p = dict(
     fix_target_max = 1,          #
     fix_target_min = 0.5,       #
     trials_per_block = 5,        #
-    num_blocks = 8,#16,             # Number of trials will be num_blocks *
+    num_blocks = 16,             # Number of trials will be num_blocks *
                                  # trials_per_block 
     dummy_blocks = 1,            # In 'block' mode, the number of dummy blocks
                                  # at the beginning of the run.

@@ -10,7 +10,7 @@ import gc
 import wx
 import numpy as np
 from ss_classes import Params
-from psychopy import core
+from psychopy import core,event
 import psychopy.monitors.calibTools as calib
 
 
@@ -153,7 +153,11 @@ if __name__ == "__main__":
             staircaseA.update(this_trial.response.correct)
         elif this_trial.block_type == 'B':
             staircaseB.update(this_trial.response.correct)
+
         this_trial.wait_iti(trial_clock)
+
+        #Flush unwanted events that may still be hanging out: 
+        event.clearEvents()
 
         #dbg
         # trial_clock.getTime()
