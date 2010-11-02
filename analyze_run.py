@@ -32,7 +32,6 @@ if __name__=="__main__":
     flake = 0.99
     slope = 3.5
     file_name = str(gui.fileOpenDlg(tryFilePath='./data')[0])
-    
     file_read = file(file_name,'r')
     p = {} #This will hold the params
     l = file_read.readline()
@@ -59,12 +58,12 @@ if __name__=="__main__":
 
     labelit = ['annulus_off','annulus_on']
     #Switch on the two annulus tasks (annulus on vs. annulus off):
-    for idx,operator in enumerate(['<','>=']):
+    for idx_annulus,operator in enumerate(['<','>=']):
         contrast = eval('contrast_all[annulus_target_contrast%s0.75]'%operator)
         this_correct = eval('correct[annulus_target_contrast%s0.75]'%operator)
 
         if p['task'] == ' Annulus ':
-            contrast = contrast - p[' annulus_contrast'] *idx
+            contrast = contrast - p[' annulus_contrast'] *idx_annulus
         
         hit_amps = contrast[this_correct==1]
         miss_amps = contrast[this_correct==0]
@@ -77,7 +76,7 @@ if __name__=="__main__":
 
         Data = zip(stim_intensities,n_correct,n_trials)
 
-        x = np.array([])
+        x = []
         y = []
 
         for idx,this in enumerate(Data):
@@ -102,10 +101,27 @@ if __name__=="__main__":
                      %(p['task'],this_fit[0],this_fit[1]))
 
         file_stem = file_name.split('/')[-1].split('.')[0]
-        fig.savefig('%s_%s.png'%(file_stem,labelit[idx]))
+        fig.savefig('%s_%s.png'%(file_stem,labelit[idx_annulus]))
         
-##     bootstrap_th = []
-##     bootstrap_slope = []
-##     for b in bootstrap_n:
-##         b_idx 
         
+        bootstrap_th = []
+        bootstrap_slope = []
+        keep_x = x
+        keep_y = y
+        keep_th = this_fit[0]
+        for b in xrange(bootstrap_n):
+            b_idx = np.random.randint(0,x.shape[0],x.shape[0])
+            x = keep_x[b_idx]
+            y = keep_y[b_idx]
+            initial = np.mean(x),slope
+            this_fit , msg = leastsq(err_func,initial)
+            bootstrap_th.append(this_fit[0])
+            bootstrap_slope.append(this_fit[0])
+        upper = np.sort(bootstrap_th)[bootstrap_n*0.975]
+        lower = np.sort(bootstrap_th)[bootstrap_n*0.025]
+        print "Task: %s (%s): Threshold estimate: %s, CI: [%s,%s]"%(p['task'],
+                                                        labelit[idx_annulus],
+                                                                    keep_th,
+                                                                    lower,
+                                                                    upper)
+            
