@@ -70,13 +70,6 @@ if __name__=="__main__":
 #        contrast = data_rec.find(annulus_target_contrast>=0.75)
         contrast = contrast_all[annulus_target_contrast>=0.75]
         this_correct = correct[annulus_target_contrast>=0.75]
-        print contrast
-#        print contrast_all[1]
-#        for i in contrast_all:
-#            if i > 0:
-#                print i
-#                contrast.append(i)
-#        print contrast
         hit_amps = contrast[this_correct==1]
         miss_amps = contrast[this_correct==0]
     all_amps = np.hstack([hit_amps,miss_amps])

@@ -1,47 +1,27 @@
 import sys
 
+from psychopy import gui
 from matplotlib.mlab import csv2rec
 import matplotlib.pyplot as plt
 import numpy as np
-from pypsignifit import (BootstrapInference,GoodnessOfFit,ParameterPlot,
-                         ThresholdPlot)
+import wx
 
-#User input GUI- not currently running, but soon?:
-#class GetFromGui(wx.Dialog):
-#    """ Allows user to set input parameters of ss through a simple GUI"""    
-#    def __init__(self, parent, id, title, combo_choices=['No Choices Given']):
-#        wx.Dialog.__init__(self, parent, id, title, size=(280, 300))
-#        # Add text labels
-#        wx.StaticText(self, -1, 'FileName:', pos=(10,20))
-#        # Add the subj id text box, drop down menu, radio buttons
-#        self.textbox = wx.TextCtrl(self, -1, pos=(100,18), size=(150, -1))
-#        self.replay_contrast = None        
-#        # Add OK/Cancel/Replay buttons
-#        wx.Button(self, 1, 'Done', (20, 240))
-#        wx.Button(self, 2, 'Quit', (180, 240))
-#        # Bind button press events to class methods for execution
-#        self.Bind(wx.EVT_BUTTON, self.OnDone, id=1)
-#        self.Bind(wx.EVT_BUTTON, self.OnClose, id=2)
-#        self.Centre()
-#        self.ShowModal()        
-#    # If "Done" is pressed, set important values and close the window
-#    def OnDone(self,event):
-#        self.success = True
-#        self.filename = self.textbox.GetValue()
-#        #If subjet is not set, default to 'test_subject':
-#        self.Close()
-#    # If "Clear" is pressed, all values are set to defaults
-#    def OnClear(self, event):
-#        self.textbox.Clear()
-#    # If "Exit is pressed", toggle failure and close the window
-#    def OnClose(self, event):
-#        self.success = False
-#        self.Close()
+#from pypsignifit import (BootstrapInference,GoodnessOfFit,ParameterPlot,
+#                         ThresholdPlot)
+
+myDlg = gui.Dlg(title="Gui for Data Analysis")#Create a dialog box with title "Gui for Data analysis"
+myDlg.addText('Data File')#title of dialog box
+myDlg.addField('File:')#adds the field to let user input file name
+myDlg.show()#show dialog box
+if gui.OK:
+    file_name = str(myDlg.data)
+    file_name = 'data/' + file_name[3:-2] #takes the 4th to 3rd to last letter to remove messy bits put in by myDlg
+    print file_name
+else:
+    print 'user cancelled'
 contrast = []
 
 if __name__=="__main__":
-    
-    file_name = sys.argv[1]
     file_read = file(file_name,'r')
     p = {} #This will hold the params
     l = file_read.readline()
@@ -66,17 +46,8 @@ if __name__=="__main__":
     elif p['task']== ' Annulus ':
         #if data_rec['annulus_target_contrast'] >= 0.75#params.targetA_contrast_min
         contrast_all = data_rec['annulus_target_contrast'] - p[' annulus_contrast']
-        print contrast_all
-#        contrast = data_rec.find(annulus_target_contrast>=0.75)
         contrast = contrast_all[annulus_target_contrast>=0.75]
         this_correct = correct[annulus_target_contrast>=0.75]
-        print contrast
-#        print contrast_all[1]
-#        for i in contrast_all:
-#            if i > 0:
-#                print i
-#                contrast.append(i)
-#        print contrast
         hit_amps = contrast[this_correct==1]
         miss_amps = contrast[this_correct==0]
     all_amps = np.hstack([hit_amps,miss_amps])
@@ -89,8 +60,7 @@ if __name__=="__main__":
     constraints = ( 'unconstrained', 'unconstrained', 'unconstrained') 
 
     #Do the psignifit thing for the psychometric curve:
-    data = zip(stim_intensities,n_correct,n_trials)
-
+    Data = zip(stim_intensities,n_correct,n_trials)
     #Both tasks are honest-to-god 2AFC:
     B = BootstrapInference ( data, priors=constraints, nafc=2 )
     B.sample()
