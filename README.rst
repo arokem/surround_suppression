@@ -154,9 +154,8 @@ time). Auditory feedback is played and the staircase is updated. Then the
 program goes to the next trial.
 
 
-============
 Subject task
-============
+------------
 
 There are two tasks, the annulus task and the fixation task. In each of the
 tasks, blocks alternate depending upon whether the annulus is present or
@@ -177,9 +176,8 @@ brighter?").  The task is the same for both block A and block B.  The annulus
 will be present in block A but not block B, but the presence/absence of the
 annulus will be task irrelevant.
 
-=============
- Analyze Run
-=============
+Analyze Run
+-----------
 
 Analyzing runs is also done directly through the PsychoPy application. Open
 analyze_run.py in a Coder view. When clicking the "run" button, a gui will
