@@ -10,9 +10,9 @@ experiments, as described in Yoon et al. 2009.
  Instructions
 ==============
 
-The program is a real memory hog, so be sure to close all the other programs
-you are running on the computer before starting it. Otherwise, stimulus timing
-problems might ensue.
+Although the program is less of a memory hog, it is still good practice to close 
+all the other programs you are running on the computer before starting it. Stimulus 
+timing problems might still ensue.
 
 
 Setting parameters
@@ -45,11 +45,31 @@ possible values of the parameter.
 - scanner {True | False}: Whether or not to wait for a ttl pulse to trigger the
   beginning of stimulus presentation
 
-- start_target_contrast {0-1}: The contrast to start the staircase with for the
-  annulus target.
+- start_target_contrastA {0-1}: The contrast to start the staircase with for the
+  annulus target.  Should be greater than .75 (annulus contrast) and can go up to 1.0
 
-- fix_target_start {0-1}: Ditto for the fixation target
-  
+- start_target_contrastB {0-1}: The contrast to start the staircase with for the
+  annulus target without the annulus.  Can be in any range, with a minimum of 0.001
+
+- fix_target_start {0-1}: Ditto for the fixation target, minimum 0.5 (contrast of fixation
+  background), max of 1.0
+
+-  targetA_contrast_max {0.75-1}: Maximum target contrast when annulus is present
+
+-  targetA_contrast_min {0.75}: Minimum target contrast when annulus is present
+
+-  targetB_contrast_max {1}: Maximum target contrast when annulus is not present (not crucial, it
+   is unlikely that subjects will need a very high contrast as compared to no contrast)
+
+-  targetB_contrast_min {0.001}: Minimum target contrast when annulus is not present (if ceiling
+   performance is an issue, this can be lowered, but pretty close to 0)
+
+-  fix_target_max {1}: Maximum fixation target contrast 
+
+-  fix_target_min {0.5}: Minimum fixation target contrast - must be at least 0.5 for contrast increment       
+
+-  trials_per_block = 5,       
+
 - display_units {'deg' | 'cm' | 'pix'}: What units to use for stimulus
   representations. Will determine the units in which the following parameters
   will be interpreted.
@@ -93,12 +113,6 @@ possible values of the parameter.
 - contrast_increments {int}: The number of contrast increments in the
   staircase.
 
-- target_contrast_min {0-1}: The minimal contrast to show as a target.
-
-- fix_target_max {0-1}: The maximal value of the fixation target.
-
-- fix_target_min {0-1}: The minimal value of the fixation target.
-
 - trials_per_block {int}: The number of trials in a block in the 'block' mode.
 
 - num_blocks {int}: The number of blocks to run. The number of trials will be
@@ -134,6 +148,24 @@ stimulus is presented for some duration. After the stimulus is presented, the
 program waits for a response from the subject (but this wait is terminated
 after a certain amount of time). Auditory feedback is played and the staircase
 is updated.
+
+============
+Subject task
+============
+
+There are two tasks, the annulus task and the fixation task. In each of the tasks,
+blocks alternate depending upon whether the annulus is present or absent.  In addition,
+at fixation there is a grey square surrounding the green or red fixation square.  One side
+(left or right) of the grey square will have greater luminance. 
+
+In the annulus task, subjects have to always respond when they detect a contrast increment
+in one of the 8 locations.  When the annulus is present, this appears as "clearer
+stripes".  When the annulus is absent, this appears as a single, low-contrast grating.
+The fixation task will appear, but is task irrelevant.
+
+Now subjects will be asked to determine on which side (left or right) a luminance increment
+at fixation occurs.  The task is the same for both block A and block B.  The annulus will be
+present in block A but not block B, but the presence/absence of the annulus will be task irrelevant.
 
 ===================
 Monitor calibration
@@ -256,3 +288,18 @@ ss_classes contains the main classes used in the program:
   stimulus, such as
 
   
+=============
+ Analyze Run
+=============
+
+Analyzing runs now can be done directly through PsychoPy.  When running analyze_run.py, a 
+gui will appear in which you can select the file (default location is the data directory).
+This script will take some time to run.  When it is complete the output will appear as:
+
+Task:  Annulus  (annulus_off): Threshold estimate: 0.0161577730699, CI: [0.0161558115558,0.0164950924887]
+Task:  Annulus  (annulus_on): Threshold estimate: 0.384498380115, CI: [0.181286466239,0.454307733751]
+
+where task is the task run during the session (Annulus or Fixation), annulus_off/on is the block,
+threshold estimate is the estimate of that block (mean of bootstrapping) and CI is the confidence interval
+for the bootstrapping.  In addition, this script will produce 2 figures, one for each block type.  You can
+open them in the terminal by typing open Name_of_file.png (for instance Name of file = SS_SS_annulus_11022010_1_annulus_off.png and SS_SS_annulus_11022010_1_annulus_on.png).
