@@ -30,7 +30,17 @@ dict(monitor_name = 'NNL', # name of the new monitor
     distance = 80, # (virtural) distance from the screen (cm)
     size = [800, 600], # size of the screen (px)
     # We can also save notes to our monitor:
-    notes = """ Rough estimate of parameters on a laptop, just for testing""")
+    notes = """ Rough estimate of parameters on a laptop, just for testing"""),
+
+'582J_multisync': dict(monitor_name = '582J_multisync', # name of the new monitor
+     calib_file = '%s582J_multisync_gamma.csv'%path, # photometer data
+     width = 40.8, # width of the screen (cm)
+     distance = 120, # distance from the screen (cm)
+     size = [800, 600], # size of the screen (px)
+     # We can also save notes to our monitor:
+     notes = """ This monitor is the LCD in the psychophysical testing room
+     582J and supposedly resembles the monitor in the scanner"""),
+
 }
 
 # Make sure to change monitorFolder in this module for custom save location

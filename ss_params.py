@@ -13,7 +13,7 @@ p = dict(
                                  #'rapid_fire' for a continuous stream of task
                                  #trials. 
 
-    monitor = 'testMonitor',     # 'NNL'
+    monitor = 'testMonitor',     # 'NNL','582J_multisync'
     screen = 0,                  # 0 is for the primary screen, 1 for auxillary
     fullscreen =False,           # True if fullscreen, False otherwise 
     scanner = True,              # True if the stimulus presentation should be
