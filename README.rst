@@ -10,9 +10,9 @@ experiments, as described in Yoon et al. 2009.
  Instructions
 ==============
 
-The program is a real memory hog, so be sure to close all the other programs
-you are running on the computer before starting it. Otherwise, stimulus timing
-problems might ensue.
+Although the program is less of a memory hog, it is still good practice to
+close all the other programs you are running on the computer before starting
+it. Stimulus timing problems might still ensue.
 
 
 Setting parameters
@@ -45,11 +45,34 @@ possible values of the parameter.
 - scanner {True | False}: Whether or not to wait for a ttl pulse to trigger the
   beginning of stimulus presentation
 
-- start_target_contrast {0-1}: The contrast to start the staircase with for the
-  annulus target.
+- start_target_contrastA {0-1}: The contrast to start the staircase with for
+  the annulus target.  Should be greater than .75 (annulus contrast) and can go
+  up to 1.0
 
-- fix_target_start {0-1}: Ditto for the fixation target
-  
+- start_target_contrastB {0-1}: The contrast to start the staircase with for
+  the annulus target without the annulus.  Can be in any range, with a minimum
+  of 0.001
+
+- fix_target_start {0-1}: Ditto for the fixation target, minimum 0.5 (contrast
+  of fixation background), max of 1.0
+
+- targetA_contrast_max {0.75-1}: Maximum target contrast when annulus is
+   present
+
+-  targetA_contrast_min {0.75}: Minimum target contrast when annulus is present
+
+-  targetB_contrast_max {1}: Maximum target contrast when annulus is not present (not crucial, it
+   is unlikely that subjects will need a very high contrast as compared to no contrast)
+
+-  targetB_contrast_min {0.001}: Minimum target contrast when annulus is not present (if ceiling
+   performance is an issue, this can be lowered, but pretty close to 0)
+
+-  fix_target_max {1}: Maximum fixation target contrast 
+
+-  fix_target_min {0.5}: Minimum fixation target contrast - must be at least 0.5 for contrast increment       
+
+-  trials_per_block = 5,       
+
 - display_units {'deg' | 'cm' | 'pix'}: What units to use for stimulus
   representations. Will determine the units in which the following parameters
   will be interpreted.
@@ -93,12 +116,6 @@ possible values of the parameter.
 - contrast_increments {int}: The number of contrast increments in the
   staircase.
 
-- target_contrast_min {0-1}: The minimal contrast to show as a target.
-
-- fix_target_max {0-1}: The maximal value of the fixation target.
-
-- fix_target_min {0-1}: The minimal value of the fixation target.
-
 - trials_per_block {int}: The number of trials in a block in the 'block' mode.
 
 - num_blocks {int}: The number of blocks to run. The number of trials will be
@@ -114,26 +131,74 @@ is screen 0 or screen 1 of the computer.
 Running the program
 -------------------
 
-In order to run the program open an instance of the Terminal app, change your
-working directory to the directory in which the program is and enter 'python
-ss_run.py' at the prompt. When you do that, a GUI will appear, asking you for
-details of this run. Enter the subject ID, the surround and annulus
-orientation. Choose the task to be performed. The replay button allows you to
-read a previous runs contrast values for the task not performed in this run and
-will replay these contrast values. If replay is not set, the other task
-contrast values will be set to the parameter setting the start of the staircase
-for that other task. Press 'Done'. Initialization of the program may take a
-minute or so, because the stimuli are generated in memory during this
-period.
+In order to run the program, open the psychopy application (which should be in
+the Applications folder). If there is no "File" menu, click "view" and choose
+"Open Coder View", then choose the "File" menu, navigate to the folder in which
+the program has been saved and open the file ss_run.py. Click the green icon of
+the running man to start running the program.  When you do that, a GUI will
+appear, asking you for details of this run. Enter the subject ID, the surround
+and annulus orientation. Choose the task to be performed. The replay button
+allows you to read a previous runs contrast values for the task not performed
+in this run and will replay these contrast values. If replay is not set, the
+other task contrast values will be set to the parameter setting the start of
+the staircase for that other task. Press 'Done'.
 
 The experiment begins with a text prompting subject to press any key to
 start. When the key is pressed, if the scanner parameter is set to 'True', the
-program waits for a ttl pulse to start running. A fixation appears and after
-that, the first trial starts. Each trial is composed of the following events: A
-stimulus is presented for some duration. After the stimulus is presented, the
-program waits for a response from the subject (but this wait is terminated
-after a certain amount of time). Auditory feedback is played and the staircase
-is updated.
+program waits for a ttl pulse to start running. Otherwise, that block will
+simply start. A fixation appears and after that, the first trial starts. Each
+trial is composed of the following events: A stimulus is presented for some
+duration. After the stimulus is presented, the program waits for a response
+from the subject (but this wait is terminated after a certain amount of
+time). Auditory feedback is played and the staircase is updated. Then the
+program goes to the next trial.
+
+
+Subject task
+------------
+
+There are two tasks, the annulus task and the fixation task. In each of the
+tasks, blocks alternate depending upon whether the annulus is present or
+absent.  In addition, at fixation there is a grey square surrounding the green
+or red fixation square.  One side (left or right) of the grey square will have
+greater luminance.
+
+In the annulus task, subjects have to always respond on which side one of the
+segments contains a contrast increment. In one block (annulus on), this will
+appear as a segment with "clearer stripes".  In the other block (When the
+annulus is off), this appears as a single, low-contrast grating.  The fixation
+task will appear, but is task irrelevant. For the annulus task, the fixation
+point contains a red background (as in "don't do the fixation task").
+
+In the fixation task, subjects will be asked to determine on which side (left
+or right) a luminance increment at fixation occurs ("which side appears
+brighter?").  The task is the same for both block A and block B.  The annulus
+will be present in block A but not block B, but the presence/absence of the
+annulus will be task irrelevant.
+
+Analyze Run
+-----------
+
+Analyzing runs is also done directly through the PsychoPy application. Open
+analyze_run.py in a Coder view. When clicking the "run" button, a gui will
+appear in which you can select the file (default location is the data
+directory, into which the data files get saved per default).  T
+
+his script will take some time to run.  When it is complete the output (on the
+lower part of the Coder view) will appear as:
+
+Task:  Annulus  (annulus_off): Threshold estimate: 0.0161577730699, CI: [0.0161558115558,0.0164950924887]
+Task:  Annulus  (annulus_on): Threshold estimate: 0.384498380115, CI: [0.181286466239,0.454307733751]
+
+where task is the task run during the session (Annulus or Fixation),
+annulus_off/on is the block, threshold estimate is the estimate of that block
+(mean of bootstrapping) and CI is the 95% confidence interval of the threshold,
+calculated using a bootstrapping procedure.  In addition, this script will
+produce 2 figures, one for each block type.  You can open them in the terminal
+by typing open Name_of_file.png (for instance Name of file =
+SS_SS_annulus_11022010_1_annulus_off.png and
+SS_SS_annulus_11022010_1_annulus_on.png) or just double-clicking on the files
+in the Finder application.
 
 ===================
 Monitor calibration
@@ -165,8 +230,9 @@ A slower and more comprehensive introduction can be found here:
 
 http://progit.org/book/
 
-Our git workflow
-================
+==================
+ Our git workflow
+==================
 
 In order for git to see the code repository, you will need to mount Plata1 as a
 volume on your machine. On a mac, this can be done by opening the Finder and
@@ -211,17 +277,9 @@ This updates your local version of the code, with all the changes commited and
 pushed into the repo by others.
 
 
-
 ===================
  Program structure
 ===================
-
-In order to run the program, use 'ss_run.py'. One way of running this is by
-opening a Terminal, changing the working directory into the directory where the
-program is stored and issuing 'python ss_run.py' at the command prompt. Another
-way is to open the psychopy application (which should be in the Applications
-folder), opening ss_run.py in the coder and pressing on the green button with
-the running man icon.
 
 ss_classes contains the main classes used in the program:
 
@@ -252,7 +310,8 @@ ss_classes contains the main classes used in the program:
 - Stimulus: This class represents and holds all of the stimulus. This includes
   the surround and the annulus gratings, as well as the fixation and the spokes
   and rings. Upon initialization, all of this gets allocated in
-  memory. Finalization of the stimulus adds the target to the  setting additional stuff in the
-  stimulus, such as
+  memory. Finalization of the stimulus adds the target to the setting
+  additional stuff in the stimulus, such as
 
+- Trial: This monster holds all the information needed for a trial. 
   
