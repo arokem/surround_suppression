@@ -6,21 +6,22 @@
 """
 
 p = dict(
-    paradigm = 'block',#'rapid_fire',     # 'block' for the fmri block design
+    paradigm = 'block',          #'rapid_fire',     # 'block' for the fmri
+                                 #block design 
                                  #(trials_per_block of trials in which the
                                  #subject performs the task, followed by
                                  #trials_per_block of no-task trials or
                                  #'rapid_fire' for a continuous stream of task
                                  #trials. 
 
-    monitor = 'testMonitor',     # 'NNL','582J_multisync'
+    monitor = 'NNL',     # 'NNL','582J_multisync'
     screen = 0,                  # 0 is for the primary screen, 1 for auxillary
     fullscreen =False,           # True if fullscreen, False otherwise 
     scanner = False,              # True if the stimulus presentation should be
                                  # triggered by a scanner ttl pulse
 
     start_target_contrastA = 0.9, # Where to start the staircase.
-    start_target_contrastB = 0.05, # Where to start the staircase.
+    start_target_contrastB = 0.5, # Where to start the staircase.
     fix_target_start = 0.65,     # Where to start the staircase.    
 
     display_units = 'deg',       # 'deg' means all the units below are in
