@@ -33,9 +33,9 @@ dict(monitor_name = 'NNL', # name of the new monitor
     notes = """ Rough estimate of parameters on a laptop, just for testing"""),
 
 '582J_multisync': dict(monitor_name = '582J_multisync', # name of the new monitor
-     calib_file = '%s582J_multisync_gamma.csv'%path, # photometer data
+     calib_file = './calibration/582J_multisync_gamma.txt', # photometer data
      width = 40.8, # width of the screen (cm)
-     distance = 120, # distance from the screen (cm)
+     distance = 60, # distance from the screen (cm)
      size = [800, 600], # size of the screen (px)
      # We can also save notes to our monitor:
      notes = """ This monitor is the LCD in the psychophysical testing room
@@ -51,6 +51,7 @@ for m in monitors.keys():
     # Initialize our intermediary variables and open the text file
     fileobj = open(monitor['calib_file'], 'rU') 
     csv_read = csv.reader(fileobj, dialect=csv.excel_tab)
+    print m
     input_levels = [];
     lums = {
         'gray' : [],
@@ -60,11 +61,19 @@ for m in monitors.keys():
 
     # Read input levels and luminescence values from file
     for row in csv_read:
-        input_levels.append(float(row[0]))
-        lums['gray'].append(float(row[1]))
-        lums['R'].append(float(row[2]))
-        lums['G'].append(float(row[3]))
-        lums['B'].append(float(row[4]))
+        print row
+        if m == '582J_multisync':
+            input_levels.append(float(row[0]))
+            lums['R'].append(float(row[1]))
+            lums['G'].append(float(row[2]))
+            lums['B'].append(float(row[3]))  
+        else:
+            input_levels.append(float(row[0]))
+            lums['gray'].append(float(row[1]))
+            lums['R'].append(float(row[2]))
+            lums['G'].append(float(row[3]))
+            lums['B'].append(float(row[4]))
+      
 
     # Calculate the gamma grid based on given lums
     gammaGrid = []
