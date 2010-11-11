@@ -74,7 +74,7 @@ I800
 aI600
 asS'notes'
 p27
-S' This monitor is the LCD in the psychophysical testing room\n     582J and supposedly resembles the monitor in the scanner'
+S' This monitor is the CRT in the psychophysical testing room\n         582D'
 p28
 sS'width'
 p29
@@ -88,8 +88,8 @@ p31
 I11
 I10
 I16
-I12
-I21
+I16
+I33
 I2
 I314
 I0
