@@ -29,7 +29,7 @@ p = dict(
 
     annulus_inner = 2*3,           # deg of visual angle, Default: 2.86
     annulus_outer = 2*6,           # deg of visual angle, Default: 7.8
-    annulus_contrast = 0.75,     # relative contrast, Default: 0.75
+    annulus_contrast = 0.5,     # relative contrast, Default: 0.75
     surround_outer = 2*12.2,       # deg of visual angle, Default: 12.2
     surround_inner = 2*0.8,        # deg of visual angle 
     surround_contrast = 1,     # relative contrast, Default: 0.75
