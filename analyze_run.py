@@ -59,23 +59,27 @@ if __name__=="__main__":
     labelit = ['annulus_off','annulus_on']
     #Switch on the two annulus tasks (annulus on vs. annulus off):
     for idx_annulus,operator in enumerate(['<','>=']):
-        contrast = eval('contrast_all[annulus_target_contrast%s0.75]'%operator)
-        this_correct = eval('correct[annulus_target_contrast%s0.75]'%operator)
+
 
         if p['task'] == ' Annulus ':
+            contrast = eval('contrast_all[annulus_target_contrast%s0.5]'%operator)
+            this_correct = eval('correct[annulus_target_contrast%s0.5]'%operator)
             contrast = contrast - p[' annulus_contrast'] *idx_annulus
-        
+        else:
+            contrast = eval('contrast_all[annulus_target_contrast%s0.5]'%operator)
+            contrast = 1- contrast
+            this_correct = eval('correct[annulus_target_contrast%s0.5]'%operator)
+
         hit_amps = contrast[this_correct==1]
         miss_amps = contrast[this_correct==0]
         all_amps = np.hstack([hit_amps,miss_amps])
-        #Get the data into this form:
+        #Get the data into this foqqrm:
         #(stimulus_intensities,n_correct,n_trials)
         stim_intensities = np.unique(all_amps)
         n_correct = [len(np.where(hit_amps==i)[0]) for i in stim_intensities]
         n_trials = [len(np.where(all_amps==i)[0]) for i in stim_intensities]
-
+        print len(all_amps)
         Data = zip(stim_intensities,n_correct,n_trials)
-
         x = []
         y = []
 
@@ -124,4 +128,5 @@ if __name__=="__main__":
                                                                     keep_th,
                                                                     lower,
                                                                     upper)
+
             

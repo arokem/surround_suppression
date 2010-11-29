@@ -587,7 +587,7 @@ class Stimulus(Event):
         self.nominal_target_co = target_co
         self.fix_target_loc = fix_target_loc
                     
-    def __call__(self):
+    def __call__(self,params):
         #Choose a random phase (btwn -pi and pi) to start the presentation
         #with XXX Should this really be random?:
         ph_rand = (np.random.rand(1) * 2*np.pi) - np.pi
@@ -607,6 +607,7 @@ class Stimulus(Event):
             if self.target is not None:
                 self.target.setContrast(np.sin(ph_rand +
                                         t*self.temporal_freq*np.pi*2))
+                self.target.setColor((self.nominal_target_co*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi) )
             
             #Draw them (order matters!)
             if self.outer_surround is not None:
@@ -969,6 +970,7 @@ class Trial(Event):
         """
 
         if insert_header:
+            f.write('Block_Type')
             f.write('Annulus target contrast, ')
             f.write('Fixation target contrast, ')
             f.write('Annulus target location, ')
@@ -977,6 +979,7 @@ class Trial(Event):
             f.write('Correct, ')
             f.write('Response time\n')
                     
+        f.write('%s,'%self.block_type)
         f.write('%s, '%self.stimulus.nominal_target_co)
         f.write('%s, '%(self.stimulus.fixation_target.color[0]))
         f.write('%s, '%self.stimulus.target_loc)

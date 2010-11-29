@@ -128,12 +128,12 @@ if __name__ == "__main__":
             this_trial.finalize_stim(params,bank,staircaseA,other_contrast[trial_idx])
         elif this_trial.block_type == 'B':
             this_trial.finalize_stim(params,bank,staircaseB,other_contrast[trial_idx])
-        this_trial.stimulus()
+        this_trial.stimulus(params)
         if this_trial.block_type == 'A':
             this_trial.finalize_fix(params,bank,staircaseA,other_contrast[trial_idx])
         if this_trial.block_type == 'B':
             this_trial.finalize_fix(params,bank,staircaseB,other_contrast[trial_idx])
-        this_trial.fixation()
+        this_trial.fixation(params)
         this_trial.response.finalize(correct_key = this_trial.correct_key,
                                      file_name=f)
         this_trial.response()

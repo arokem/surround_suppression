@@ -21,7 +21,7 @@ p = dict(
                                  # triggered by a scanner ttl pulse
 
     start_target_contrastA = 0.9, # Where to start the staircase.
-    start_target_contrastB = 0.5, # Where to start the staircase.
+    start_target_contrastB = 0.2, # Where to start the staircase.
     fix_target_start = 0.65,     # Where to start the staircase.    
 
     display_units = 'deg',       # 'deg' means all the units below are in
