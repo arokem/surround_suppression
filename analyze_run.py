@@ -21,6 +21,8 @@ def weib_fit(pars):
     return weibull(x,thresh,slope,guess,flake)
     
 def err_func(pars):
+    if pars[1] <=0:
+        return np.inf
     return y-weib_fit(pars)
 
 if __name__=="__main__":
@@ -48,7 +50,6 @@ if __name__=="__main__":
         l = file_read.readline()
     data_rec = csv2rec(file_name)
     annulus_target_contrast = data_rec['annulus_target_contrast']
-    block_type = data_rec['block_type']
     correct = data_rec['correct']
 
     #Which staircase to analyze:
@@ -59,17 +60,19 @@ if __name__=="__main__":
 
     labelit = ['annulus_off','annulus_on']
     #Switch on the two annulus tasks (annulus on vs. annulus off):
-#    for idx_annulus,operator in enumerate(['<','>=']):
-    idx_block = 0
-    for i in ['B','A']:
+    for idx_annulus,operator in enumerate(['<','>=']):
+
+
         if p['task'] == ' Annulus ':
-           contrast = contrast_all[block_type == i]
-           this_correct = correct[block_type == i]
-           contrast = contrast - p[' annulus_contrast'] *idx_block
+            contrast = eval('contrast_all[annulus_target_contrast%s0.55]'%operator)
+            this_correct = eval('correct[annulus_target_contrast%s0.55]'%operator)
+            contrast = contrast - p[' annulus_contrast'] *idx_annulus
         else:
-           contrast = contrast_all[i]
-           contrast = 1-contrast
-           this_correct = correct[i]
+            contrast = eval('contrast_all[annulus_target_contrast%s0.55]'%operator)
+            contrast = 1- contrast
+            this_correct = eval('correct[annulus_target_contrast%s0.55]'%operator)
+        contrast = contrast[5:]
+        this_correct = this_correct[5:]
         hit_amps = contrast[this_correct==1]
         miss_amps = contrast[this_correct==0]
         all_amps = np.hstack([hit_amps,miss_amps])
@@ -82,30 +85,33 @@ if __name__=="__main__":
         Data = zip(stim_intensities,n_correct,n_trials)
         x = []
         y = []
-
+        n = []
         for idx,this in enumerate(Data):
             #Take only cases where there were at least 3 observations:
-            if n_trials>=3:
+            if n_trials[idx]>=3:
                 #Contrast values: 
                 x = np.hstack([x,this[2] * [this[0]]])
                 #% correct:
                 y = np.hstack([y,this[2] * [this[1]/float(this[2])]])
-
+                n = np.hstack([n,[n_trials[idx]]*this[2]])
+        #print n,x,y
         initial = np.mean(x),slope
         this_fit , msg = leastsq(err_func,initial,warning=False)
         fig = plt.figure()
         ax = fig.add_subplot(1,1,1)
-        ax.plot(x,y,'o')
+        for idx,this_x in enumerate(x):
+            ax.plot(this_x,y[idx],'o',color = 'b',markersize = n[idx])
         x_for_plot = np.linspace(np.min(x),np.max(x),100)
         ax.plot(x_for_plot,weibull(x_for_plot,this_fit[0],
                                    this_fit[1],
                                    guess,
-                                   flake))
+                                   flake),
+                                   color = 'g')
         ax.set_title('%s task::thresh=%1.2f::slope=%1.2f'
                      %(p['task'],this_fit[0],this_fit[1]))
 
         file_stem = file_name.split('/')[-1].split('.')[0]
-        fig.savefig('data/%s_%s.png'%(file_stem,labelit[idx_block]))
+        fig.savefig('%s_%s.png'%(file_stem,labelit[idx_annulus]))
         
         
         bootstrap_th = []
@@ -124,10 +130,9 @@ if __name__=="__main__":
         upper = np.sort(bootstrap_th)[bootstrap_n*0.975]
         lower = np.sort(bootstrap_th)[bootstrap_n*0.025]
         print "Task: %s (%s): Threshold estimate: %s, CI: [%s,%s]"%(p['task'],
-                                                        labelit[idx_block],
+                                                        labelit[idx_annulus],
                                                                     keep_th,
                                                                     lower,
                                                                     upper)
-        idx_block += 1
 
             
