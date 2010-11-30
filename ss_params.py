@@ -20,7 +20,7 @@ p = dict(
     scanner = False,              # True if the stimulus presentation should be
                                  # triggered by a scanner ttl pulse
 
-    start_target_contrastA = 0.9, # Where to start the staircase.
+    start_target_contrastA = 0.75, # Where to start the staircase.
     start_target_contrastB = 0.2, # Where to start the staircase.
     fix_target_start = 0.65,     # Where to start the staircase.    
 
