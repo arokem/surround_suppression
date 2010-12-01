@@ -23,8 +23,8 @@ p = dict(
     start_target_contrastA = 0.9, # Where to start the staircase for parallel condition.
     start_target_orthog_contrastA = 0.75, #Where to start the staircase for orthogonal condition.  This will make sure that staircases converge on threshold.
     start_target_contrastB = 0.2, # Where to start the staircase.
-    fix_target_start = 0.65,     # Where to start the staircase.    
-
+    fix_target_start = 0.75,     # Where to start the staircase.    
+    fix_baseline = 0.5, #baseline contrast of fixation (to compare with fix_target_start)
     display_units = 'deg',       # 'deg' means all the units below are in
                                  # degrees of visual angle.
 

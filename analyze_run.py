@@ -69,9 +69,9 @@ if __name__=="__main__":
            this_correct = correct[block_type == i]
            contrast = contrast - p[' annulus_contrast'] *idx_block
         else:
-           contrast = contrast_all[i]
-           contrast = 1-contrast
-           this_correct = correct[i]
+           contrast = contrast_all[block_type == i]
+           contrast = contrast - 0.5#p[' annulus_contrast'] *idx_block
+           this_correct = correct[block_type == i]
         contrast = contrast[5:]
         this_correct = this_correct[5:]
         hit_amps = contrast[this_correct==1]

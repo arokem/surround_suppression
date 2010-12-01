@@ -356,7 +356,7 @@ class StimulusBank():
                                                 )
 
         self.fixation_square = visual.PatchStim(win, tex=None,
-                                                color=1  * rgb,
+                                                color=params.fix_baseline  * rgb,
                                                 size=params.fixation_size/8,
                                                 interpolate=True,
                                                 )
@@ -468,7 +468,7 @@ class Stimulus(Event):
         self.fixation_square = bank.fixation_square
         self.fixation.setOri(fixation_ori)
         #self.fixation.setColor(rgb*fixation_color)
-        self.fixation.setColor(0.5)
+        self.fixation.setColor(params.fix_baseline)
         self.fixation_square.setColor(fixation_color)
         #The center is always set to be black:
         self.fixation_surround = bank.fixation_surround
