@@ -70,7 +70,7 @@ if __name__=="__main__":
            contrast = contrast - p[' annulus_contrast'] *idx_block
         else:
            contrast = contrast_all[block_type == i]
-           contrast = contrast - 0.5#p[' annulus_contrast'] *idx_block
+           contrast = contrast - p[' fix_baseline']
            this_correct = correct[block_type == i]
         contrast = contrast[5:]
         this_correct = this_correct[5:]
