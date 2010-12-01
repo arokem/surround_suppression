@@ -61,13 +61,22 @@ if __name__ == "__main__":
     #Initialize the staircase, depending on which task is performed
     if params.task == 'Annulus':
         message = """ On which side are the targets in the GRATING?\n Press 1 for left and 2 for right\n Press any key to start""" 
-        staircaseA = Staircase(params.start_target_contrastA,
+        if params.surround_ori == params.annulus_ori:
+            staircaseA = Staircase(params.start_target_contrastA,
                             params.annulus_contrast/params.contrast_increments,
                             harder = -1, #For this task, higher values are
                                       #actually harder => closer to the annulus
                                       #value
                             ub=params.targetA_contrast_max,
                             lb=params.targetA_contrast_min)
+        else:
+            staircaseA = Staircase(params.start_target_orthog_contrastA,
+                            params.annulus_contrast/params.contrast_increments,
+                            harder = -1, #For this task, higher values are
+#                                      #actually harder => closer to the annulus
+                                      #value
+                            ub=params.targetA_contrast_max,
+                            lb=params.targetA_contrast_min)            
         staircaseB = Staircase(params.start_target_contrastB,
                             params.annulus_contrast/params.contrast_increments,
                             harder = -1, #For this task, higher values are
@@ -75,14 +84,7 @@ if __name__ == "__main__":
                                       #value
                             ub=params.targetB_contrast_max,
                             lb=params.targetB_contrast_min)
-#        staircase = Staircase(params.start_target_contrastB,
-#                            params.annulus_contrast/params.contrast_increments,
-#                            harder = -1, #For this task, higher values are
-#                                      #actually harder => closer to the annulus
-#                                      #value
-#                            ub=params.target_contrast_max,
-#                            lb=params.target_contrast_min
-#2                            )
+
         if params._replay is None:
             #The fixation target appears but has a constant contrast set to the
             #starting point 

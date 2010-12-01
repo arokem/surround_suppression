@@ -50,6 +50,7 @@ if __name__=="__main__":
         l = file_read.readline()
     data_rec = csv2rec(file_name)
     annulus_target_contrast = data_rec['annulus_target_contrast']
+    block_type = data_rec['block_type']
     correct = data_rec['correct']
 
     #Which staircase to analyze:
@@ -60,17 +61,17 @@ if __name__=="__main__":
 
     labelit = ['annulus_off','annulus_on']
     #Switch on the two annulus tasks (annulus on vs. annulus off):
-    for idx_annulus,operator in enumerate(['<','>=']):
-
-
+    #for idx_annulus,operator in enumerate(['<','>=']):
+    idx_block = 0
+    for i in ['B','A']:
         if p['task'] == ' Annulus ':
-            contrast = eval('contrast_all[annulus_target_contrast%s0.55]'%operator)
-            this_correct = eval('correct[annulus_target_contrast%s0.55]'%operator)
-            contrast = contrast - p[' annulus_contrast'] *idx_annulus
+           contrast = contrast_all[block_type == i]
+           this_correct = correct[block_type == i]
+           contrast = contrast - p[' annulus_contrast'] *idx_block
         else:
-            contrast = eval('contrast_all[annulus_target_contrast%s0.55]'%operator)
-            contrast = 1- contrast
-            this_correct = eval('correct[annulus_target_contrast%s0.55]'%operator)
+           contrast = contrast_all[i]
+           contrast = 1-contrast
+           this_correct = correct[i]
         contrast = contrast[5:]
         this_correct = this_correct[5:]
         hit_amps = contrast[this_correct==1]
@@ -111,7 +112,7 @@ if __name__=="__main__":
                      %(p['task'],this_fit[0],this_fit[1]))
 
         file_stem = file_name.split('/')[-1].split('.')[0]
-        fig.savefig('%s_%s.png'%(file_stem,labelit[idx_annulus]))
+        fig.savefig('%s_%s.png'%(file_stem,labelit[idx_block]))
         
         
         bootstrap_th = []
@@ -130,9 +131,10 @@ if __name__=="__main__":
         upper = np.sort(bootstrap_th)[bootstrap_n*0.975]
         lower = np.sort(bootstrap_th)[bootstrap_n*0.025]
         print "Task: %s (%s): Threshold estimate: %s, CI: [%s,%s]"%(p['task'],
-                                                        labelit[idx_annulus],
+                                                        labelit[idx_block],
                                                                     keep_th,
                                                                     lower,
                                                                     upper)
+        idx_block += 1
 
             
