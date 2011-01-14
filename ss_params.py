@@ -21,10 +21,10 @@ p = dict(
                                  # triggered by a scanner ttl pulse
 
     start_target_contrastA = 0.9, # Where to start the staircase for parallel condition.
-    start_target_orthog_contrastA = 0.75, #Where to start the staircase for orthogonal condition.  This will make sure that staircases converge on threshold.
-    start_target_contrastB = 0.2, # Where to start the staircase.
-    fix_target_start = 0.75,     # Where to start the staircase.    
-    fix_baseline = 0.5, #baseline contrast of fixation (to compare with fix_target_start)
+    start_target_orthog_contrastA = 0.65, #Where to start the staircase for orthogonal condition.  This will make sure that staircases converge on threshold.
+    start_target_contrastB = 0.1, # Where to start the staircase.
+    fix_target_start = 0.2,     # Where to start the staircase.    
+    fix_baseline = 0.0, #baseline contrast of fixation (to compare with fix_target_start)
     display_units = 'deg',       # 'deg' means all the units below are in
                                  # degrees of visual angle.
 
@@ -32,7 +32,7 @@ p = dict(
     annulus_outer = 2*6,           # deg of visual angle, Default: 7.8
     annulus_contrast = 0.5,     # relative contrast, Default: 0.75
     surround_outer = 2*12.2,       # deg of visual angle, Default: 12.2
-    surround_inner = 2*0.8,        # deg of visual angle 
+    surround_inner = 2*1.0,        # deg of visual angle, must be larger than fixation_size 
     surround_contrast = 1,     # relative contrast, Default: 0.75
     ring_width = 2*0.1,            # deg of visual angle, Default: 0.1
     spoke_width =  2*0.1,          # deg of visual angle, Default: 0.1
@@ -44,7 +44,7 @@ p = dict(
     fixation_duration = 0.1,     # seconds, Default: 0.1
     response_duration = 0.9,     # seconds, Default: 0.9
     feedback_duration = 0.25,    # seconds, Default: 0.25
-    fixation_size = 0.8,         # deg of visual angle, Standard: 0.8
+    fixation_size = 1.2,         # deg of visual angle, Standard: 1.2
     contrast_increments = 15,    # How many steps from the lowest to the highest
                                  #contrast, Standard: 15 
        #
@@ -53,7 +53,7 @@ p = dict(
     targetB_contrast_max = 1.0,
     targetB_contrast_min = 0.001,
     fix_target_max = 1,          #
-    fix_target_min = 0.5,       #
+    fix_target_min = 0,       #
     trials_per_block = 5,        #
     num_blocks = 16,             # Number of trials will be num_blocks *
                                  # trials_per_block 
@@ -63,7 +63,6 @@ p = dict(
 
 #This should be the same:
 p['targetA_contrast_min'] = p['annulus_contrast']
-#p['targetA_contrast_max'] = p['annulus_contrast'] + 0.25
 p['targetB_contrast_max'] = p['annulus_contrast']
 #This is derived from the above settings: 
 p['trial_duration'] =  (p['stimulus_duration'] +

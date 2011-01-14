@@ -3,6 +3,7 @@ import sys
 from psychopy import gui
 from matplotlib.mlab import csv2rec
 import matplotlib.pyplot as plt
+import os
 import numpy as np
 from scipy.optimize import leastsq
 
@@ -30,7 +31,7 @@ if __name__=="__main__":
     bootstrap_n = 1000
 
     #Weibull params:
-    guess = 0.5 #The guessing rate is 0.5
+    guess = 0.25 #The guessing rate is 0.25 for 4afc
     flake = 0.99
     slope = 3.5
     file_name = str(gui.fileOpenDlg(tryFilePath='./data')[0])
@@ -89,7 +90,7 @@ if __name__=="__main__":
         n = []
         for idx,this in enumerate(Data):
             #Take only cases where there were at least 3 observations:
-            if n_trials[idx]>=3:
+            if n_trials[idx]>=2:
                 #Contrast values: 
                 x = np.hstack([x,this[2] * [this[0]]])
                 #% correct:
@@ -112,8 +113,11 @@ if __name__=="__main__":
                      %(p['task'],this_fit[0],this_fit[1]))
 
         file_stem = file_name.split('/')[-1].split('.')[0]
-        fig.savefig('%s_%s.png'%(file_stem,labelit[idx_block]))
-        
+        if os.path.exists('data/analyzed_data'):
+            fig.savefig('data/analyzed_data/%s_%s.png'%(file_stem,labelit[idx_block]))
+        else:
+            os.mkdir('data/analyzed_data')
+            fig.savefig('data/analyzed_data/%s_%s.png'%(file_stem,labelit[idx_block]))
         
         bootstrap_th = []
         bootstrap_slope = []

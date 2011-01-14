@@ -2,7 +2,7 @@
  Introduction
 ==============
 
-This is a 2nd version of the stimulus used for the surround suppression
+This is a 3rd version of the stimulus used for the surround suppression
 experiments, as described in Yoon et al. 2009. 
 
 
@@ -42,19 +42,20 @@ possible values of the parameter.
 - fullscreen {True | False}: Whether or not to show the stimulus in fullscreen
   mode.
 
-- scanner {True | False}: Whether or not to wait for a ttl pulse to trigger the
-  beginning of stimulus presentation
+- scanner {True | False}: Whether or not to wait for a ttl pulse to trigger   the beginning of stimulus presentation
 
 - start_target_contrastA {0-1}: The contrast to start the staircase with for
-  the annulus target.  Should be greater than .75 (annulus contrast) and can go
-  up to 1.0
+  the annulus target.  Should be greater than .5 (annulus contrast) and can   go up to 1.0
+
+- start_target_orthog_contrastA {0-1}: The contrast to start the staircase w  ith for  the annulus target, orthogonal condition.  Should be greater than  .5 (annulus contrast) and can  go up to 1.0
 
 - start_target_contrastB {0-1}: The contrast to start the staircase with for
-  the annulus target without the annulus.  Can be in any range, with a minimum
-  of 0.001
+  the annulus target without the annulus.  Can be in any range, with a minim  um of 0.001
 
-- fix_target_start {0-1}: Ditto for the fixation target, minimum 0.5 (contrast
-  of fixation background), max of 1.0
+- fix_target_start {0-1}: Ditto for the fixation target, minimum 0 (contrast
+  of fixation background), max of 1.0, must be highter than fix_baseline
+
+- fix_baseline = {0-1}: baseline contrast of fixation to compare with fix_target_start, must be below fix_target_start
 
 - targetA_contrast_max {0.75-1}: Maximum target contrast when annulus is
    present
@@ -160,55 +161,42 @@ Subject task
 There are two tasks, the annulus task and the fixation task. In each of the
 tasks, blocks alternate depending upon whether the annulus is present or
 absent.  In addition, at fixation there is a grey square surrounding the green
-or red fixation square.  One side (left or right) of the grey square will have
+or red fixation square.  One corner (upper left,upper right, lower right, or lower left) of the grey square will have
 greater luminance.
 
-In the annulus task, subjects have to always respond on which side one of the
+In the annulus task, subjects have to always respond in which corner one of the
 segments contains a contrast increment. In one block (annulus on), this will
 appear as a segment with "clearer stripes".  In the other block (When the
 annulus is off), this appears as a single, low-contrast grating.  The fixation
 task will appear, but is task irrelevant. For the annulus task, the fixation
 point contains a red background (as in "don't do the fixation task").
 
-In the fixation task, subjects will be asked to determine on which side (left
-or right) a luminance increment at fixation occurs ("which side appears
+In the fixation task, subjects will be asked to determine in which corner (upper left,upper right, lower right, or lower left) a luminance increment at fixation occurs ("which side appears
 brighter?").  The task is the same for both block A and block B.  The annulus
 will be present in block A but not block B, but the presence/absence of the
 annulus will be task irrelevant.
 
-Analyze Run
+Analyze Runs
 -----------
 
 Analyzing runs is also done directly through the PsychoPy application. Open
 analyze_run.py in a Coder view. When clicking the "run" button, a gui will
 appear in which you can select the file (default location is the data
-directory, into which the data files get saved per default).  T
-
-his script will take some time to run.  When it is complete the output (on the
+directory, into which the data files get saved per default).  This script will take some time to run.  When it is complete the output (on the
 lower part of the Coder view) will appear as:
 
 Task:  Annulus  (annulus_off): Threshold estimate: 0.0161577730699, CI: [0.0161558115558,0.0164950924887]
 Task:  Annulus  (annulus_on): Threshold estimate: 0.384498380115, CI: [0.181286466239,0.454307733751]
 
 where task is the task run during the session (Annulus or Fixation),
-annulus_off/on is the block, threshold estimate is the estimate of that block
-(mean of bootstrapping) and CI is the 95% confidence interval of the threshold,
-calculated using a bootstrapping procedure.  In addition, this script will
-produce 2 figures, one for each block type.  You can open them in the terminal
-by typing open Name_of_file.png (for instance Name of file =
-SS_SS_annulus_11022010_1_annulus_off.png and
-SS_SS_annulus_11022010_1_annulus_on.png) or just double-clicking on the files
-in the Finder application.
+annulus_off/on is the block, threshold estimate is the estimate of that block(mean of bootstrapping) and CI is the 95% confidence interval of the threshold, calculated using a bootstrapping procedure.  In addition, this script will produce 2 figures, one for each block type.  You can open them in the terminal by typing open Name_of_file.png (for instance Name of file =
+SS_SS_annulus_11022010_1_annulus_off.png and SS_SS_annulus_11022010_1_annulus_on.png) or just double-clicking on the files in the Finder application.
 
 ===================
 Monitor calibration
 ===================
 
-Calibration of new monitors is done using the file `new_monitor.py`. Edit the
-file by adding the details needed (see the already existing monitors). Then run
-the script by entering 'python new_monitor.py' in a terminal. This should
-create a new psychopy .calib file in the calibration directory, which you can
-now use in subsequent runs of the experiment
+Calibration of new monitors is done using the file `new_monitor.py`. Edit the file by adding the details needed (see the already existing monitors). Then run the script by entering 'python new_monitor.py' in a terminal. This should create a new psychopy .calib file in the calibration directory, which you can now use in subsequent runs of the experiment
 
 =================
  Version control

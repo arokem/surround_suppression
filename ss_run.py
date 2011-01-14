@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     #Initialize the staircase, depending on which task is performed
     if params.task == 'Annulus':
-        message = """ On which side are the targets in the GRATING?\n Press 1 for left and 2 for right\n Press any key to start""" 
+        message = """ Where is the target ?\n Press 1 for upper left, 2 for upper right,\n 3 for lower right, or 4 for lower left \n Press any key to start""" 
         if params.surround_ori == params.annulus_ori:
             staircaseA = Staircase(params.start_target_contrastA,
                             params.annulus_contrast/params.contrast_increments,
@@ -78,7 +78,7 @@ if __name__ == "__main__":
                             ub=params.targetA_contrast_max,
                             lb=params.targetA_contrast_min)            
         staircaseB = Staircase(params.start_target_contrastB,
-                            params.annulus_contrast/params.contrast_increments,
+                            params.start_target_contrastB/params.contrast_increments,
                             harder = -1, #For this task, higher values are
                                       #actually harder => closer to the annulus
                                       #value
@@ -94,8 +94,7 @@ if __name__ == "__main__":
             other_contrast = params._replay
             
     elif params.task == 'Fixation':
-        message = """ On which side are the targets in the FIXATION?\n Press 1 for left and 2 for right\n Press any key to start"""
-
+        message = """ Where is the target ?\n Press 1 for upper left, 2 for upper right,\n 3 for lower right, or 4 for lower left \n Press any key to start""" 
         #Just one staircase:
         staircaseA = staircaseB = Staircase(params.fix_target_start,
                             params.fix_target_start/params.contrast_increments,

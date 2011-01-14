@@ -195,7 +195,7 @@ class Staircase(object):
     A psychophysical staircase
 
     """ 
-    def __init__(self,start,step,n_up=3,n_down=1,harder=-1,ub=1,lb=0):
+    def __init__(self,start,step,n_up=2,n_down=1,harder=-1,ub=1,lb=0):
         """
         Initialization function for the staircase class
 
@@ -322,11 +322,12 @@ class StimulusBank():
         spoke_width = params.spoke_width
 
         self.spokes = []
-        num_spokes = 8 #This is hard-coded for now
+        num_spokes = 4 #This is hard-coded for now
         for i in np.arange(num_spokes/2):
             self.spokes.append(visual.ShapeStim(win,
                                 fillColor = -1,
                                 lineColor = -1,
+                                lineWidth = 2.0,
                                 vertices = ((-params.spoke_width/2,
                                               params.annulus_outer/2),
                                             (params.spoke_width/2,
@@ -335,7 +336,7 @@ class StimulusBank():
                                              -params.annulus_outer/2),
                                             (params.spoke_width/2,
                                              params.annulus_outer/2)),
-                                ori=i*45,
+                                ori=i*90,
                                 interpolate = True))
 
         self.fixation_surround = visual.PatchStim(win, tex= None,
@@ -491,7 +492,7 @@ class Stimulus(Event):
         staircase). Set to None if no target is to be set in this stimulus
         object 
 
-        target_loc: the location of the target (integer between 0 and 7) in
+        target_loc: the location of the target (integer between 0 and 3) in
         this trial. defaults to None => random location
 
         target_ori: The orientation of the target (typically set to the
@@ -540,9 +541,9 @@ class Stimulus(Event):
             #we need to adjust for that, so that the target locations
             #remain invariant across different orientations (hence
             #subtraction of annulus_ori):
-            target_mask[np.where(theta<target_loc*np.deg2rad(45)-
+            target_mask[np.where(theta<target_loc*np.deg2rad(90)-
                                  np.deg2rad(target_ori))] = -1
-            target_mask[np.where(theta>(target_loc+1)*np.deg2rad(45)-
+            target_mask[np.where(theta>(target_loc+1)*np.deg2rad(90)-
                                  np.deg2rad(target_ori))] = -1
             # 45 is hard-coded for now and depends on the number of
             #targets/wedges we want to have in the annulus (corresponds to the
@@ -564,28 +565,50 @@ class Stimulus(Event):
                                            sf=params.spatial_freq,
                                            ori=target_ori,
                                            )
+        if fix_target_co is None: 
+            self.fixation_target = None
+        else:
+        #Independtly, set the fixation target with a contrast value:
+        #if fix_target_co is not None:
+            if fix_target_loc == 0 or fix_target_loc is None: #This is the
+                                                                #default
+                    pos = [-params.fixation_size*3/16,params.fixation_size*3/16]
+            elif fix_target_loc == 1:
+                    pos = [params.fixation_size*3/16,params.fixation_size*3/16]
+            elif fix_target_loc == 2:
+                    pos = [params.fixation_size*3/16,-params.fixation_size*3/16]
+            else:
+                    pos = [-params.fixation_size*3/16,-params.fixation_size*3/16]
+
+            self.fixation_target = visual.PatchStim(self.win,
+                                                tex=None,
+                                                pos=pos,
+                                                color=fix_target_co* rgb,
+                                                size=[params.fixation_size*3/8,
+                                                      params.fixation_size*3/8])
 
         #Independtly, set the fixation target with a contrast value:
         #if fix_target_co is not None:
-        if fix_target_loc == 1 or fix_target_loc is None: #This is the
-                                                              #default
-                pos = [params.fixation_size*3/16,0]
-        else:
-                pos = [-params.fixation_size*3/16,0]
+#        if fix_target_loc == 1 or fix_target_loc is None: #This is the
+#                                                              #default
+#                pos = [params.fixation_size*3/16,0]
+#        else:
+#                pos = [-params.fixation_size*3/16,0]
 
         self.fixation_target = visual.PatchStim(self.win,
                                                 tex=None,
                                                 pos=pos,
                                                 color=fix_target_co* rgb,
                                                 size=[params.fixation_size*3/8,
-                                                      params.fixation_size*3/4])
+                                                      params.fixation_size*3/8])
 
-        self.fixation_target.SetColor = fix_target_co
+        self.fixation_target_co= fix_target_co
         self.target_loc = target_loc
         #This is the nominal target contrast, because in fact, the target
         #contrast oscillates with the counter-phase flickering
         self.nominal_target_co = target_co
         self.fix_target_loc = fix_target_loc
+        self.fix_target_co = fix_target_co
                     
     def __call__(self,params,block_type):
         #Choose a random phase (btwn -pi and pi) to start the presentation
@@ -608,16 +631,12 @@ class Stimulus(Event):
                 self.target.setContrast(np.sin(ph_rand +
                                         t*self.temporal_freq*np.pi*2))
                 if block_type == 'A':
-#                    self.target.setColor((self.nominal_target_co - params.annulus_contrast)+((self.nominal_target_co*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi)) )
                     self.target.setColor((params.annulus_contrast*rgb)+(((self.nominal_target_co-params.annulus_contrast)*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi)) )
-                    #print (params.annulus_contrast*rgb)+(((self.nominal_target_co-params.annulus_contrast)*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi))
                 elif block_type == 'B':
                     self.target.setColor((self.nominal_target_co*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi)) 
-                    
-                #           else:
-  #              self.fixation_target.setColor((self.nominal_target_co*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi) )
-                
-            
+            if self.fixation_target is not None:#if self.params.task is 'Fixation':
+                self.fixation_target.setColor((params.fix_baseline*rgb)+(((self.fix_target_co-params.fix_baseline)*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi)) )
+
             #Draw them (order matters!)
             if self.outer_surround is not None:
                 self.outer_surround.draw()
@@ -713,7 +732,7 @@ class Response(Event):
     Getting responses from subjects and evaluating their correctness
     
     """
-    def __init__(self,params,keys=['1','2'],duration=None):
+    def __init__(self,params,keys=['1','2','3','4'],duration=None):
         """
 
         Initializer for the Response object. Listening only to '1' and '2',
@@ -846,8 +865,8 @@ class Trial(Event):
         params: a Params object
 
         target_loc: The location of the annulus target, in which the target is
-        to appear. Locations 0,1,2,3 are on the left side and locations
-        4,5,6,7 are on the right side of the annulus. Defaults to None, in
+        to appear. Locations 0,1 are on the left side and locations
+        2,3 are on the right side of the annulus. Defaults to None, in
         which case no annulus is presented and no response is recorded.
 
         fix_target_loc: One of two locations in which the fixation target can
@@ -935,10 +954,14 @@ class Trial(Event):
                                 target_loc=self.target_loc,
                                 fix_target_loc=self.fix_target_loc,
                                 fix_target_co=other_contrast)
-           if self.target_loc in [0,1,2,3]:
+           if self.target_loc in [0]:#upper_left
+               self.correct_key = '4'
+           elif self.target_loc in [1]:#upper_right
                self.correct_key = '1'
-           else:
+           elif self.target_loc in [2]:
                self.correct_key = '2'
+           elif self.target_loc in [3]:
+               self.correct_key = '3'
     
         elif self.params.task=='Fixation':
             self.stimulus.finalize(self.params,target_co=other_contrast,
@@ -946,13 +969,16 @@ class Trial(Event):
                                 fix_target_loc=self.fix_target_loc,
                                 fix_target_co=staircase.value)            
             #dbg:
-            #print staircase.value
 
-            if self.fix_target_loc == 1:
-                self.correct_key = '2'
-            else:
+            if self.fix_target_loc == 0:
                 self.correct_key = '1'
-        
+            elif self.fix_target_loc == 1:
+                self.correct_key = '2'
+            elif self.fix_target_loc == 2:
+                self.correct_key = '3'
+            else:
+                self.correct_key = '4'        
+
     def finalize_fix(self,params,bank,staircase,other_contrast):
         """ Finalize only the fixation"""
         self.fixation = Stimulus(self.win,self.params,
@@ -990,7 +1016,8 @@ class Trial(Event):
                     
         f.write('%s,'%self.block_type)
         f.write('%s, '%self.stimulus.nominal_target_co)
-        f.write('%s, '%(self.stimulus.fixation_target.color[0]))
+#        f.write('%s, '%(self.stimulus.fixation_target.color[0]))
+        f.write('%s, '%self.stimulus.fix_target_co)
         f.write('%s, '%self.stimulus.target_loc)
         f.write('%s, '%self.stimulus.fix_target_loc)
         f.write('%s, '%self.response.key)
@@ -1030,8 +1057,8 @@ def make_trial_list(win,params):
         for i in range(params.trials_per_block*params.num_blocks):
             trial_list.append( Trial(win,params,
                 block_type = 'A',
-                target_loc = int(np.random.rand(1) * 8), 
-                fix_target_loc= int(np.random.rand(1) * 2),
+                target_loc = int(np.random.rand(1) * 4), 
+                fix_target_loc= int(np.random.rand(1) * 4),
                 fix_color=[1,1,1]))
 
 
@@ -1044,20 +1071,6 @@ def make_trial_list(win,params):
         elif params.task == 'Fixation':
             fix_color = [0,1,0]
 
-#        #Start by appending the "dummy blocks" in which subjects don't
-#        #perform the task (actually hemi-blocks):
-#        for block in range(params.dummy_blocks):
-#            for n_trial in range(params.trials_per_block):
-#                trial_list.append(
-#                        Trial(win,params,
-#                              fix_color=fix_color,
-#                              block_type = 'C',
-#                              target_loc=None,
-#                              fix_target_loc=int(np.random.rand(1)*2))
-#                              )
-        #fix_ori = fix_ori_switch
-        #fix_ori_switch += 90
-
         #Append the blocks:    
         for block in range(params.num_blocks/2):
             #Block B Task hemi-block:
@@ -1067,8 +1080,8 @@ def make_trial_list(win,params):
                               fix_color=fix_color,
                               #fix_ori = fix_ori,
                               block_type = 'B',
-                              target_loc=int(np.random.rand(1)*8),
-                              fix_target_loc=int(np.random.rand(1)*2))
+                              target_loc=int(np.random.rand(1)*4),
+                              fix_target_loc=int(np.random.rand(1)*4))
                               )
             #Block A Task hemi-block:
             for n_trial in range(params.trials_per_block):
@@ -1077,8 +1090,8 @@ def make_trial_list(win,params):
                               fix_color=fix_color,
                               #fix_ori = fix_ori,
                               block_type = 'A',
-                              target_loc=int(np.random.rand(1)*8),
-                              fix_target_loc=int(np.random.rand(1)*2))
+                              target_loc=int(np.random.rand(1)*4),
+                              fix_target_loc=int(np.random.rand(1)*4))
                               )
 
         #Add a final Block B hemi-block:
@@ -1088,8 +1101,8 @@ def make_trial_list(win,params):
                     fix_color=fix_color,
                     #fix_ori = fix_ori,
                     block_type = 'B',
-                    target_loc=int(np.random.rand(1)*8),
-                    fix_target_loc=int(np.random.rand(1)*2))
+                    target_loc=int(np.random.rand(1)*4),
+                    fix_target_loc=int(np.random.rand(1)*4))
                               )
 
 
