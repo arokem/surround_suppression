@@ -624,7 +624,6 @@ class Stimulus(Event):
                     self.target.setColor((self.nominal_target_co*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi)) 
             if self.fixation_target is not None:#if self.params.task is 'Fixation':
                 self.fixation_target.setColor((params.fix_baseline*rgb)+(((self.fix_target_co-params.fix_baseline)*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi)) )
-                print ((params.fix_baseline*rgb)+(((self.fix_target_co-params.fix_baseline)*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi)) )
                 self.fixation_foil.setColor((params.fix_baseline*rgb)+(((self.fix_foil_co-params.fix_baseline)*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi)) )
                 
             
