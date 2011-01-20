@@ -62,7 +62,7 @@ if __name__ == "__main__":
 
     #Initialize the staircase, depending on which task is performed
     if params.task == 'Annulus':
-        message = """ Is there target?\n Press 1 for left, 2 for right,\n  Press any key to start""" 
+        message = """ Is there target?\n Press 1 for no, 2 for yes,\n  Press any key to start""" 
         if params.surround_ori == params.annulus_ori:
             staircaseA = Staircase(params.start_target_contrastA,
                             params.annulus_contrast/params.contrast_increments,
@@ -96,7 +96,7 @@ if __name__ == "__main__":
             other_contrast = params._replay
             
     elif params.task == 'Fixation':
-        message = """ Is there target?\n Press 1 for left, 2 for right,\n  Press any key to start""" 
+        message = """ Is there target?\n Press 1 for no, 2 for yes,\n  Press any key to start""" 
         #Just one staircase:
         staircaseA = staircaseB = Staircase(params.fix_target_start,
                             params.fix_target_start/params.contrast_increments,
