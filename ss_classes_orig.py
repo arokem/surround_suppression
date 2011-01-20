@@ -12,6 +12,7 @@ Classes for the surround suppression experiment
 import gc
 
 import wx
+import random
 import numpy as np
 from psychopy import core, visual, event, gui
 from psychopy.sound import Sound as Sound
@@ -346,7 +347,8 @@ class StimulusBank():
 
         self.fixation = visual.PatchStim(win, tex=None,
                                          size=params.fixation_size*3/4,
-                                         interpolate=True)
+                                         interpolate=True,
+                                         opacity = 1.0)
 
         #Set the center to always be black:
         self.fixation_center = visual.PatchStim(win, tex=None,
@@ -506,12 +508,14 @@ class Stimulus(Event):
         behavior if stays as None} or left{any other input})
 
         """
-        fix_foil_co = params.fix_foil_co
+#        fix_foil_co = params.fix_foil_co
         #If either target location or contrast is set to the default, there
         #will be no target:
         if target_co is None:
             self.target = None        
         elif target_co is None: 
+            self.target = None
+        elif target_loc < 0:
             self.target = None
         else:
         #Now, if there is an annulus target, proceed to setting it:
@@ -566,36 +570,38 @@ class Stimulus(Event):
                                            )
 #        if fix_target_loc is None:
 #            self.fixation_target = None        
-        if fix_target_co is None:#None: 
+        if fix_target_loc < 0:#None: 
             self.fixation_target = None
         else:
         #Independtly, set the fixation target with a contrast value:
         #if fix_target_co is not None:
-            if fix_target_loc == 1 or fix_target_loc is None: #This is the
+#            if self.fixation_target != None: #This is the
                                                                 #default
-                    pos = [params.fixation_size*3/16,0]
-            else:
-                    pos = [-params.fixation_size*3/16,0]
+#                    pos = [0,0]#params.fixation_size*3/8,0]
+#            else:
+#                    pos = [-params.fixation_size*3/16,0]
 
-            self.fixation_target = visual.PatchStim(self.win,
+                    self.fixation_target = visual.PatchStim(self.win,
                                                 tex=None,
-                                                pos=pos,
+#                                                pos=pos,
                                                 color=fix_target_co* rgb,
-                                                size=[params.fixation_size*3/8,
-                                                      params.fixation_size*3/4])
-            self.fixation_foil = visual.PatchStim(self.win,
-                                                tex=None,
-                                                pos=(-1.0*pos[0],pos[1]),#-1*pos,
-                                                color=fix_foil_co* rgb,
-                                                size=[params.fixation_size*3/8,
-                                                      params.fixation_size*3/4])
+                                                size=[params.fixation_size*3/4,
+                                                      params.fixation_size*3/4],
+                                                opacity = 1.0)
+#            self.fixation_foil = visual.PatchStim(self.win,
+#                                                tex=None,
+#                                                pos=(-1.0*pos[0],pos[1]),#-1*pos,
+#                                                color=fix_foil_co* rgb,
+#                                                size=[params.fixation_size*3/8,
+#                                                      params.fixation_size*3/4])
 
         self.target_loc = target_loc
         #This is the nominal target contrast, because in fact, the target
         #contrast oscillates with the counter-phase flickering
         self.nominal_target_co = target_co
+        self.nominal_fix_target_co = fix_target_co
         self.fix_target_co = fix_target_co
-        self.fix_foil_co = fix_foil_co
+#        self.fix_foil_co = fix_foil_co
         self.fix_target_loc = fix_target_loc
                     
     def __call__(self,params,block_type):
@@ -624,7 +630,7 @@ class Stimulus(Event):
                     self.target.setColor((self.nominal_target_co*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi)) 
             if self.fixation_target is not None:#if self.params.task is 'Fixation':
                 self.fixation_target.setColor((params.fix_baseline*rgb)+(((self.fix_target_co-params.fix_baseline)*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi)) )
-                self.fixation_foil.setColor((params.fix_baseline*rgb)+(((self.fix_foil_co-params.fix_baseline)*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi)) )
+#                self.fixation_foil.setColor((params.fix_baseline*rgb)+(((self.fix_foil_co-params.fix_baseline)*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi)) )
                 
             
             #Draw them (order matters!)
@@ -643,7 +649,6 @@ class Stimulus(Event):
             self.fixation.draw()
             if self.fixation_target is not None:
                 self.fixation_target.draw()
-                self.fixation_foil.draw()
             self.fixation_center.draw()
             self.fixation_square.draw()
 
@@ -939,13 +944,13 @@ class Trial(Event):
                                  fixation_ori = self.fix_ori)
 
         #The following steps look the same for either block:
-        fix_foil_co = 0.5
+#        fix_foil_co = 0.5
         if self.params.task=='Annulus':
            self.stimulus.finalize(self.params,target_co=staircase.value,
                                 target_loc=self.target_loc,
                                 fix_target_loc=self.fix_target_loc,
                                 fix_target_co=other_contrast)
-           if self.target_loc in [0,1,2,3]:
+           if self.target_loc < 0:#in [0]:
                self.correct_key = '1'
            else:
                self.correct_key = '2'
@@ -958,10 +963,10 @@ class Trial(Event):
             #dbg:
             #print staircase.value
 
-            if self.fix_target_loc == 1:
-                self.correct_key = '2'
-            else:
+            if self.fix_target_loc < 0:
                 self.correct_key = '1'
+            else:
+                self.correct_key = '2'
         
     def finalize_fix(self,params,bank,staircase,other_contrast):
         """ Finalize only the fixation"""
@@ -978,7 +983,7 @@ class Trial(Event):
             wait_time = (self.params.trial_duration) - now
             core.wait(wait_time)
 
-    def save(self,f,insert_header=False):
+    def save(self,f,target_there,fix_target_there,insert_header=False,):
 
         """ Save the trial information, including whether subjects got it right
         or not to file
@@ -996,19 +1001,30 @@ class Trial(Event):
             f.write('Fixation target location, ')
             f.write('Response, ')
             f.write('Correct, ')
+            f.write('Target Present, ')
             f.write('Response time\n')
                     
         f.write('%s,'%self.block_type)
         f.write('%s, '%self.stimulus.nominal_target_co)
-        f.write('%s, '%(self.stimulus.fixation_target.color[0]))
+        f.write('%s, '%self.stimulus.nominal_fix_target_co)#fixation_target.color[0]))
         f.write('%s, '%self.stimulus.target_loc)
         f.write('%s, '%self.stimulus.fix_target_loc)
         f.write('%s, '%self.response.key)
-        #Record no-response trials as a -1:
         if self.response.correct is None:
+        #Record no-response trials as a -1:
             f.write('%s, '%-1)
         else:
             f.write('%s, '%self.response.correct)
+        if self.params.task == 'Annulus':
+            if target_there < 0:
+                f.write('%s,' %0)
+            else:
+                f.write('%s,' %1)
+        elif self.params.task == 'Fixation':
+            if fix_target_there < 0:
+                f.write('%s,' %0)
+            else:
+                f.write('%s,' %1)
         f.write('%s\n'%self.response.response_time)
         
         #return f
@@ -1038,9 +1054,11 @@ def make_trial_list(win,params):
     #This is simple:
     if params.paradigm == 'rapid_fire':
         for i in range(params.trials_per_block*params.num_blocks):
+            target_there = [-1,1]
+            target_there = random.choice(target_there)
             trial_list.append( Trial(win,params,
                 block_type = 'A',
-                target_loc = int(np.random.rand(1) * 8), 
+                target_loc= target_there * int(np.random.rand(1) * 8), 
                 fix_target_loc= int(np.random.rand(1) * 2),
                 fix_color=[1,1,1]))
 
@@ -1072,34 +1090,46 @@ def make_trial_list(win,params):
         for block in range(params.num_blocks/2):
             #Block B Task hemi-block:
             for n_trial in range(params.trials_per_block):
+                target_there = [-1,1]
+                target_there = random.choice(target_there)
+                fix_target_there = [-1,1]
+                fix_target_there = random.choice(fix_target_there)
                 trial_list.append(
                         Trial(win,params,
                               fix_color=fix_color,
                               #fix_ori = fix_ori,
                               block_type = 'B',
-                              target_loc=int(np.random.rand(1)*8),
-                              fix_target_loc=int(np.random.rand(1)*2))
+                              target_loc= target_there * int(np.random.rand(1) * 8), 
+                              fix_target_loc= fix_target_there)#int(np.random.rand(1)*2))
                               )
             #Block A Task hemi-block:
             for n_trial in range(params.trials_per_block):
+                target_there = [-1,1]
+                target_there = random.choice(target_there)
+                fix_target_there = [-1,1]
+                fix_target_there = random.choice(fix_target_there)
                 trial_list.append(
                         Trial(win,params,
                               fix_color=fix_color,
                               #fix_ori = fix_ori,
                               block_type = 'A',
-                              target_loc=int(np.random.rand(1)*8),
-                              fix_target_loc=int(np.random.rand(1)*2))
+                              target_loc= target_there * int(np.random.rand(1) * 8), 
+                              fix_target_loc= fix_target_there)#int(np.random.rand(1)*2))
                               )
 
         #Add a final Block B hemi-block:
         for n_trial in range(params.trials_per_block):
-            trial_list.append(
+                target_there = [-1,1]
+                target_there = random.choice(target_there)
+                fix_target_there = [-1,1]
+                fix_target_there = random.choice(fix_target_there)
+                trial_list.append(
                 Trial(win,params,
                     fix_color=fix_color,
                     #fix_ori = fix_ori,
                     block_type = 'B',
-                    target_loc=int(np.random.rand(1)*8),
-                    fix_target_loc=int(np.random.rand(1)*2))
+                    target_loc= target_there * int(np.random.rand(1) * 8), 
+                    fix_target_loc= fix_target_there)#int(np.random.rand(1)*2))
                               )
 
 

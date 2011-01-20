@@ -8,6 +8,7 @@ And on the Psychtoolbox version used to get the data in Yoon et al. (2009 and
 import gc
 
 import wx
+import random
 import numpy as np
 from ss_classes_orig import Params
 from psychopy import core,event
@@ -57,10 +58,11 @@ if __name__ == "__main__":
 
     #Make a trial list:
     trial_list = make_trial_list(win,params)
+#    print trial_list[0].target_loc
 
     #Initialize the staircase, depending on which task is performed
     if params.task == 'Annulus':
-        message = """ Where is the target ?\n Press 1 for  left, 2 for  right,\n  Press any key to start""" 
+        message = """ Is there target?\n Press 1 for left, 2 for right,\n  Press any key to start""" 
         if params.surround_ori == params.annulus_ori:
             staircaseA = Staircase(params.start_target_contrastA,
                             params.annulus_contrast/params.contrast_increments,
@@ -94,7 +96,7 @@ if __name__ == "__main__":
             other_contrast = params._replay
             
     elif params.task == 'Fixation':
-        message = """ Where is the target ?\n Press 1 for  left, 2 for  right,\n  Press any key to start""" 
+        message = """ Is there target?\n Press 1 for left, 2 for right,\n  Press any key to start""" 
         #Just one staircase:
         staircaseA = staircaseB = Staircase(params.fix_target_start,
                             params.fix_target_start/params.contrast_increments,
@@ -144,10 +146,10 @@ if __name__ == "__main__":
 #        print 'new trial'
         #On the first trial, insert the header: 
         if trial_idx == 0:
-            this_trial.save(f,insert_header=True)
+            this_trial.save(f,trial_list[trial_idx].target_loc,trial_list[trial_idx].fix_target_loc,insert_header=True)
         else:
             #On other trials, just insert the data:
-            this_trial.save(f)
+            this_trial.save(f,trial_list[trial_idx].target_loc,trial_list[trial_idx].fix_target_loc)
 
         #update after saving:
         if this_trial.block_type == 'A':
