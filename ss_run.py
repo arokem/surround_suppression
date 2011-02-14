@@ -28,7 +28,12 @@ if __name__ == "__main__":
     app = wx.App()
     app.MainLoop()
     params.set_by_gui()
-    
+    if params.surround_ori == params.annulus_ori:
+        params.subject = params.subject + '_parallel'
+    elif abs(params.surround_ori - params.annulus_ori) == 90.0:
+        params.subject = params.subject + '_orthogonal'
+    else:
+        params.subject = params.subject + '_' + str(abs(params.surround_ori - params.annulus_ori)) 
     f = start_data_file(params.subject)
 
     #Start by saving in the parameter setting:
@@ -60,7 +65,7 @@ if __name__ == "__main__":
 
     #Initialize the staircase, depending on which task is performed
     if params.task == 'Annulus':
-        message = """ Where is the target ?\n Press 1 for upper left, 2 for upper right,\n 3 for lower right, or 4 for lower left \n Press any key to start""" 
+        message = """ Where is the target ?\n Press 1 for lower left, 2 for upper left,\n 3 for upper right, or 4 for lower right \n Press any key to start""" 
         if params.surround_ori == params.annulus_ori:
             staircaseA = Staircase(params.start_target_contrastA,
                             params.annulus_contrast/params.contrast_increments,
@@ -94,7 +99,7 @@ if __name__ == "__main__":
             other_contrast = params._replay
             
     elif params.task == 'Fixation':
-        message = """ Where is the target ?\n Press 1 for upper left, 2 for upper right,\n 3 for lower right, or 4 for lower left \n Press any key to start""" 
+        message = """ Where is the target ?\n Press 1 for lower left, 2 for upper left,\n 3 for upper right, or 4 for lower right \n Press any key to start""" 
         #Just one staircase:
         staircaseA = staircaseB = Staircase(params.fix_target_start,
                             params.fix_target_start/params.contrast_increments,

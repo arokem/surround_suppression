@@ -13,24 +13,21 @@ p = dict(
                                  #trials_per_block of no-task trials or
                                  #'rapid_fire' for a continuous stream of task
                                  #trials. 
-
     monitor = 'NNL',     # 'NNL','582J_multisync'
     screen = 0,                  # 0 is for the primary screen, 1 for auxillary
     fullscreen =False,           # True if fullscreen, False otherwise 
     scanner = False,              # True if the stimulus presentation should be
                                  # triggered by a scanner ttl pulse
-
-    start_target_contrastA = 0.9, # Where to start the staircase for parallel condition.
+    start_target_contrastA = 0.4, # Where to start the staircase for parallel condition.
     start_target_orthog_contrastA = 0.65, #Where to start the staircase for orthogonal condition.  This will make sure that staircases converge on threshold.
     start_target_contrastB = 0.1, # Where to start the staircase.
     fix_target_start = 0.2,     # Where to start the staircase.    
     fix_baseline = 0.0, #baseline contrast of fixation (to compare with fix_target_start)
     display_units = 'deg',       # 'deg' means all the units below are in
                                  # degrees of visual angle.
-
     annulus_inner = 2*3,           # deg of visual angle, Default: 2.86
     annulus_outer = 2*6,           # deg of visual angle, Default: 7.8
-    annulus_contrast = 0.5,     # relative contrast, Default: 0.75
+    annulus_contrast = 0.2,     # relative contrast, Default: 0.75
     surround_outer = 2*12.2,       # deg of visual angle, Default: 12.2
     surround_inner = 2*1.0,        # deg of visual angle, must be larger than fixation_size 
     surround_contrast = 1,     # relative contrast, Default: 0.75
@@ -47,9 +44,7 @@ p = dict(
     fixation_size = 1.2,         # deg of visual angle, Standard: 1.2
     contrast_increments = 15,    # How many steps from the lowest to the highest
                                  #contrast, Standard: 15 
-       #
     targetA_contrast_max = 1.0,
-    targetA_contrast_min = 0.75,
     targetB_contrast_max = 1.0,
     targetB_contrast_min = 0.001,
     fix_target_max = 1,          #

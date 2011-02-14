@@ -64,7 +64,7 @@ class Params(object):
             raise ValueError("Parameter %s is protected, please don't touch!"%name)
         else:
             super.__setattr__(self,name,value)
-            self._dont_touch.append(name)
+#            self._dont_touch.append(name)
 
     def set_by_gui(self):
         """
@@ -954,14 +954,14 @@ class Trial(Event):
                                 target_loc=self.target_loc,
                                 fix_target_loc=self.fix_target_loc,
                                 fix_target_co=other_contrast)
-           if self.target_loc in [0]:#upper_left
-               self.correct_key = '4'
-           elif self.target_loc in [1]:#upper_right
+           if self.target_loc in [0]:#
                self.correct_key = '1'
-           elif self.target_loc in [2]:
+           elif self.target_loc in [1]:#upper_right
                self.correct_key = '2'
-           elif self.target_loc in [3]:
+           elif self.target_loc in [2]:
                self.correct_key = '3'
+           elif self.target_loc in [3]:
+               self.correct_key = '4'
     
         elif self.params.task=='Fixation':
             self.stimulus.finalize(self.params,target_co=other_contrast,
