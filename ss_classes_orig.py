@@ -511,12 +511,13 @@ class Stimulus(Event):
 #        fix_foil_co = params.fix_foil_co
         #If either target location or contrast is set to the default, there
         #will be no target:
+        target_co = 1
         if target_co is None:
-            self.target = None        
-        elif target_co is None: 
-            self.target = None
-        elif target_loc < 0:
-            self.target = None
+            target_co = 1#self.target = None        
+#        elif target_co is None: 
+#            self.target = None
+#        elif target_loc < 0:
+#            self.target = None
         else:
         #Now, if there is an annulus target, proceed to setting it:
             if target_ori is None:
@@ -614,22 +615,28 @@ class Stimulus(Event):
         while t<self.duration: #Keep going for the duration
             t=clock.getTime()
             
-            self.annulus.setContrast(np.sin(ph_rand +
-                                            t*self.temporal_freq*np.pi*2))
-            self.inner_surround.setContrast(np.sin(ph_rand +
-                                            t*self.temporal_freq*np.pi*2))
-            self.outer_surround.setContrast(np.sin(ph_rand +
-                                            t*self.temporal_freq*np.pi*2))
+            self.annulus.setContrast(1)#np.sin(ph_rand +
+                                            #t*self.temporal_freq*np.pi*2))
+            self.inner_surround.setContrast(1)#np.sin(ph_rand +
+                                            #t*self.temporal_freq*np.pi*2))
+            self.outer_surround.setContrast(1)#np.sin(ph_rand +
+                                            #t*self.temporal_freq*np.pi*2))
+#            self.annulus.setContrast(np.sin(ph_rand +
+#                                            t*self.temporal_freq*np.pi*2))
+#            self.inner_surround.setContrast(np.sin(ph_rand +
+#                                            t*self.temporal_freq*np.pi*2))
+#            self.outer_surround.setContrast(np.sin(ph_rand +
+#                                            t*self.temporal_freq*np.pi*2))
 
             if self.target is not None:
-                self.target.setContrast(np.sin(ph_rand +
-                                        t*self.temporal_freq*np.pi*2))
+                self.target.setContrast(1)#np.sin(ph_rand +
+                                        #t*self.temporal_freq*np.pi*2))
                 if block_type == 'A':
-                    self.target.setColor((params.annulus_contrast*rgb)+(((self.nominal_target_co-params.annulus_contrast)*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi)) )
+                    self.target.setColor((0.1))#params.annulus_contrast*rgb)+(((self.nominal_target_co-params.annulus_contrast)*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi)) )
                 elif block_type == 'B':
-                    self.target.setColor((self.nominal_target_co*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi)) 
+                    self.target.setColor((self.nominal_target_co*rgb))# * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi)) 
             if self.fixation_target is not None:#if self.params.task is 'Fixation':
-                self.fixation_target.setColor((params.fix_baseline*rgb)+(((self.fix_target_co-params.fix_baseline)*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi)) )
+                self.fixation_target.setColor((params.fix_baseline*rgb)+(((self.fix_target_co-params.fix_baseline)*rgb)))# * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi)) )
 #                self.fixation_foil.setColor((params.fix_baseline*rgb)+(((self.fix_foil_co-params.fix_baseline)*rgb) * np.sin((params.stimulus_duration-t)/params.stimulus_duration * np.pi)) )
                 
             

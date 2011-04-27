@@ -66,7 +66,7 @@ if __name__ == "__main__":
         if params.surround_ori == params.annulus_ori:
             staircaseA = Staircase(params.start_target_contrastA,
                             params.annulus_contrast/params.contrast_increments,
-                            harder = -1, #For this task, higher values are
+                            harder = 1, #For this task, higher values are
                                       #actually harder => closer to the annulus
                                       #value
                             ub=params.targetA_contrast_max,
@@ -74,14 +74,14 @@ if __name__ == "__main__":
         else:
             staircaseA = Staircase(params.start_target_orthog_contrastA,
                             params.annulus_contrast/params.contrast_increments,
-                            harder = -1, #For this task, higher values are
+                            harder = 1, #For this task, higher values are
 #                                      #actually harder => closer to the annulus
                                       #value
                             ub=params.targetA_contrast_max,
                             lb=params.targetA_contrast_min)            
         staircaseB = Staircase(params.start_target_contrastB,
                             params.start_target_contrastB/params.contrast_increments,
-                            harder = -1, #For this task, higher values are
+                            harder = 1, #For this task, higher values are
                                       #actually harder => closer to the annulus
                                       #value
                             ub=params.targetB_contrast_max,
@@ -100,7 +100,7 @@ if __name__ == "__main__":
         #Just one staircase:
         staircaseA = staircaseB = Staircase(params.fix_target_start,
                             params.fix_target_start/params.contrast_increments,
-                            harder = -1, 
+                            harder = 1, 
                             ub=params.fix_target_max,
                             lb=params.fix_target_min
                             )
