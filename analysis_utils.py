@@ -1,5 +1,7 @@
 import numpy as np
 from matplotlib.mlab import csv2rec
+from scipy.optimize import leastsq
+import matplotlib.pyplot as plt
 
 def get_data(file_name):
     file_read = file(file_name,'r')
@@ -41,7 +43,7 @@ def defloaterrorize(a):
     return a
        
 def analyze(amp, c, guess=0.5, flake=0.01, slope=3.5, fig_name=None,
-            bootstrap_n=1000):
+            bootstrap_n=1000, n_up=3):
     """
     Perform a psychometric curve analysis of the data in the staircase and
     save a figure, if needed.
@@ -70,6 +72,9 @@ def analyze(amp, c, guess=0.5, flake=0.01, slope=3.5, fig_name=None,
     bootstrap_n: int
        The number of boot samples to take for the bootstrapping analysis
 
+    n_up: int
+       What kind of staircase was used
+       
     Note
     ----
 
@@ -116,7 +121,7 @@ def analyze(amp, c, guess=0.5, flake=0.01, slope=3.5, fig_name=None,
         n = []
         for idx,this in enumerate(Data):
             #Take only cases where there were at least n_up observations:
-            if n_trials[idx]>=self.n_up:
+            if n_trials[idx]>=n_up:
                 #Contrast values: 
                 x = np.hstack([x,this[2] * [this[0]]])
                 #% correct:
