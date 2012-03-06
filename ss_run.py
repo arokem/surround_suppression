@@ -126,7 +126,7 @@ if __name__ == "__main__":
     #here:
     if params.scanner:
        Text(win,text='',keys=['t'])() #Assuming a TTL is a 't' key
-       
+       Beginning(win,params,bank)
     #Loop over the event list, while consuming each event, by calling it:
     for trial_idx,this_trial in enumerate(trial_list):
         trial_clock = core.Clock()
@@ -146,7 +146,6 @@ if __name__ == "__main__":
         if this_trial.correct_key is not None:
             this_trial.feedback.finalize(this_trial.response.correct)
         this_trial.feedback()
-#        print 'new trial'
         #On the first trial, insert the header: 
         if trial_idx == 0:
             this_trial.save(f,insert_header=True)
@@ -159,15 +158,10 @@ if __name__ == "__main__":
             staircaseA.update(this_trial.response.correct)
         elif this_trial.block_type == 'B':
             staircaseB.update(this_trial.response.correct)
-
         this_trial.wait_iti(trial_clock)
 
         #Flush unwanted events that may still be hanging out: 
         event.clearEvents()
 
-        #dbg
-        # trial_clock.getTime()
-    
     f.close()
-    core.quit()
-    
+

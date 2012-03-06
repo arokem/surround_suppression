@@ -16,9 +16,11 @@ p = dict(
     monitor = 'NNL',     # 'NNL','582J_multisync'
     screen = 0,                  # 0 is for the primary screen, 1 for auxillary
     fullscreen =False,           # True if fullscreen, False otherwise 
-    scanner = False,              # True if the stimulus presentation should be
+    scanner = True,              # True if the stimulus presentation should be
                                  # triggered by a scanner ttl pulse
-    start_target_contrastA = 0.4, # Where to start the staircase for parallel condition.
+    scanner_wait_time = 4, #extra seconds at beginning of scan, 
+                                          # will present fixation point, rings and spokes 
+    start_target_contrastA = 0.40, # Where to start the staircase for parallel condition.
     start_target_orthog_contrastA = 0.65, #Where to start the staircase for orthogonal condition.  This will make sure that staircases converge on threshold.
     start_target_contrastB = 0.1, # Where to start the staircase.
     fix_target_start = 0.2,     # Where to start the staircase.    
@@ -30,7 +32,7 @@ p = dict(
     annulus_contrast = 0.2,     # relative contrast, Default: 0.75
     surround_outer = 2*12.2,       # deg of visual angle, Default: 12.2
     surround_inner = 2*1.0,        # deg of visual angle, must be larger than fixation_size 
-    surround_contrast = 1,     # relative contrast, Default: 0.75
+    surround_contrast = 0.80,     # relative contrast, Default: 0.80
     ring_width = 2*0.1,            # deg of visual angle, Default: 0.1
     spoke_width =  2*0.1,          # deg of visual angle, Default: 0.1
     spatial_freq = 1.1,          # cycles/deg, Default: 1.1
@@ -49,8 +51,8 @@ p = dict(
     targetB_contrast_min = 0.001,
     fix_target_max = 1,          #
     fix_target_min = 0,       #
-    trials_per_block = 5,        #
-    num_blocks = 16,             # Number of trials will be num_blocks *
+    trials_per_block = 10,        #
+    num_blocks = 8,             # Number of trials will be num_blocks *
                                  # trials_per_block 
     dummy_blocks = 1,            # In 'block' mode, the number of dummy blocks
                                  # at the beginning of the run.

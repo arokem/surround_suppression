@@ -8,7 +8,7 @@ Classes for the surround suppression experiment
 - Trial
 
 
-""" 
+"""
 import gc
 
 import wx
@@ -262,7 +262,7 @@ class Staircase(object):
 
 class StimulusBank(): 
     def __init__(self,win,params,tex_res=256):
-        
+        rgb = np.array([1.0,1.0,1.0])
         self.outer_surround = visual.PatchStim(win,tex="sin",mask="circle",
                                           texRes=tex_res,
                                           color=params.surround_contrast,
@@ -361,7 +361,7 @@ class StimulusBank():
                                                 size=params.fixation_size/8,
                                                 interpolate=True,
                                                 )
-        
+         
 class Stimulus(Event):
 
     """The surround suppression stimulus, including everything """
@@ -468,9 +468,9 @@ class Stimulus(Event):
         self.fixation = bank.fixation
         self.fixation_square = bank.fixation_square
         self.fixation.setOri(fixation_ori)
-        #self.fixation.setColor(rgb*fixation_color)
+        self.fixation.setColor(rgb*0)
         self.fixation.setColor(params.fix_baseline)
-        self.fixation_square.setColor(fixation_color)
+        self.fixation_square.setColor(rgb*fixation_color)
         #The center is always set to be black:
         self.fixation_surround = bank.fixation_surround
         self.fixation_center = bank.fixation_center
@@ -541,10 +541,12 @@ class Stimulus(Event):
             #we need to adjust for that, so that the target locations
             #remain invariant across different orientations (hence
             #subtraction of annulus_ori):
-            target_mask[np.where(theta<target_loc*np.deg2rad(90)-
-                                 np.deg2rad(target_ori))] = -1
-            target_mask[np.where(theta>(target_loc+1)*np.deg2rad(90)-
-                                 np.deg2rad(target_ori))] = -1
+            if target_loc == 0 and target_ori == 90:
+                target_mask[np.where(theta<4*np.deg2rad(90)-np.deg2rad(target_ori))] = -1#if theta<
+                target_mask[np.where(theta>(4+1)*np.deg2rad(90)-np.deg2rad(target_ori))] = -1#iftheta >0
+            else:
+                target_mask[np.where(theta<target_loc*np.deg2rad(90)-np.deg2rad(target_ori))] = -1
+                target_mask[np.where(theta>(target_loc+1)*np.deg2rad(90)-np.deg2rad(target_ori))] = -1
             # 45 is hard-coded for now and depends on the number of
             #targets/wedges we want to have in the annulus (corresponds to the
             #number of spokes as well).
@@ -667,6 +669,94 @@ class Stimulus(Event):
         return self
 
     
+class Beginning(Event):
+    """
+    A class for showing the rings and fixation, so that the stimulus can be presented at the beginning of fMRI runs
+    """
+
+    def __init__(self,win,params,
+                 bank,
+                 duration=None,
+                 surround_contrast=None,surround_ori=None,
+                 annulus_contrast=None, annulus_ori=None, fixation_ori=None,
+                 fixation_color=None,fixation_shape=None,
+                 tex_res = 128):
+        fixation_ori = 90
+        self.win = win 
+        self.ring1 = bank.ring1
+        #This is the bit between the annulus and the inner surround: 
+        self.ring2 = bank.ring2
+        self.inner_surround = bank.inner_surround 
+
+        #This is the central area, between the inner surround and the fixation: 
+        self.center_area = bank.center_area
+
+        self.spokes = bank.spokes
+        self.fixation = bank.fixation
+        self.fixation_square = bank.fixation_square
+        self.fixation.setOri(fixation_ori)
+        self.fixation.setColor(rgb*0)
+        self.fixation.setColor(params.fix_baseline)
+        self.fixation_square.setColor(0*rgb)
+        #The center is always set to be black:
+        self.fixation_surround = bank.fixation_surround
+        self.fixation_center = bank.fixation_center
+        self.fixation_center.setOri(fixation_ori)
+        self.outer_surround = bank.outer_surround
+
+
+        #Set the params for the different components of the stimulus. The
+        #default is to follow what is given by the params:
+        if surround_contrast is None:
+            surround_contrast = params.surround_contrast
+        if annulus_contrast is None:
+            annulus_contrast = params.annulus_contrast
+
+        #Set both parts of the surround
+        self.outer_surround = bank.outer_surround
+        self.outer_surround.setColor(0*rgb)#surround_contrast)
+        self.outer_surround.setContrast(0)
+        self.outer_surround.setColor(surround_contrast)
+
+        self.inner_surround = bank.inner_surround 
+        self.inner_surround.setColor(0)#surround_contrast)
+        
+        #Set the annulus:
+        self.annulus = bank.annulus 
+        self.annulus.setColor(0)#annulus_contrast)
+        self.annulus.setColor(0)#annulus_contrast)
+        
+        #This is the bit between the annulus and the outer surround: 
+        self.ring1 = bank.ring1
+        #This is the bit between the annulus and the inner surround: 
+        self.ring2 = bank.ring2
+        
+        #This is the central area, between the inner surround and the fixation: 
+        self.center_area = bank.center_area
+
+        self.spokes = bank.spokes
+
+
+
+        if self.outer_surround is not None:
+            self.outer_surround.draw()
+        self.ring1.draw()
+        self.annulus.draw()
+
+        for spoke in self.spokes:
+            spoke.draw()
+        self.ring2.draw()
+        self.inner_surround.draw()
+        self.center_area.draw()
+        self.fixation_surround.draw()
+        self.fixation.draw()
+
+        self.fixation_center.draw()
+        self.fixation_square.draw()
+        self.win.flip() #update the screen
+        core.wait(params.scanner_wait_time)
+        return None
+
 class Text(Event):
 
     """
@@ -954,13 +1044,13 @@ class Trial(Event):
                                 target_loc=self.target_loc,
                                 fix_target_loc=self.fix_target_loc,
                                 fix_target_co=other_contrast)
-           if self.target_loc in [0]:#
+           if self.target_loc in [1]:#
                self.correct_key = '1'
-           elif self.target_loc in [1]:#upper_right
+           elif self.target_loc in [2]:#
                self.correct_key = '2'
-           elif self.target_loc in [2]:
-               self.correct_key = '3'
            elif self.target_loc in [3]:
+               self.correct_key = '3'
+           elif self.target_loc in [0] or self.target_loc in [4]:
                self.correct_key = '4'
     
         elif self.params.task=='Fixation':
@@ -1060,7 +1150,6 @@ def make_trial_list(win,params):
                 target_loc = int(np.random.rand(1) * 4), 
                 fix_target_loc= int(np.random.rand(1) * 4),
                 fix_color=[1,1,1]))
-
 
     #This is a bit more complicated:
     elif params.paradigm == 'block':
