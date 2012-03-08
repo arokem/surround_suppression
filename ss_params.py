@@ -20,8 +20,8 @@ p = dict(
                                  # triggered by a scanner ttl pulse
     scanner_wait_time = 4, #extra seconds at beginning of scan, 
                                           # will present fixation point, rings and spokes 
-    start_target_contrastA = 0.40, # Where to start the staircase for parallel condition.
-    start_target_orthog_contrastA = 0.65, #Where to start the staircase for orthogonal condition.  This will make sure that staircases converge on threshold.
+    start_target_contrastA = 0.35, # Where to start the staircase for parallel condition.
+    start_target_orthog_contrastA = 0.25, #Where to start the staircase for orthogonal condition.  This will make sure that staircases converge on threshold.
     start_target_contrastB = 0.1, # Where to start the staircase.
     fix_target_start = 0.2,     # Where to start the staircase.    
     fix_baseline = 0.0, #baseline contrast of fixation (to compare with fix_target_start)
@@ -51,6 +51,7 @@ p = dict(
     targetB_contrast_min = 0.001,
     fix_target_max = 1,          #
     fix_target_min = 0,       #
+    trials_per_dummy = 5, #only have 5 trials in original block, dummy block that is not analyzed
     trials_per_block = 10,        #
     num_blocks = 8,             # Number of trials will be num_blocks *
                                  # trials_per_block 

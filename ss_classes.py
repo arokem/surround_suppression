@@ -1160,18 +1160,19 @@ def make_trial_list(win,params):
         elif params.task == 'Fixation':
             fix_color = [0,1,0]
 
-        #Append the blocks:    
-        for block in range(params.num_blocks/2):
-            #Block B Task hemi-block:
-            for n_trial in range(params.trials_per_block):
-                trial_list.append(
-                        Trial(win,params,
-                              fix_color=fix_color,
-                              #fix_ori = fix_ori,
-                              block_type = 'B',
-                              target_loc=int(np.random.rand(1)*4),
-                              fix_target_loc=int(np.random.rand(1)*4))
+    #Add an initial ddummy Block B hemi-block:
+        for n_trial in range(params.trials_per_dummy):
+            trial_list.append(
+                Trial(win,params,
+                    fix_color=fix_color,
+                    #fix_ori = fix_ori,
+                    block_type = 'B',
+                    target_loc=int(np.random.rand(1)*4),
+                    fix_target_loc=int(np.random.rand(1)*4))
                               )
+
+    #Append the blocks:    
+        for block in range(params.num_blocks/2):
             #Block A Task hemi-block:
             for n_trial in range(params.trials_per_block):
                 trial_list.append(
@@ -1182,17 +1183,18 @@ def make_trial_list(win,params):
                               target_loc=int(np.random.rand(1)*4),
                               fix_target_loc=int(np.random.rand(1)*4))
                               )
-
-        #Add a final Block B hemi-block:
-        for n_trial in range(params.trials_per_block):
-            trial_list.append(
-                Trial(win,params,
-                    fix_color=fix_color,
-                    #fix_ori = fix_ori,
-                    block_type = 'B',
-                    target_loc=int(np.random.rand(1)*4),
-                    fix_target_loc=int(np.random.rand(1)*4))
+            #Block B Task hemi-block:
+            for n_trial in range(params.trials_per_block):
+                trial_list.append(
+                        Trial(win,params,
+                              fix_color=fix_color,
+                              #fix_ori = fix_ori,
+                              block_type = 'B',
+                              target_loc=int(np.random.rand(1)*4),
+                              fix_target_loc=int(np.random.rand(1)*4))
                               )
+
+
 
 
     #If the input is not valid throw and error:
