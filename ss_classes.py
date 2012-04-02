@@ -764,7 +764,7 @@ class Text(Event):
     """
 
     def __init__ (self,win,text='Press a key to continue',
-                  keys=['1','2'],**kwargs):
+                  keys=['0','1','2','3','4','5','6','7','8','9','+'],**kwargs):
         """
         
         Will do the default thing(show 'text' in white on gray background),
@@ -801,7 +801,7 @@ class Text(Event):
                     return
 
 
-def start_text(win,text=None,keys=['1','2']):
+def start_text(win,text=None,keys=['0','1','2','3','4','5','6','7','8','9','+']):
     """
 
     This is a short-cut function to provide the default usage of the Text
@@ -822,10 +822,10 @@ class Response(Event):
     Getting responses from subjects and evaluating their correctness
     
     """
-    def __init__(self,params,keys=['1','2','3','4'],duration=None):
+    def __init__(self,params,keys=['0','1','2','3','4','5','6','7','8','9','+'],duration=None):
         """
 
-        Initializer for the Response object. Listening only to '1' and '2',
+        Initializer for the Response object. Listening only to 0-9 and +,
         unless the keys input variable is set otherwise.
         
         """
@@ -849,7 +849,7 @@ class Response(Event):
         
         When the object is called, it evaluates whether the key pressed is
         the right key for that trial and returns 1 if the right key was pressed
-        and 0 if the other one was pressed. If no key is replaced during the
+        and 0 if another key was pressed. If no key is replaced during the
         duration will return None
 
         """
@@ -1044,14 +1044,24 @@ class Trial(Event):
                                 target_loc=self.target_loc,
                                 fix_target_loc=self.fix_target_loc,
                                 fix_target_co=other_contrast)
-           if self.target_loc in [1]:#
-               self.correct_key = '1'
-           elif self.target_loc in [2]:#
-               self.correct_key = '2'
-           elif self.target_loc in [3]:
-               self.correct_key = '3'
-           elif self.target_loc in [0] or self.target_loc in [4]:
-               self.correct_key = '4'
+           if params.scanner == False:
+               if self.target_loc in [1]:#
+                   self.correct_key = '1'
+               elif self.target_loc in [2]:#
+                   self.correct_key = '2'
+               elif self.target_loc in [3]:
+                   self.correct_key = '3'
+               elif self.target_loc in [0] or self.target_loc in [4]:
+                   self.correct_key = '4'
+           else:
+               if self.target_loc in [1]:#
+                   self.correct_key = '7'
+               elif self.target_loc in [2]:#
+                   self.correct_key = '8'
+               elif self.target_loc in [3]:
+                   self.correct_key = '9'
+               elif self.target_loc in [0] or self.target_loc in [4]:
+                   self.correct_key = '+'                
     
         elif self.params.task=='Fixation':
             self.stimulus.finalize(self.params,target_co=other_contrast,
@@ -1060,14 +1070,24 @@ class Trial(Event):
                                 fix_target_co=staircase.value)            
             #dbg:
 
-            if self.fix_target_loc == 0:
-                self.correct_key = '1'
-            elif self.fix_target_loc == 1:
-                self.correct_key = '2'
-            elif self.fix_target_loc == 2:
-                self.correct_key = '3'
+            if params.scanner == False:
+               if self.target_loc in [1]:#
+                   self.correct_key = '1'
+               elif self.target_loc in [2]:#
+                   self.correct_key = '2'
+               elif self.target_loc in [3]:
+                   self.correct_key = '3'
+               elif self.target_loc in [0] or self.target_loc in [4]:
+                   self.correct_key = '4'
             else:
-                self.correct_key = '4'        
+               if self.target_loc in [1]:#
+                   self.correct_key = '7'
+               elif self.target_loc in [2]:#
+                   self.correct_key = '8'
+               elif self.target_loc in [3]:
+                   self.correct_key = '9'
+               elif self.target_loc in [0] or self.target_loc in [4]:
+                   self.correct_key = '+' 
 
     def finalize_fix(self,params,bank,staircase,other_contrast):
         """ Finalize only the fixation"""
