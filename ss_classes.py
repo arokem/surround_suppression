@@ -822,7 +822,8 @@ class Response(Event):
     Getting responses from subjects and evaluating their correctness
     
     """
-    def __init__(self,params,keys=['0','1','2','3','4','5','6','7','8','9','+'],duration=None):
+    def __init__(self,params,keys=['0','1','2','3','4','5','6','7','8','9','+','num_0','num_1','num_2','num_3','num_4','num_5','num_6','num_7',
+    'num_8','num_9','num_add'],duration=None):
         """
 
         Initializer for the Response object. Listening only to 0-9 and +,
@@ -1055,13 +1056,13 @@ class Trial(Event):
                    self.correct_key = '4'
            else:
                if self.target_loc in [1]:#
-                   self.correct_key = '7'
+                   self.correct_key = 'num_7'
                elif self.target_loc in [2]:#
-                   self.correct_key = '8'
+                   self.correct_key = 'num_8'
                elif self.target_loc in [3]:
-                   self.correct_key = '9'
+                   self.correct_key = 'num_9'
                elif self.target_loc in [0] or self.target_loc in [4]:
-                   self.correct_key = '+'                
+                   self.correct_key = 'num_add'                
     
         elif self.params.task=='Fixation':
             self.stimulus.finalize(self.params,target_co=other_contrast,
@@ -1081,13 +1082,13 @@ class Trial(Event):
                    self.correct_key = '4'
             else:
                if self.target_loc in [1]:#
-                   self.correct_key = '7'
+                   self.correct_key = 'num_7'
                elif self.target_loc in [2]:#
-                   self.correct_key = '8'
+                   self.correct_key = 'num_8'
                elif self.target_loc in [3]:
-                   self.correct_key = '9'
+                   self.correct_key = 'num_9'
                elif self.target_loc in [0] or self.target_loc in [4]:
-                   self.correct_key = '+' 
+                   self.correct_key = 'num_+' 
 
     def finalize_fix(self,params,bank,staircase,other_contrast):
         """ Finalize only the fixation"""
