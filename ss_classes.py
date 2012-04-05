@@ -1088,7 +1088,7 @@ class Trial(Event):
                elif self.target_loc in [3]:
                    self.correct_key = 'num_9'
                elif self.target_loc in [0] or self.target_loc in [4]:
-                   self.correct_key = 'num_+' 
+                   self.correct_key = 'num_add' 
 
     def finalize_fix(self,params,bank,staircase,other_contrast):
         """ Finalize only the fixation"""
