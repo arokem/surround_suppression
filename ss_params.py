@@ -50,13 +50,13 @@ p = dict(
     targetB_contrast_max = 1.0,
     targetB_contrast_min = 0.001,
     fix_target_max = 1,          #
-    fix_target_min = 0,       #
-    trials_per_dummy = 5, #only have 5 trials in original block, dummy block that is not analyzed
-    trials_per_block = 10,        #
-    num_blocks = 8,             # Number of trials will be num_blocks *
-                                 # trials_per_block 
+    fix_target_min = 0,          #
+    trials_per_dummy = 5,        #only have 5 trials in original block, dummy block that is not analyzed
+    trials_per_block = 15,       #
+    num_blocks = 8,              # Number of trials will be num_blocks *
+                                   # trials_per_block 
     dummy_blocks = 1,            # In 'block' mode, the number of dummy blocks
-                                 # at the beginning of the run.
+                                   # at the beginning of the run.
     )
 
 #This should be the same:

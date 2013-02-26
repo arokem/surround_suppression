@@ -1181,7 +1181,7 @@ def make_trial_list(win,params):
         elif params.task == 'Fixation':
             fix_color = [0,1,0]
 
-    #Add an initial ddummy Block B hemi-block:
+    #Add an initial dummy Block B hemi-block:
         for n_trial in range(params.trials_per_dummy):
             trial_list.append(
                 Trial(win,params,
