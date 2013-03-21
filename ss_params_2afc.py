@@ -22,7 +22,7 @@ p = dict(
                                           # will present fixation point, rings and spokes 
     start_target_contrastA = 0.5, # Where to start the staircase for parallel condition.
     start_target_orthog_contrastA = 0.25, #Where to start the staircase for orthogonal condition.  This will make sure that staircases converge on threshold.
-    start_target_contrastB = 0.1, # Where to start the staircase.
+    start_target_contrastB = 0.5, # Where to start the staircase.
     fix_target_start = 0.2,     # Where to start the staircase.    
     fix_baseline = 0.2, #baseline contrast of fixation (to compare with fix_target_start)
     display_units = 'deg',       # 'deg' means all the units below are in
@@ -57,13 +57,13 @@ p = dict(
                                  # trials_per_block 
     dummy_blocks = 1,            # In 'block' mode, the number of dummy blocks
                                  # at the beginning of the run.
-    left_key = 1,
-    right_key = 2,
+    present_key = 1,
+    absent_key = 2,
     )
 
 #This should be the same:
 p['targetA_contrast_min'] = p['annulus_contrast']
-p['targetB_contrast_max'] = p['annulus_contrast']
+#p['targetB_contrast_max'] = p['annulus_contrast']
 #This is derived from the above settings: 
 p['trial_duration'] =  (p['stimulus_duration'] +
                         p['fixation_duration'] +

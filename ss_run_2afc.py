@@ -51,6 +51,7 @@ if __name__ == "__main__":
                         screen=params.screen,
                         fullscr=params.fullscreen,
                         units=params.display_units)
+    win.setMouseVisible(False)
 
     #Initialize all the instances of stimulus bits and pieces for reuse: 
     bank = StimulusBank(win,params)
