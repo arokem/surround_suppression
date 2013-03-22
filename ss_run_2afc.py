@@ -34,7 +34,7 @@ if __name__ == "__main__":
     #Start by saving in the parameter setting:
     params.save(f)
     
-    #For now, assume that the target and the annulus are going to have the same
+    #For now, assume that the  and the annulus are going to have the same
     #orientation: 
     params.target_ori = params.annulus_ori
     
@@ -70,6 +70,13 @@ if __name__ == "__main__":
                                       #value
                             ub=params.targetA_contrast_max,
                             lb=params.targetA_contrast_min)
+            staircaseB = Staircase(params.start_target_contrastB,
+                            params.start_target_contrastB/params.contrast_increments,
+                            harder = -1, #For this task, higher values are
+                                      #actually harder => closer to the annulus
+                                      #value
+                            ub=params.targetB_contrast_max,
+                            lb=params.targetB_contrast_min)
         else:
             staircaseA = Staircase(params.start_target_orthog_contrastA,
                             params.annulus_contrast/params.contrast_increments,
@@ -78,7 +85,7 @@ if __name__ == "__main__":
                                       #value
                             ub=params.targetA_contrast_max,
                             lb=params.targetA_contrast_min)            
-        staircaseB = Staircase(params.start_target_contrastB,
+            staircaseB = Staircase(params.start_target_contrastB,
                             params.start_target_contrastB/params.contrast_increments,
                             harder = -1, #For this task, higher values are
                                       #actually harder => closer to the annulus

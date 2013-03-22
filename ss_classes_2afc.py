@@ -323,7 +323,7 @@ class StimulusBank():
         spoke_width = params.spoke_width
 
         self.spokes = []
-        num_spokes = 8 #This is hard-coded for now
+        num_spokes = params.num_segments #This is hard-coded for now
         for i in np.arange(num_spokes/2):
             self.spokes.append(visual.ShapeStim(win,
                                 fillColor = -1,
@@ -336,7 +336,7 @@ class StimulusBank():
                                              -params.annulus_outer/2),
                                             (params.spoke_width/2,
                                              params.annulus_outer/2)),
-                                ori=i*45,
+                                ori=i*360/params.num_segments,
                                 interpolate = True))
 
         self.fixation_surround = visual.PatchStim(win, tex= None,
@@ -540,9 +540,9 @@ class Stimulus(Event):
             #we need to adjust for that, so that the target locations
             #remain invariant across different orientations (hence
             #subtraction of annulus_ori):
-            target_mask[np.where(theta<target_loc*np.deg2rad(45)-
+            target_mask[np.where(theta<target_loc*np.deg2rad(360/params.num_segments)-
                                  np.deg2rad(target_ori))] = -1
-            target_mask[np.where(theta>(target_loc+1)*np.deg2rad(45)-
+            target_mask[np.where(theta>(target_loc+1)*np.deg2rad(360/params.num_segments)-
                                  np.deg2rad(target_ori))] = -1
             # 45 is hard-coded for now and depends on the number of
             #targets/wedges we want to have in the annulus (corresponds to the
@@ -1127,8 +1127,8 @@ def make_trial_list(win,params):
         for i in range(params.trials_per_block*params.num_blocks):
             trial_list.append( Trial(win,params,
                 block_type = 'A',
-                target_loc = random.choice([0,int(np.random.rand(1) * 8)]), 
-                fix_target_loc = random.choice([0,int(np.random.rand(1) * 8)]),
+                target_loc = random.choice([0,int(np.random.rand(1) * params.num_segments)]), 
+                fix_target_loc = random.choice([0,int(np.random.rand(1) * params.num_segments)]),
                 fix_color=[1,1,1]))
 
     #This is a bit more complicated:
@@ -1147,8 +1147,8 @@ def make_trial_list(win,params):
                     fix_color=fix_color,
                     #fix_ori = fix_ori,
                     block_type = 'B',
-                    target_loc = random.choice([0,int(np.random.rand(1) * 8)]), 
-                    fix_target_loc = random.choice([0,int(np.random.rand(1) * 8)])
+                    target_loc = random.choice([0,int(np.random.rand(1) * params.num_segments)]), 
+                    fix_target_loc = random.choice([0,int(np.random.rand(1) * params.num_segments)])
                               )
                  )
 
@@ -1161,8 +1161,8 @@ def make_trial_list(win,params):
                               fix_color=fix_color,
                               #fix_ori = fix_ori,
                               block_type = 'A',
-                              target_loc = random.choice([0,int(np.random.rand(1) * 8)]), 
-                              fix_target_loc = random.choice([0,int(np.random.rand(1) * 8)])
+                              target_loc = random.choice([0,int(np.random.rand(1) * params.num_segments)]), 
+                              fix_target_loc = random.choice([0,int(np.random.rand(1) * params.num_segments)])
                               ))
             #Block A Task hemi-block:
             for n_trial in range(params.trials_per_block):
@@ -1171,8 +1171,8 @@ def make_trial_list(win,params):
                               fix_color=fix_color,
                               #fix_ori = fix_ori,
                               block_type = 'B',
-                              target_loc = random.choice([0,int(np.random.rand(1) * 8)]), 
-                              fix_target_loc = random.choice([0,int(np.random.rand(1) * 8)]) 
+                              target_loc = random.choice([0,int(np.random.rand(1) * params.num_segments)]), 
+                              fix_target_loc = random.choice([0,int(np.random.rand(1) * params.num_segments)]) 
                               ))
 
 
