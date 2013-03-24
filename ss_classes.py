@@ -1089,8 +1089,14 @@ class Trial(Event):
             f.write('%s, '%(self.stimulus.fixation_target.color[0]))
         except:
             f.write('0, ')
-        f.write('%s, '%self.stimulus.target_loc)
-        f.write('%s, '%self.stimulus.fix_target_loc)
+        try:
+            f.write('%s, '%self.stimulus.target_loc[0])
+        except:
+            f.write('%s, '%self.stimulus.target_loc)
+        try:
+            f.write('%s, '%self.stimulus.fix_target_loc[0])
+        except:
+            f.write('%s, '%self.stimulus.fix_target_loc)
         f.write('%s, '%self.response.key)
         #Record no-response trials as a -1:
         if self.response.correct is None:
