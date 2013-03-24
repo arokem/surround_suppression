@@ -6,36 +6,16 @@ And on the Psychtoolbox version used to get the data in Yoon et al. (2009 and
 
 """ 
 import gc
-
+q
 import wx
 import numpy as np
-from ss_classes import Params
+from ss_classes_2afc_noflicker import Params
 from psychopy import core,event
 import psychopy.monitors.calibTools as calib
 
-"""
-Insert Marker
-"""
-#Allow to use commands from C library(EDC02032013)
-from ctypes import *#(EDC02032013)
-import os#(EDC02032013)
-#Load the ViewPoint library#(EDC02032013)
-vpxDylib = '/usr/local/lib/libvpx_interapp.dylib'#(EDC02032013)
-vpx=cdll.LoadLibrary(vpxDylib)#(EDC02032013)
-#vpx = CDLL( vpxDylib );#(EDC02032013)#not necessary on Mac
-#Change this to match ethernet server and port#(EDC02032013)
-vpx.VPX_ConnectToViewPoint('152.79.52.61',5000)#function from the vpx.h file #(EDC02032013)
-#Allows synchrously insert marker
-vpx.VPX_SendCommand('dataFile_AsynchMarkerData No');#(EDC02032013)
-#Send the marker from the list
-#not sure if the list is useful any more if changed to detection task
-marker_list=["1","2","3","4"];#(EDC02032013)
-
-"""
-"""
 
 #This brings in all of the classes defined in ss_classes:
-from ss_classes import *
+from ss_classes_2afc_noflicker import *
 from ss_tools import start_data_file
     
 if __name__ == "__main__":
@@ -122,7 +102,7 @@ if __name__ == "__main__":
             other_contrast = params._replay
             
     elif params.task == 'Fixation':
-        message = """ Is there a target ?\n Press 1 for  yes, 2 for  no,\n  Press any key to start""" 
+        message = """ Where is the target ?\n Press 1 for  left, 2 for  right,\n  Press any key to start""" 
         #Just one staircase:
         staircaseA = staircaseB = Staircase(params.fix_target_start,
                             params.fix_target_start/params.contrast_increments,
@@ -152,10 +132,6 @@ if __name__ == "__main__":
        Beginning(win,params,bank)       
     #Loop over the event list, while consuming each event, by calling it:
     for trial_idx,this_trial in enumerate(trial_list):
-        #Send a marker to the EyeTracker
-        #theMarker='T'#(EDC02032013)
-        vpx.VPX_SendCommand('dataFile_InsertMarker S')#(EDC02032013)
-        vpx.VPX_SendCommand('say "Inserting Marker S"')#(EDC02032013)
         trial_clock = core.Clock()
         if this_trial.block_type == 'A':
             this_trial.finalize_stim(params,bank,staircaseA,other_contrast[trial_idx])
@@ -173,6 +149,7 @@ if __name__ == "__main__":
         if this_trial.correct_key is not None:
             this_trial.feedback.finalize(this_trial.response.correct)
         this_trial.feedback()
+#        print 'new trial'
         #On the first trial, insert the header: 
         if trial_idx == 0:
             this_trial.save(f,insert_header=True)

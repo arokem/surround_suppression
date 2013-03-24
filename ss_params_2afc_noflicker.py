@@ -18,13 +18,13 @@ p = dict(
     fullscreen =False,           # True if fullscreen, False otherwise 
     scanner = True,              # True if the stimulus presentation should be
                                  # triggered by a scanner ttl pulse
-    num_segments = 4,
+    num_segments = 8,
     scanner_wait_time = 4, #extra seconds at beginning of scan, 
                                           # will present fixation point, rings and spokes 
-    start_target_contrastA = 0.5, # Where to start the staircase for parallel condition.
+    start_target_contrastA = 1.0, # Where to start the staircase for parallel condition.
     start_target_orthog_contrastA = 0.3, #Where to start the staircase for orthogonal condition.  This will make sure that staircases converge on threshold.
     start_target_contrastB = 0.25, # Where to start the staircase.
-    fix_target_start = 0.4,     # Where to start the staircase.    
+    fix_target_start = 0.2,     # Where to start the staircase.    
     fix_baseline = 0.2, #baseline contrast of fixation (to compare with fix_target_start)
     display_units = 'deg',       # 'deg' means all the units below are in
                                  # degrees of visual angle.
@@ -40,7 +40,7 @@ p = dict(
     spatial_phase = 0,           # seconds, Default: 0
     temporal_freq = 4,           # Hz, Default: 4
     temporal_phase = 0,          # seconds, Default: 0
-    stimulus_duration = 0.75,    # seconds, Default: 0.75
+    stimulus_duration = 2.0,    # seconds, Default: 0.75
     fixation_duration = 0.1,     # seconds, Default: 0.1
     response_duration = 0.9,     # seconds, Default: 0.9
     feedback_duration = 0.25,    # seconds, Default: 0.25
