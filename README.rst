@@ -5,6 +5,22 @@
 This is a 3rd version of the stimulus used for the surround suppression
 experiments, as described in Yoon et al. 2009. 
 
+The code is released under the [CC-3.0 license]
+(http://creativecommons.org/licenses/by/3.0/) : if you use the code or data herein,
+please cite the following :
+
+Yoon, J., Rokem, A., Silver, M., Minzenberg, M., Ursu, S., Ragland, J., &
+Carter, C. (2009). Diminished orientation-specific surround suppression of
+visual processing in schizophrenia. Schizophrenia Bulletin, 35(6), 1078–1084.
+
+Yoon, Jong H, Maddock, R. J., Rokem, A., Silver, M. A., Minzenberg, M. J.,
+Ragland, J. D., & Carter, C. S. (2010). GABA concentration is reduced in visual
+cortex in schizophrenia and correlates with orientation-specific surround
+suppression. Journal of Neuroscience, 30(10), 3777–3781. 
+
+Kosovicheva, A. A., Sheremata, S. L., Rokem, A., Landau, A. N., & Silver,
+M. A. (2012). Cholinergic enhancement reduces orientation-specific surround
+suppression but not visual crowding. Frontiers in behavioral neuroscience, 6: 61.
 
 ==============
  Instructions
